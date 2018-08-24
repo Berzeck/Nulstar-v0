@@ -2,10 +2,10 @@
 #include <QString>
 #include <QStringList>
 #include <QTextStream>
-#include "NConnectionServer.h"
+#include "NConnectionController.h"
 
 int main(int argc, char *argv[])
-{
+{    
   QCoreApplication lApp(argc, argv);
   lApp.setApplicationName(QString(APP_NAME).replace("_"," "));
   lApp.setApplicationVersion(APP_VERSION);
@@ -30,7 +30,8 @@ int main(int argc, char *argv[])
             "    <Level> :  5 [Everything]\n"
             "  --port [Port Number] : Port that will be opened for user connections\n"
             "  --adminport [Port Number] : Port that will be opened for system adminitration\n"
-            "  --securemode <Mode> : Sets the security model that will be used for communication\n"
+            "  --commport [Port Number] : Port that will be opened for internal communication with other components\n"
+            "  --secmode <Mode> : Sets the security model that will be used for communication\n"
             "    <Mode> :  0 [No encryption]\n"
             "    <Mode> :  1 [Ssl]\n\n" << endl;
             return 0;

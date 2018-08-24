@@ -1,27 +1,26 @@
-## [DEFAULT]
 QT -= gui
-
-CONFIG += c++11 console
+QT += websockets
 CONFIG -= app_bundle
-
-# The following define makes your compiler emit warnings if you use
-# any feature of Qt which as been marked deprecated (the exact warnings
-# depend on your compiler). Please consult the documentation of the
-# deprecated API in order to know how to port your code away from it.
+CONFIG += c++11 console
 DEFINES += QT_DEPRECATED_WARNINGS
-
-# You can also make your code fail to compile if you use deprecated APIs.
-# In order to do so, uncomment the following line.
-# You can also select to disable deprecated APIs only up to a certain version of Qt.
-#DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
+HEADERS += ServiceManager.h
 
 SOURCES += ServiceManager.cpp
+
+TARGET = ServiceManager
+DESTDIR = $$DESTDIR/MainComponents
+VERSION = 0.0.1.1
+DEFINES += APP_NAME=\\\"Nulstar_Service_Manager\\\" APP_VERSION=\\\"$$VERSION\\\" APP_VERSION_NAME=\\\"Baby_Apple_I\\\"
+
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Libraries/Network/release/ -lNetwork
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Libraries/Network/debug/ -lNetwork
+else:unix: LIBS += -L$$DESTDIR/../Libraries/ -lNetwork
+
+INCLUDEPATH += $$PWD/../Libraries/Network
+DEPENDPATH += $$PWD/../Libraries/Network
+QMAKE_RPATHDIR = $$DESTDIR/../Libraries/
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
-
-## [CUSTOM]
-TARGET = ServiceManager
-DESTDIR = $$DESTDIR/MainComponents
