@@ -1,5 +1,5 @@
-#ifndef NNULSTARWEBSOCKETSSERVER_H
-#define NNULSTARWEBSOCKETSSERVER_H
+#ifndef NWEBSOCKETSSERVER_H
+#define NWEBSOCKETSSERVER_H
 
 #include <QHostAddress>
 #include <QObject>
@@ -9,17 +9,18 @@
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
 
 namespace NulstarNS {
-  class NETWORKSHARED_EXPORT NNulstarWebSocketsServer : public QWebSocketServer {
+  class NETWORKSHARED_EXPORT NWebSocketsServer : public QWebSocketServer {
     Q_OBJECT
 
     public:
-      explicit NNulstarWebSocketsServer(const QString& lName, SslMode lSecureMode, QObject* rParent = nullptr);
-      ~NNulstarWebSocketsServer();
+      explicit NWebSocketsServer(const QString& lName, SslMode lSecureMode, QObject* rParent = nullptr);
+      virtual ~NWebSocketsServer();
 
       bool fListen(const QHostAddress& lAddress = QHostAddress::Any, quint16 lPort = 0);
 
     private:
-      QList<QWebSocket* > mConnections;
+      QList<QWebSocket* > mConnections;      
+      bool listen(const QHostAddress &address = QHostAddress::Any, quint16 port = 0) { return QWebSocketServer::listen(address, port); }
 
     private Q_SLOTS:
       void fOnNewConnection();

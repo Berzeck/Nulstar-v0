@@ -2,31 +2,29 @@
 #define NCONNECTIONCONTROLLER_H
 
 #include <QObject>
+#include <NCoreService.h>
 #include <Network.h>
 
 namespace NulstarNS {
-  class NNulstarWebSocketsServer;
-  class NETWORKSHARED_EXPORT NConnectionController : public QObject {
+  class NWebSocketsServer;
+  class NETWORKSHARED_EXPORT NConnectionController : public NCoreService {
     Q_OBJECT
 
     public:      
-      explicit NConnectionController(quint8 lSecureMode, quint16 lAdminPort, quint16 lClientPort, quint16 lCommPort, quint8 lDebugLevel, QObject* rParent = nullptr);
+      explicit NConnectionController(quint8 lSecureMode, quint8 lDebugLevel, QObject* rParent = nullptr);
       ~NConnectionController();
 
     private:      
       quint8 mSecureMode;
-      quint16 mAdminPort;
-      quint16 mClientPort;
-      quint16 mCommPort;
       quint8 mDebugLevel;
-      NNulstarWebSocketsServer* pWebAdminServer;
-      NNulstarWebSocketsServer* pWebClientServer;
-      NNulstarWebSocketsServer* pWebCommServer;
+      NWebSocketsServer* pWebAdminServer;
+      NWebSocketsServer* pWebClientServer;
+      NWebSocketsServer* pWebCommServer;
 
     public Q_SLOTS:
-      void fControlAdminServer(bool lStartServer);
-      void fControlClientServer(bool lStartServer);
-      void fControlCommServer(bool lStartServer);
+      void fControlAdminServer(bool lStartServer, quint16 lAdminPort = 0);
+      void fControlClientServer(bool lStartServer, quint16 lClientPort = 0);
+      void fControlCommServer(bool lStartServer, quint16 lCommPort = 0);
   };
 }
 

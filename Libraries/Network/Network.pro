@@ -11,9 +11,11 @@ CONFIG += c++11
 DEFINES += QT_DEPRECATED_WARNINGS
 
 HEADERS += Network.h \
-           NNulstarWebSocketsServer.h
+           NWebSocketsServer.h \
+    NCoreService.h
 
-SOURCES += NNulstarWebSocketsServer.cpp
+SOURCES += NWebSocketsServer.cpp \
+    NCoreService.cpp
 
 unix {
   target.path = /usr/lib
