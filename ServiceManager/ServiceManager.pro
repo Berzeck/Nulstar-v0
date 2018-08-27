@@ -3,9 +3,10 @@ QT += websockets
 CONFIG -= app_bundle
 CONFIG += c++11 console
 DEFINES += QT_DEPRECATED_WARNINGS
-HEADERS += ServiceManager.h
+HEADERS += NServiceManagerController.h
 
-SOURCES += ServiceManager.cpp
+SOURCES += NServiceManagerController.cpp \
+           ServiceManager.cpp
 
 TARGET = ServiceManager
 DESTDIR = $$DESTDIR/MainComponents
