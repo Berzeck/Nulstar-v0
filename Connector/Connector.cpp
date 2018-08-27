@@ -1,3 +1,4 @@
+#include <QCommandLineParser>
 #include <QCoreApplication>
 #include <QString>
 #include <QStringList>
@@ -7,38 +8,43 @@
 int main(int argc, char *argv[])
 {    
   QCoreApplication lApp(argc, argv);
-  lApp.setApplicationName(QString(APP_NAME).replace("_"," "));
+  QString lAppName(QString(APP_NAME).replace("_"," "));
+  lApp.setApplicationName(lAppName);
   lApp.setApplicationVersion(APP_VERSION);
   lApp.setOrganizationDomain(QStringLiteral("nulstar.com"));
   lApp.setOrganizationName(QStringLiteral("Nulstar"));
 
-  QStringList lOptions;
-  for(int i1 = 1; i1 < argc; ++i1)
-    lOptions << QString::fromUtf8 (argv[i1]);
-  QTextStream lOut(stdout);
-  if((lOptions.isEmpty()) || ((lOptions.at(0) == "--help"))) {
-    lOut << lApp.applicationName() << "\n"
-            "-----------------\n"
-            "  Parameters:\n\n"
-            "  --version : Displays current version\n"
-            "  --help : Shows this help\n"
-            "  --debuglevel <Level> : Sets the level of internal information to be available\n"
-            "    <Level> :  1 [Critical]\n"
-            "    <Level> :  2 [Error]\n"
-            "    <Level> :  3 [Warnings]\n"
-            "    <Level> :  4 [Information]\n"
-            "    <Level> :  5 [Everything]\n"
-            "  --port [Port Number] : Port that will be opened for user connections\n"
-            "  --adminport [Port Number] : Port that will be opened for system adminitration\n"
-            "  --commport [Port Number] : Port that will be opened for internal communication with other components\n"
-            "  --secmode <Mode> : Sets the security model that will be used for communication\n"
-            "    <Mode> :  0 [No encryption]\n"
-            "    <Mode> :  1 [Ssl]\n\n" << endl;
-            return 0;
+  QCommandLineParser lParser;
+  lParser.setApplicationDescription(lAppName);
+  lParser.addHelpOption();
+  lParser.addVersionOption();
+  lParser.addOptions({
+    {{"d", "debug"} , QStringLiteral("Debug Level [1-5]."), QStringLiteral("debug")},
+    {{"s", "sectype"}, QStringLiteral("Security Type [0-1]."), QStringLiteral("sectype")},
+    {{"a", "adminport"}, QStringLiteral("Admin Port."), QStringLiteral("adminport")},
+    {{"c", "clientport"}, QStringLiteral("Client Port."), QStringLiteral("clientport")},
+    {{"m", "commport"}, QStringLiteral("Communication Port."), QStringLiteral("commport")},
+  });
+  lParser.process(lApp);
+  if(!lParser.isSet("debug") || lParser.value("debug").toUShort() < 1 || lParser.value("debug").toUShort() > 5) {
+    fputs(qPrintable(QString("Wrong debug level! [1-5]\n\n%1\n").arg(lParser.helpText())), stderr);
+    return 1;
   }
-  if(lOptions.contains(QStringLiteral("--version")))  {
-    lOut <<  lApp.applicationName() << " - " << lApp.applicationVersion() << " [" << QString(APP_VERSION_NAME).replace("_"," ") << "]" <<  endl;
-    return 0;
+  if(!lParser.isSet("sectype") || (lParser.value("sectype").toUShort() != 0 && lParser.value("sectype").toUShort() != 1)) {
+    fputs(qPrintable(QString("Wrong security type! [0-1]\n\n%1\n").arg(lParser.helpText())), stderr);
+    return 2;
+  }
+  if(!lParser.isSet("adminport")) {
+    fputs(qPrintable(QString("Admin port not set!\n\n%1\n").arg(lParser.helpText())), stderr);
+    return 3;
+  }
+  if(!lParser.isSet("clientport")) {
+    fputs(qPrintable(QString("Client port not set!\n\n%1\n").arg(lParser.helpText())), stderr);
+    return 4;
+  }
+  if(!lParser.isSet("commport")) {
+    fputs(qPrintable(QString("Communication port not set!\n\n%1\n").arg(lParser.helpText())), stderr);
+    return 5;
   }
   return lApp.exec();
 }
