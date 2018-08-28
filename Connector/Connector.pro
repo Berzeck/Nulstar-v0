@@ -18,11 +18,11 @@ win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Libraries/Network/r
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Libraries/Network/debug/ -lNetwork
 else:unix: LIBS += -L$$DESTDIR/../Libraries/ -lNetwork
 
+QMAKE_LFLAGS_RELEASE += -s
 INCLUDEPATH += $$PWD/../Libraries/Network
 DEPENDPATH += $$PWD/../Libraries/Network
 QMAKE_RPATHDIR = $$DESTDIR/../Libraries/
-#QMAKE_POST_LINK=$(STRIP) $(TARGET)
-# Default rules for deployment.
+
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target

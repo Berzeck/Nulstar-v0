@@ -1,8 +1,8 @@
 #include "NCoreService.h"
 
 namespace NulstarNS {
-  NCoreService::NCoreService(QObject *rParent)
-              : QObject (rParent) {
+  NCoreService::NCoreService(ELogLevel lLogLevel, QObject *rParent)
+              : QObject(rParent), mLogLevel(lLogLevel) {
 
   }
 

@@ -19,14 +19,14 @@ int main(int argc, char *argv[])
   lParser.addHelpOption();
   lParser.addVersionOption();
   lParser.addOptions({
-    {{"d", "debug"} , QStringLiteral("Debug Level [1-5]."), QStringLiteral("debug")},
+    {{"d", "loglevel"} , QStringLiteral("Log Level [1-5]."), QStringLiteral("loglevel")},
     {{"s", "sectype"}, QStringLiteral("Security Type [0-1]."), QStringLiteral("sectype")},
     {{"a", "adminport"}, QStringLiteral("Admin Port."), QStringLiteral("adminport")},
     {{"c", "clientport"}, QStringLiteral("Client Port."), QStringLiteral("clientport")},
     {{"m", "commport"}, QStringLiteral("Communication Port."), QStringLiteral("commport")},
   });
   lParser.process(lApp);
-  if(!lParser.isSet("debug") || lParser.value("debug").toUShort() < 1 || lParser.value("debug").toUShort() > 5) {
+  if(!lParser.isSet("loglevel") || lParser.value("loglevel").toUShort() < 1 || lParser.value("loglevel").toUShort() > 5) {
     fputs(qPrintable(QString("Wrong debug level! [1-5]\n\n%1\n").arg(lParser.helpText())), stderr);
     return 1;
   }
@@ -46,5 +46,8 @@ int main(int argc, char *argv[])
     fputs(qPrintable(QString("Communication port not set!\n\n%1\n").arg(lParser.helpText())), stderr);
     return 5;
   }
+  using NulstarNS::NConnectionController;
+  NConnectionController lController(static_cast<QWebSocketServer::SslMode> (lParser.value("sectype").toUInt()), static_cast<NConnectionController::ELogLevel> (lParser.value("loglevel").toUInt()));
+  lController.fControlAdminServer(NConnectionController::EServiceAction::eStartService, static_cast<quint16> (lParser.value("adminport").toUInt()));
   return lApp.exec();
 }

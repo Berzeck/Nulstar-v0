@@ -1,30 +1,29 @@
 #ifndef NCONNECTIONCONTROLLER_H
 #define NCONNECTIONCONTROLLER_H
 
+#include <QHostAddress>
 #include <QObject>
 #include <NCoreService.h>
 #include <Network.h>
+#include <NWebSocketServer.h>
 
 namespace NulstarNS {
-  class NWebSocketsServer;
   class NETWORKSHARED_EXPORT NConnectionController : public NCoreService {
     Q_OBJECT
 
     public:      
-      explicit NConnectionController(quint8 lSecureMode, quint8 lDebugLevel, QObject* rParent = nullptr);
+      explicit NConnectionController(QWebSocketServer::SslMode lSslMode, NCoreService::ELogLevel lLogLevel, QObject* rParent = nullptr);
       ~NConnectionController();
 
     private:      
-      quint8 mSecureMode;
-      quint8 mDebugLevel;
-      NWebSocketsServer* pWebAdminServer;
-      NWebSocketsServer* pWebClientServer;
-      NWebSocketsServer* pWebCommServer;
+      NWebSocketServer* pWebAdminServer;
+      NWebSocketServer* pWebClientServer;
+      NWebSocketServer* pWebCommServer;
 
     public Q_SLOTS:
-      void fControlAdminServer(bool lStartServer, quint16 lAdminPort = 0);
-      void fControlClientServer(bool lStartServer, quint16 lClientPort = 0);
-      void fControlCommServer(bool lStartServer, quint16 lCommPort = 0);
+      void fControlAdminServer(EServiceAction lAction, quint16 lAdminPort = 0, QHostAddress::SpecialAddress lAddress = QHostAddress::Any);
+      void fControlClientServer(EServiceAction lAction, quint16 lClientPort = 0, QHostAddress::SpecialAddress lAddress = QHostAddress::Any);
+      void fControlCommServer(EServiceAction lAction, quint16 lCommPort = 0, QHostAddress::SpecialAddress lAddress = QHostAddress::Any);
   };
 }
 

@@ -1,18 +1,15 @@
 #include <QHostAddress>
 #include <QWebSocket>
-#include <QWebSocketServer>
-#include <NWebSocketsServer.h>
 #include "NConnectionController.h"
 
 
 namespace NulstarNS {
-  NConnectionController::NConnectionController(quint8 lSecureMode, quint8 lDebugLevel, QObject* rParent)
-                       : NCoreService (rParent), mSecureMode(lSecureMode), mDebugLevel(lDebugLevel) {
-    if(lSecureMode == NWebSocketsServer::NonSecureMode) {
-      pWebAdminServer = new NWebSocketsServer(QStringLiteral("Nulstar Admin"), NWebSocketsServer::NonSecureMode, this);
-      pWebClientServer = new NWebSocketsServer(QStringLiteral("Nulstar Client"), NWebSocketsServer::NonSecureMode, this);
-      pWebCommServer = new NWebSocketsServer(QStringLiteral("Nulstar Internal Communication"), NWebSocketsServer::NonSecureMode, this);
-    }
+  NConnectionController::NConnectionController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, QObject* rParent)
+                       : NCoreService(lLogLevel, rParent) {
+    NCoreService::mLogLevel = lLogLevel;
+    pWebAdminServer = new NWebSocketServer(QStringLiteral("Nulstar Admin"), lSslMode, this);
+    pWebClientServer = new NWebSocketServer(QStringLiteral("Nulstar Client"), lSslMode, this);
+    pWebCommServer = new NWebSocketServer(QStringLiteral("Nulstar Internal Communication"), lSslMode, this);
   }
 
   NConnectionController::~NConnectionController() {
@@ -21,19 +18,40 @@ namespace NulstarNS {
     pWebCommServer->close();
   }
 
-  void NConnectionController::fControlAdminServer(bool lStartServer, quint16 lAdminPort) {
-    if(lAdminPort && lStartServer) pWebAdminServer->fListen(QHostAddress::Any, lAdminPort);
-    else pWebAdminServer->close();
+  void NConnectionController::fControlAdminServer(EServiceAction lAction, quint16 lAdminPort, QHostAddress::SpecialAddress lAddress ) {
+    if(lAction == EServiceAction::eStartService) {
+      pWebAdminServer->fListen(lAddress, lAdminPort);
+    }
+    if(lAction == EServiceAction::eStopService) {
+      pWebAdminServer->close();
+    }
+    if(lAction == EServiceAction::eChangePort) {
+      pWebAdminServer->fSetPort(lAdminPort);
+    }
   }
 
-  void NConnectionController::fControlClientServer(bool lStartServer, quint16 lClientPort) {
-    if(lClientPort && lStartServer) pWebClientServer->fListen(QHostAddress::Any, lClientPort);
-    else pWebClientServer->close();
+  void NConnectionController::fControlClientServer(EServiceAction lAction, quint16 lClientPort, QHostAddress::SpecialAddress lAddress ) {
+    if(lAction == EServiceAction::eStartService) {
+      pWebClientServer->fListen(lAddress, lClientPort);
+    }
+    if(lAction == EServiceAction::eStopService) {
+      pWebClientServer->close();
+    }
+    if(lAction == EServiceAction::eChangePort) {
+      pWebClientServer->fSetPort(lClientPort);
+    }
   }
 
-  void NConnectionController::fControlCommServer(bool lStartServer, quint16 lCommPort) {
-    if(lCommPort && lStartServer) pWebCommServer->fListen(QHostAddress::Any, lCommPort);
-    else pWebCommServer->close();
+  void NConnectionController::fControlCommServer(EServiceAction lAction, quint16 lCommPort, QHostAddress::SpecialAddress lAddress ) {
+    if(lAction == EServiceAction::eStartService) {
+      pWebCommServer->fListen(lAddress, lCommPort);
+    }
+    if(lAction == EServiceAction::eStopService) {
+      pWebCommServer->close();
+    }
+    if(lAction == EServiceAction::eChangePort) {
+      pWebCommServer->fSetPort(lCommPort);
+    }
   }
 }
 

@@ -11,10 +11,10 @@ CONFIG += c++11
 DEFINES += QT_DEPRECATED_WARNINGS
 
 HEADERS += Network.h \
-           NWebSocketsServer.h \
+           NWebSocketServer.h \
     NCoreService.h
 
-SOURCES += NWebSocketsServer.cpp \
+SOURCES += NWebSocketServer.cpp \
     NCoreService.cpp
 
 unix {
@@ -22,7 +22,7 @@ unix {
   INSTALLS += target
 }
 
-## [CUSTOM]
+QMAKE_LFLAGS_RELEASE += -s
 TEMPLATE = lib
 TARGET = Network
 DESTDIR = $$DESTDIR/Libraries
