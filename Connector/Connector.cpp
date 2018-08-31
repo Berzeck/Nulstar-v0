@@ -48,6 +48,6 @@ int main(int argc, char *argv[])
   }
   using NulstarNS::NConnectionController;
   NConnectionController lController(static_cast<QWebSocketServer::SslMode> (lParser.value("sectype").toUInt()), static_cast<NConnectionController::ELogLevel> (lParser.value("loglevel").toUInt()));
-  lController.fControlAdminServer(NConnectionController::EServiceAction::eStartService, static_cast<quint16> (lParser.value("adminport").toUInt()));
+  lController.fControlCommServer(NConnectionController::EServiceAction::eStartService, static_cast<quint16> (lParser.value("commport").toUInt()));
   return lApp.exec();
 }
