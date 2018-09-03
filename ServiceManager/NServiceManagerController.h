@@ -4,12 +4,11 @@
 #include <QHostAddress>
 #include <QObject>
 #include <NCoreService.h>
-#include <Network.h>
 #include <NWebSocketServer.h>
 
 namespace NulstarNS {
   class NWebSocketServer;
-  class NETWORKSHARED_EXPORT NServiceManagerController : public NCoreService {
+  class NServiceManagerController : public NCoreService {
     Q_OBJECT
 
     public:      

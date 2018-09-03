@@ -11,7 +11,7 @@
 #include <NWebSocketServer.h>
 
 namespace NulstarNS {
-  class NETWORKSHARED_EXPORT NMainController : public NCoreService {
+  class NMainController : public NCoreService {
     Q_OBJECT
 
     public:      
