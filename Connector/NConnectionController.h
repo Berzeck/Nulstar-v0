@@ -4,15 +4,14 @@
 #include <QHostAddress>
 #include <QObject>
 #include <NCoreService.h>
-#include <Network.h>
 #include <NWebSocketServer.h>
 
 namespace NulstarNS {
-  class NETWORKSHARED_EXPORT NConnectionController : public NCoreService {
+  class NConnectionController : public NCoreService {
     Q_OBJECT
 
     public:      
-      explicit NConnectionController(QWebSocketServer::SslMode lSslMode, NCoreService::ELogLevel lLogLevel, QObject* rParent = nullptr);
+      explicit NConnectionController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, QList<QNetworkAddressEntry> lAllowedNetworks = QList<QNetworkAddressEntry> (), QObject* rParent = nullptr);
       ~NConnectionController();
 
     private:      

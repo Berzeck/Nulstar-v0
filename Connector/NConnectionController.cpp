@@ -4,8 +4,8 @@
 
 
 namespace NulstarNS {
-  NConnectionController::NConnectionController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, QObject* rParent)
-                       : NCoreService(lLogLevel, rParent) {
+  NConnectionController::NConnectionController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, QList<QNetworkAddressEntry> lAllowedNetworks, QObject* rParent)
+                       : NCoreService(lLogLevel, lAllowedNetworks, rParent) {
     NCoreService::mLogLevel = lLogLevel;
     pWebAdminServer = new NWebSocketServer(QStringLiteral("Nulstar Admin"), lSslMode, this);
     pWebClientServer = new NWebSocketServer(QStringLiteral("Nulstar Client"), lSslMode, this);

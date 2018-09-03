@@ -1,8 +1,8 @@
 #include "NCoreService.h"
 
 namespace NulstarNS {
-  NCoreService::NCoreService(ELogLevel lLogLevel, QObject *rParent)
-              : QObject(rParent), mLogLevel(lLogLevel) {
+  NCoreService::NCoreService(ELogLevel lLogLevel, QList<QNetworkAddressEntry> lAllowedNetworks, QObject *rParent)
+              : QObject(rParent), mLogLevel(lLogLevel), mAllowedNetworks(lAllowedNetworks) {
 
   }
 
@@ -15,7 +15,7 @@ namespace NulstarNS {
   void NCoreService::fOnConnected() {
     connect(&mWebSocket, &QWebSocket::textMessageReceived, this, &NCoreService::fOnTextMessageReceived);
     mWebSocket.sendTextMessage(QStringLiteral("Sending Roles!"));
-    setProperty("CU", QString("111"));
+setProperty("CU", QString("111"));
   }
 
   void NCoreService::fOnTextMessageReceived(const QString &lTextMessage) {

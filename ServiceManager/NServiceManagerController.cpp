@@ -3,8 +3,8 @@
 #include "NServiceManagerController.h"
 
 namespace NulstarNS {
-  NServiceManagerController::NServiceManagerController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, QObject* rParent)
-                           : NCoreService(lLogLevel, rParent) {
+  NServiceManagerController::NServiceManagerController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, QList<QNetworkAddressEntry> lAllowedNetworks, QObject* rParent)
+                           : NCoreService(lLogLevel, lAllowedNetworks, rParent) {
     NCoreService::mLogLevel = lLogLevel;
     pWebCommServer = new NWebSocketServer(QStringLiteral("Nulstar Internal Communication"), lSslMode, this);
   }

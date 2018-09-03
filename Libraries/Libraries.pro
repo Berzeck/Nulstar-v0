@@ -1,3 +1,5 @@
 TEMPLATE = subdirs
-SUBDIRS += Network
+SUBDIRS += Core \
+           Network
 
+Core.depends = Network

@@ -13,7 +13,7 @@ namespace NulstarNS {
     Q_OBJECT
 
     public:      
-      explicit NServiceManagerController(QWebSocketServer::SslMode lSslMode, NCoreService::ELogLevel lLogLevel, QObject* rParent = nullptr);
+      explicit NServiceManagerController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, QList<QNetworkAddressEntry> lAllowedNetworks = QList<QNetworkAddressEntry> (), QObject* rParent = nullptr);
       ~NServiceManagerController();
 
     private:      
