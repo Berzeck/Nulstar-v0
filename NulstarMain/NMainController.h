@@ -15,17 +15,16 @@ namespace NulstarNS {
     Q_OBJECT
 
     public:      
-      explicit NMainController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, QList<QNetworkAddressEntry> lAllowedNetworks = QList<QNetworkAddressEntry> (), QObject* rParent = nullptr);
-      ~NMainController();      
+      explicit NMainController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, QList<QNetworkAddressEntry> lAllowedNetworks = QList<QNetworkAddressEntry> (), quint16 lCommPort = 0,
+                               QHostAddress::SpecialAddress lBindAddress = QHostAddress::Null, QObject* rParent = nullptr);
+      ~NMainController() {}
 
       void fSetComponent(const QString& lComponentName, QList<QPair<QString, QString>> lParameters);
 
     private:      
-      NWebSocketServer* pWebCommServer;
       QMap<QString, QList<QPair<QString, QString>> > mComponents;
 
     public Q_SLOTS:
-      void fControlCommServer(EServiceAction lAction, quint16 lCommPort = 0, QHostAddress::SpecialAddress lAddress = QHostAddress::Any);
       void fStartComponent(const QString& lComponentName);
       void fStartComponents();
   };

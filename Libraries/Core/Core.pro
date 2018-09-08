@@ -10,9 +10,11 @@ CONFIG += c++11
 DEFINES += QT_DEPRECATED_WARNINGS
 
 HEADERS += Core.h \
-           NCoreService.h
+           NCoreService.h \
+    NApiBuilder.h
 
-SOURCES += NCoreService.cpp
+SOURCES += NCoreService.cpp \
+    NApiBuilder.cpp
 
 win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Network/release/ -lNetwork
 else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Network/debug/ -lNetwork

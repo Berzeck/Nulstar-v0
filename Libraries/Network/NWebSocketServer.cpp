@@ -2,8 +2,8 @@
 #include "NWebSocketServer.h"
 
 namespace NulstarNS {
-  NWebSocketServer::NWebSocketServer(const QString& lName, SslMode lSslMode, QObject* rParent)
-                  : QWebSocketServer(lName, lSslMode, rParent), mPort(0) {
+  NWebSocketServer::NWebSocketServer(const QString& lName, const QString& lLabel, SslMode lSslMode, QObject* rParent)
+                  : QWebSocketServer(lLabel, lSslMode, rParent), mPort(0), mName(lName), mBindAddress(QHostAddress::Null) {
 
   }
 
@@ -11,12 +11,13 @@ namespace NulstarNS {
     qDeleteAll(mConnections.begin(), mConnections.end());
   }
 
-  bool NWebSocketServer::fListen(const QHostAddress& lAddress, quint16 lPort) {
+  bool NWebSocketServer::fListen(const QHostAddress& lBindAddress, quint16 lPort) {
     bool lSuccess = false;
     if(isListening())
       return false;
-    if(lPort) mPort = lPort;
-    if((lSuccess = listen(lAddress, mPort)))
+    fSetPort(lPort);
+    fSetBindAddress(lBindAddress);
+    if((lSuccess = listen(mBindAddress, mPort)))
       connect(this, &NWebSocketServer::QWebSocketServer::newConnection, this, &NWebSocketServer::fOnNewConnection, static_cast<Qt::ConnectionType>(Qt::UniqueConnection | Qt::AutoConnection));
     return lSuccess;
   }
@@ -48,6 +49,10 @@ qDebug() << "socketDisconnected:" << rClient;
       mConnections.removeAll(rClient);
       rClient->deleteLater();
     }
+  }
+
+  void NWebSocketServer::fSetBindAddress(const QHostAddress& lBindAddress) {
+    if(lBindAddress != QHostAddress::Null) mBindAddress = lBindAddress;
   }
 
   void NWebSocketServer::fSetPort(quint16 lPort) {

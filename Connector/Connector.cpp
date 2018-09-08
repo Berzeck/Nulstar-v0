@@ -1,5 +1,6 @@
 #include <QCommandLineParser>
 #include <QCoreApplication>
+#include <QHostAddress>
 #include <QList>
 #include <QNetworkAddressEntry>
 #include <QString>
@@ -62,7 +63,7 @@ int main(int argc, char *argv[])
       lAllowedNetworks << lNetworkAddress;
     }
   }
-  NulstarNS::NConnectionController lController(static_cast<QWebSocketServer::SslMode> (lParser.value("sslmode").toUInt()), static_cast<NulstarNS::NConnectionController::ELogLevel> (lParser.value("loglevel").toUInt()), lAllowedNetworks);
-  lController.fControlCommServer(NulstarNS::NConnectionController::EServiceAction::eStartService, static_cast<quint16> (lParser.value("commport").toUInt()));
+  NulstarNS::NConnectionController lController(static_cast<QWebSocketServer::SslMode> (lParser.value("sslmode").toUInt()), static_cast<NulstarNS::NConnectionController::ELogLevel> (lParser.value("loglevel").toUInt()), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::Any);
+  lController.fControlWebServer(QString(), NulstarNS::NConnectionController::EServiceAction::eStartService);  // Start all web sockets servers
   return lApp.exec();
 }

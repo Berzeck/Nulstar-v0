@@ -1,57 +1,20 @@
 #include <QHostAddress>
+#include <QSettings>
 #include <QWebSocket>
+#include <NWebSocketServer.h>
+#include <NApiBuilder.h>
 #include "NConnectionController.h"
 
+const QString lAdminServerLabel = "Nulstar Management";
+const QString lAdminServerName = "WebAdminServer";
+const QString lClientServerLabel = "Nulstar Client Channel";
+const QString lClientServerName = "WebClientServer";
 
 namespace NulstarNS {
-  NConnectionController::NConnectionController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, QList<QNetworkAddressEntry> lAllowedNetworks, QObject* rParent)
-                       : NCoreService(lLogLevel, lAllowedNetworks, rParent) {
-    NCoreService::mLogLevel = lLogLevel;
-    pWebAdminServer = new NWebSocketServer(QStringLiteral("Nulstar Admin"), lSslMode, this);
-    pWebClientServer = new NWebSocketServer(QStringLiteral("Nulstar Client"), lSslMode, this);
-    pWebCommServer = new NWebSocketServer(QStringLiteral("Nulstar Internal Communication"), lSslMode, this);
-  }
-
-  NConnectionController::~NConnectionController() {
-    pWebAdminServer->close();
-    pWebClientServer->close();    
-    pWebCommServer->close();
-  }
-
-  void NConnectionController::fControlAdminServer(EServiceAction lAction, quint16 lAdminPort, QHostAddress::SpecialAddress lAddress ) {
-    if(lAction == EServiceAction::eStartService) {
-      pWebAdminServer->fListen(lAddress, lAdminPort);
-    }
-    if(lAction == EServiceAction::eStopService) {
-      pWebAdminServer->close();
-    }
-    if(lAction == EServiceAction::eChangePort) {
-      pWebAdminServer->fSetPort(lAdminPort);
-    }
-  }
-
-  void NConnectionController::fControlClientServer(EServiceAction lAction, quint16 lClientPort, QHostAddress::SpecialAddress lAddress ) {
-    if(lAction == EServiceAction::eStartService) {
-      pWebClientServer->fListen(lAddress, lClientPort);
-    }
-    if(lAction == EServiceAction::eStopService) {
-      pWebClientServer->close();
-    }
-    if(lAction == EServiceAction::eChangePort) {
-      pWebClientServer->fSetPort(lClientPort);
-    }
-  }
-
-  void NConnectionController::fControlCommServer(EServiceAction lAction, quint16 lCommPort, QHostAddress::SpecialAddress lAddress ) {
-    if(lAction == EServiceAction::eStartService) {
-      pWebCommServer->fListen(lAddress, lCommPort);
-    }
-    if(lAction == EServiceAction::eStopService) {
-      pWebCommServer->close();
-    }
-    if(lAction == EServiceAction::eChangePort) {
-      pWebCommServer->fSetPort(lCommPort);
-    }
+  NConnectionController::NConnectionController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, quint16 lAdminPort, quint16 lClientPort, QHostAddress::SpecialAddress lBindAddress, QObject* rParent)
+                       : NCoreService(lSslMode, lLogLevel, lAllowedNetworks, lCommPort, lBindAddress, rParent) {
+    fAddWebSocketServer(lAdminServerName, lAdminServerLabel, lAdminPort, QHostAddress::Any, false);
+    fAddWebSocketServer(lClientServerName, lClientServerLabel, lClientPort, QHostAddress::Any, false);
   }
 }
 

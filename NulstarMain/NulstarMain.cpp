@@ -56,8 +56,8 @@ int main(int argc, char *argv[])
   }
   if(lHostAddress.isNull() || lHostAddress.isLoopback()) lBindAddress = QHostAddress::LocalHost;
   else lBindAddress = QHostAddress::Any;
-  NulstarNS::NMainController lController(static_cast<QWebSocketServer::SslMode> (lSslMode.toUInt()), static_cast<NulstarNS::NMainController::ELogLevel> (lLogLevel.toUInt()), lAllowedNetworks);
-  lController.fControlCommServer(NulstarNS::NMainController::EServiceAction::eStartService, static_cast<quint16> (lCommunicationPort.toUInt()), lBindAddress);
+  NulstarNS::NMainController lController(static_cast<QWebSocketServer::SslMode> (lSslMode.toUInt()), static_cast<NulstarNS::NMainController::ELogLevel> (lLogLevel.toUInt()), lAllowedNetworks, lCommunicationPort.toUShort(), lBindAddress);
+  lController.fControlWebServer(QString(), NulstarNS::NMainController::EServiceAction::eStartService);  // Start all web sockets servers
 
   for(const QString& lGroup : lGroups) {
     lSettings.beginGroup(lGroup);

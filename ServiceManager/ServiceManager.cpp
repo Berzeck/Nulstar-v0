@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
       lAllowedNetworks << lNetworkAddress;
     }
   }
-  NulstarNS::NServiceManagerController lController(static_cast<QWebSocketServer::SslMode> (lParser.value("sslmode").toUInt()), static_cast<NulstarNS::NServiceManagerController::ELogLevel> (lParser.value("loglevel").toUInt()), lAllowedNetworks);
-  lController.fControlCommServer(NulstarNS::NServiceManagerController::EServiceAction::eStartService, static_cast<quint16> (lParser.value("commport").toUInt()));
+  NulstarNS::NServiceManagerController lController(static_cast<QWebSocketServer::SslMode> (lParser.value("sslmode").toUInt()), static_cast<NulstarNS::NServiceManagerController::ELogLevel> (lParser.value("loglevel").toUInt()), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::Any);
+  lController.fControlWebServer(QString(), NulstarNS::NServiceManagerController::EServiceAction::eStartService);  // Start all web sockets servers
   return lApp.exec();
 }

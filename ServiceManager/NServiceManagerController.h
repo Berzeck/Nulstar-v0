@@ -11,15 +11,10 @@ namespace NulstarNS {
   class NServiceManagerController : public NCoreService {
     Q_OBJECT
 
-    public:      
-      explicit NServiceManagerController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, QList<QNetworkAddressEntry> lAllowedNetworks = QList<QNetworkAddressEntry> (), QObject* rParent = nullptr);
-      ~NServiceManagerController();
-
-    private:      
-      NWebSocketServer* pWebCommServer;
-
-    public Q_SLOTS:
-      void fControlCommServer(EServiceAction lAction, quint16 lCommPort = 0, QHostAddress::SpecialAddress lAddress = QHostAddress::Any);
+    public:
+      explicit NServiceManagerController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, QList<QNetworkAddressEntry> lAllowedNetworks = QList<QNetworkAddressEntry> (), quint16 lCommPort = 0,
+                                         QHostAddress::SpecialAddress lBindAddress = QHostAddress::Null, QObject* rParent = nullptr);
+      ~NServiceManagerController() {}
   };
 }
 
