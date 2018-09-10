@@ -13,11 +13,9 @@ DESTDIR = $$DESTDIR/MainComponents
 VERSION = 0.0.1.1
 DEFINES += APP_NAME=\\\"Nulstar_Service_Manager\\\" APP_VERSION=\\\"$$VERSION\\\" APP_VERSION_NAME=\\\"Baby_Apple_I\\\"
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Libraries/Network/release/ -lNetwork -L$$OUT_PWD/../Libraries/Core/release/ -lCore
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Libraries/Network/debug/ -lNetwork -L$$OUT_PWD/../Libraries/Core/debug/ -lCore
-else:unix: LIBS += -L$$DESTDIR/../Libraries/ -lNetwork -L$$DESTDIR/../Libraries/ -lCore
+LIBS += -L$$DESTDIR/../Libraries/ -lNetwork -L$$DESTDIR/../Libraries/ -lCore
 
-QMAKE_LFLAGS_RELEASE += -s
+unix:QMAKE_LFLAGS_RELEASE += -s
 INCLUDEPATH += $$PWD/../Libraries/Network $$PWD/../Libraries/Core
 DEPENDPATH += $$PWD/../Libraries/Network $$PWD/../Libraries/Core
 QMAKE_RPATHDIR = $$DESTDIR/../Libraries/
