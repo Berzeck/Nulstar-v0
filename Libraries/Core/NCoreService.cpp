@@ -7,10 +7,13 @@ const QString lCommServerLabel = "Nulstar Internal Communication";
 const QString lCommServerName = "WebCommServer";
 
 namespace NulstarNS {
-  NCoreService::NCoreService(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lPort, QHostAddress::SpecialAddress lBindAddress, QObject *rParent)
-              : QObject(rParent), mLogLevel(lLogLevel), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks), pApiBuilder(new NApiBuilder(this)) {
+  NCoreService::NCoreService(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress& lServiceManagerIP, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lPort, QHostAddress::SpecialAddress lBindAddress, QObject *rParent)
+              : QObject(rParent), mLogLevel(lLogLevel), mServiceManagerIP(lServiceManagerIP), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks), pApiBuilder(new NApiBuilder(this)) {
+
+    if(mServiceManagerIP.isNull()) mServiceManagerIP = QHostAddress::LocalHost;
 
     fAddWebSocketServer(lCommServerName, lCommServerLabel, lPort, lBindAddress, false);
+    fFillMethodDescriptions();
 // We use a timer so the function fBuildApi is executed when the application enters the main loop, therefor after the derived classes are created
     QTimer::singleShot(0, this, &NCoreService::fBuildApi);
   }
@@ -37,6 +40,16 @@ namespace NulstarNS {
     mWebSocket.open(lUrl);
   }
 
+  NResponse NCoreService::fSetMaxConnections(quint64 lID, QString lExternalID, const QString& lName, int lMaxconnections) {
+    if(mWebServers.contains(lName)) {
+      mWebServers[lName]->fSetMaxConnections(lMaxconnections);
+      NResponse lResponse(lID, lExternalID, true, true);
+      return lResponse;
+    }
+    NResponse lResponse(lID, lExternalID, false, false, tr("Web server '%1' not found.").arg(lName));
+    return lResponse;
+  }
+
   bool NCoreService::fControlWebServer(const QString &lName, EServiceAction lAction) {
     QStringList lWebServerNames;
     if(lName.isEmpty()) lWebServerNames = mWebServers.keys();
@@ -58,6 +71,23 @@ namespace NulstarNS {
     return true;
   }
 
+  NResponse NCoreService::fMaxConnections(quint64 lID, QString lExternalID, const QString &lName) {
+    if(mWebServers.contains(lName)) {
+      NResponse lResponse(lID, lExternalID, true, mWebServers[lName]->fMaxConnections());
+      return lResponse;
+    }
+    NResponse lResponse(lID, lExternalID, false, 0, tr("Web server '%1' not found.").arg(lName));
+    return lResponse;
+  }
+
+  NResponse NCoreService::fTotalConnections(quint64 lID, QString lExternalID, const QString &lName) {
+    if(mWebServers.contains(lName)) {
+      NResponse lResponse(lID, lExternalID, true, mWebServers[lName]->fTotalConnections());
+      return lResponse;
+    }
+    NResponse lResponse(lID, lExternalID, false, 0, tr("Web server '%1' not found.").arg(lName));
+    return lResponse;
+  }
   void NCoreService::fOnConnected() {
     connect(&mWebSocket, &QWebSocket::textMessageReceived, this, &NCoreService::fOnTextMessageReceived);
     mWebSocket.sendTextMessage(QStringLiteral("Sending Roles!"));

@@ -3,7 +3,7 @@
 
 namespace NulstarNS {
   NWebSocketServer::NWebSocketServer(const QString& lName, const QString& lLabel, SslMode lSslMode, QObject* rParent)
-                  : QWebSocketServer(lLabel, lSslMode, rParent), mPort(0), mName(lName), mBindAddress(QHostAddress::Null) {
+                  : QWebSocketServer(lLabel, lSslMode, rParent), mMaxConnections(0), mPort(0), mName(lName), mBindAddress(QHostAddress::Null) {
 
   }
 
@@ -23,6 +23,8 @@ namespace NulstarNS {
   }
 
   void NWebSocketServer::fOnNewConnection() {
+    if(mMaxConnections && (mConnections.size() >= mMaxConnections))
+      return;
     QWebSocket* rSocket = nextPendingConnection();
     connect(rSocket, &QWebSocket::textMessageReceived, this, &NWebSocketServer::fProcessTextMessage);
     connect(rSocket, &QWebSocket::binaryMessageReceived, this, &NWebSocketServer::fProcessBinaryMessage);

@@ -8,8 +8,8 @@
 const QString lComponentsDirectory("MainComponents");
 
 namespace NulstarNS {
-  NMainController::NMainController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, QHostAddress::SpecialAddress lBindAddress, QObject* rParent)
-                 : NCoreService(lSslMode, lLogLevel, lAllowedNetworks, lCommPort, lBindAddress, rParent) {
+  NMainController::NMainController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress& lServiceManagerIP, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, QHostAddress::SpecialAddress lBindAddress, QObject* rParent)
+                 : NCoreService(lSslMode, lLogLevel, lServiceManagerIP, lAllowedNetworks, lCommPort, lBindAddress, rParent) {
     QTimer::singleShot(0, this, &NMainController::fStartComponents);
   }
 

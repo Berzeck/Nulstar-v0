@@ -18,13 +18,17 @@ namespace NulstarNS {
 
       bool fListen(const QHostAddress& lAddress = QHostAddress::Null, quint16 lPort = 0);
       QString fName() { return mName; }
+      int fMaxConnections() { return mMaxConnections; }
+      int fTotalConnections() { return mConnections.size(); }
       void fSetName(const QString& lName);
+      void fSetMaxConnections(int lMaxConnections) { mMaxConnections = lMaxConnections; }
       void fSetPort(quint16 lPort);
       void fSetBindAddress(const QHostAddress& lBindAddress);
 
     private:
+      int mMaxConnections;
       quint16 mPort;
-      QString mName;
+      QString mName;      
       QHostAddress mBindAddress;
       QList<QWebSocket* > mConnections;
       bool listen(const QHostAddress &address = QHostAddress::Any, quint16 port = 0) { return QWebSocketServer::listen(address, port); }

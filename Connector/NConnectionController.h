@@ -4,19 +4,37 @@
 #include <QHostAddress>
 #include <QObject>
 #include <NCoreService.h>
+#include <NResponse.h>
 
 namespace NulstarNS {
+  const QString lAdminServerLabel = "Nulstar Management";
+  const QString lAdminServerName = "WebAdminServer";
+  const QString lClientServerLabel = "Nulstar Client Channel";
+  const QString lClientServerName = "WebClientServer";
+
   class NWebSocketServer;
   class NConnectionController : public NCoreService {
     Q_OBJECT
 
     public:      
-      explicit NConnectionController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, QList<QNetworkAddressEntry> lAllowedNetworks = QList<QNetworkAddressEntry> (), quint16 lCommPort = 0, quint16 lAdminPort = 0, quint16 lClientPort = 0,
-                                     QHostAddress::SpecialAddress lBindAddress = QHostAddress::Null, QObject* rParent = nullptr);
+      explicit NConnectionController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress& lServiceManagerIP = QHostAddress::LocalHost, QList<QNetworkAddressEntry> lAllowedNetworks = QList<QNetworkAddressEntry> (), quint16 lCommPort = 0,
+                                     quint16 lAdminPort = 0, quint16 lClientPort = 0, QHostAddress::SpecialAddress lBindAddress = QHostAddress::Null, QObject* rParent = nullptr);
       ~NConnectionController() {}
 
+    protected:
+      void fFillMethodDescriptions();
+
+    private:
+      quint64 mRequestID;
+      quint8 mCompressionLevel;
+
     public Q_SLOTS:
-      API_PRIVATE_FUNCTION void aFunction(int lParameter) { Q_UNUSED(lParameter); }
+      API_ADMIN_FUNCTION NResponse setmaxconnections(quint64 lID, QString lExternalID, int lMaxConnections) { return fSetMaxConnections(lID, lExternalID, lClientServerName, lMaxConnections); }
+      API_ADMIN_FUNCTION NResponse getmaxconnections(quint64 lID, QString lExternalID) { return fMaxConnections(lID, lExternalID,lClientServerName); }
+      API_ADMIN_FUNCTION NResponse gettotalconnections(quint64 lID, QString lExternalID) { return fTotalConnections(lID, lExternalID, lClientServerName); }
+      API_ADMIN_FUNCTION NResponse setcompressionlevel(quint64 lID, QString lExternalID, quint8 lCompressionLevel);
+      API_PUBLIC_FUNCTION NResponse getcompressionlevel(quint64 lID, QString lExternalID);
+
   };
 }
 
