@@ -6,9 +6,11 @@
 #include <QString>
 #include <QStringList>
 #include <QTextStream>
+#include <QUrl>
 #include <Core.h>
 #include "NConnectionController.h"
 
+const QString lOrganizationName = "Nulstar";
 
 int main(int argc, char *argv[])
 {    
@@ -16,11 +18,13 @@ int main(int argc, char *argv[])
   QString lAppName(QString(APP_NAME).replace("_"," "));
   lApp.setApplicationName(lAppName);
   lApp.setApplicationVersion(APP_VERSION);
-  lApp.setOrganizationDomain(QStringLiteral("nulstar.com"));
-  lApp.setOrganizationName(QStringLiteral("Nulstar"));
+  lApp.setOrganizationDomain(APP_DOMAIN);
+  lApp.setOrganizationName(lOrganizationName);
 
   QList<QNetworkAddressEntry> lAllowedNetworks;
   QCommandLineParser lParser;
+  QString lServiceManagerUrl;
+  unsigned short lSslMode = 0;
   lParser.setApplicationDescription(lAppName);
   lParser.addHelpOption();
   lParser.addVersionOption();
@@ -31,7 +35,7 @@ int main(int argc, char *argv[])
     {{"c", "clientport"}, QStringLiteral("Client Port."), QStringLiteral("clientport")},
     {{"m", "commport"}, QStringLiteral("Communication Port."), QStringLiteral("commport")},
     {{"n", "allowednetworks"}, QStringLiteral("Allowed Networks."), QStringLiteral("allowednetworks")},
-    {{"i", "managerip"}, QStringLiteral("Service manager ip."), QStringLiteral("managerip")},
+    {{"i", "managerurl"}, QStringLiteral("Service manager URL."), QStringLiteral("managerurl")},
   });
   lParser.process(lApp);
   if(!lParser.isSet("loglevel") || lParser.value("loglevel").toUShort() < 1 || lParser.value("loglevel").toUShort() > 5) {
@@ -42,6 +46,7 @@ int main(int argc, char *argv[])
     fputs(qPrintable(QString("Wrong security type! [0-1]\n\n%1\n").arg(lParser.helpText())), stderr);
     return 2;
   }
+  lSslMode = lParser.value("sslmode").toUShort();
   if(!lParser.isSet("adminport")) {
     fputs(qPrintable(QString("Admin port not set!\n\n%1\n").arg(lParser.helpText())), stderr);
     return 3;
@@ -54,6 +59,12 @@ int main(int argc, char *argv[])
     fputs(qPrintable(QString("Communication port not set!\n\n%1\n").arg(lParser.helpText())), stderr);
     return 5;
   }
+  if(lParser.isSet("managerurl")) {
+    lServiceManagerUrl = lParser.value("managerurl");
+    if(lSslMode == 0) lServiceManagerUrl.prepend("ws://");
+    if(lSslMode == 1) lServiceManagerUrl.prepend("wss://");
+  }
+qDebug(lServiceManagerUrl.toLatin1());
   if(lParser.isSet("allowednetworks")) {
     QStringList lNetworks(lParser.value("allowednetworks").split(","));
     for(const QString& lNetwork : lNetworks) {
@@ -64,7 +75,7 @@ int main(int argc, char *argv[])
       lAllowedNetworks << lNetworkAddress;
     }
   }
-  NulstarNS::NConnectionController lController(static_cast<QWebSocketServer::SslMode> (lParser.value("sslmode").toUInt()), static_cast<NulstarNS::NConnectionController::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("managerip")),
+  NulstarNS::NConnectionController lController(static_cast<QWebSocketServer::SslMode> (lParser.value("sslmode").toUInt()), static_cast<NulstarNS::NConnectionController::ELogLevel> (lParser.value("loglevel").toUInt()), QUrl(lServiceManagerUrl),
                                    lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::Any);
   lController.fControlWebServer(QString(), NulstarNS::NConnectionController::EServiceAction::eStartService);  // Start all web sockets servers
   return lApp.exec();

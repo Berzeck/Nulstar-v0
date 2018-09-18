@@ -5,11 +5,12 @@
 #include <QWebSocket>
 #include "NMainController.h"
 
+const QString lServiceManager("ServiceManager");
 const QString lComponentsDirectory("MainComponents");
 
 namespace NulstarNS {
-  NMainController::NMainController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress& lServiceManagerIP, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, QHostAddress::SpecialAddress lBindAddress, QObject* rParent)
-                 : NCoreService(lSslMode, lLogLevel, lServiceManagerIP, lAllowedNetworks, lCommPort, lBindAddress, rParent) {
+  NMainController::NMainController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QUrl &lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, QHostAddress::SpecialAddress lBindAddress, QObject* rParent)
+                 : NCoreService(lSslMode, lLogLevel, lServiceManagerUrl, lAllowedNetworks, lCommPort, lBindAddress, rParent) {
     QTimer::singleShot(0, this, &NMainController::fStartComponents);
   }
 
@@ -20,7 +21,6 @@ namespace NulstarNS {
 
   void NMainController::fStartComponent(const QString& lComponentName) {
     QString lAppName(QString("%1/%2/%3").arg(QCoreApplication::applicationDirPath()).arg(lComponentsDirectory).arg(lComponentName));
- //   QString lSystem(QSysInfo::productType());
 #ifdef Q_OS_WIN
   lAppName.append(".exe");
 #endif
@@ -38,7 +38,9 @@ qDebug("Execution failed!");
   }
 
   void NMainController::fStartComponents() {
+    fStartComponent(lServiceManager);
     QStringList lAllComponents(mComponents.keys());
+    lAllComponents.removeAll(lServiceManager);
     for(const QString& lComponentName : lAllComponents)
       fStartComponent(lComponentName);
   }

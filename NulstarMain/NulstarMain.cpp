@@ -6,11 +6,13 @@
 #include <QString>
 #include <QStringList>
 #include <QTextStream>
+#include <QUrl>
 #include "NMainController.h"
 
 const QString lConstantsFile("Constants.ncf");
 const QString lControllerName("ServiceController");
 const QString lManageParameter("Managed");
+const QString lServiceManagerUrlParameter("managerurl");
 
 int main(int argc, char *argv[])
 {
@@ -56,7 +58,7 @@ int main(int argc, char *argv[])
   }
   if(lHostAddress.isNull() || lHostAddress.isLoopback()) lBindAddress = QHostAddress::LocalHost;
   else lBindAddress = QHostAddress::Any;
-  NulstarNS::NMainController lController(static_cast<QWebSocketServer::SslMode> (lSslMode.toUInt()), static_cast<NulstarNS::NMainController::ELogLevel> (lLogLevel.toUInt()), QHostAddress(lParser.value("managerip")), lAllowedNetworks, lCommunicationPort.toUShort(), lBindAddress);
+  NulstarNS::NMainController lController(static_cast<QWebSocketServer::SslMode> (lSslMode.toUInt()), static_cast<NulstarNS::NMainController::ELogLevel> (lLogLevel.toUInt()), QUrl(QHostAddress(QHostAddress::LocalHost).toString()), lAllowedNetworks, lCommunicationPort.toUShort(), lBindAddress);
   lController.fControlWebServer(QString(), NulstarNS::NMainController::EServiceAction::eStartService);  // Start all web sockets servers
 
   for(const QString& lGroup : lGroups) {
@@ -73,6 +75,16 @@ int main(int argc, char *argv[])
             lParameter.second = lSettings.value(lKey).toString();
             lParameters << lParameter;
           }
+        }
+        if(lGroup != "ServiceManager") {
+          QPair<QString, QString> lServiceManagerUrl;
+          QSettings lServiceManagerSettings(lConfigFile, QSettings::IniFormat);
+          lServiceManagerSettings.beginGroup("ServiceManager");
+          QString lPort = lServiceManagerSettings.value("CommPort").toString();
+          lServiceManagerUrl.first = lServiceManagerUrlParameter;
+          lServiceManagerUrl.second = QString("%1:%2").arg(lHostAddress.toString()).arg(lPort);
+          lServiceManagerSettings.endGroup();
+          lParameters << lServiceManagerUrl;
         }
         lController.fSetComponent(lGroup, lParameters);
       }      

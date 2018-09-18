@@ -8,7 +8,7 @@
 #endif
 
 #include <QHostAddress>
-#include <QList>
+#include <QJsonDocument>
 #include <QMap>
 #include <QNetworkAddressEntry>
 #include <QObject>
@@ -28,10 +28,16 @@ namespace NulstarNS {
       enum class ELogLevel {eLogCritical = 1, eLogImportant = 2, eLogWarning = 3, eLogInfo = 4, eLogEverything = 5};
       enum class EServiceAction {eStartService = 0, eStopService = 1, eRestartService = 2};
 
-      NCoreService(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel = ELogLevel::eLogWarning, const QHostAddress& lServiceManagerIP = QHostAddress::LocalHost, QList<QNetworkAddressEntry> lAllowedNetworks = QList<QNetworkAddressEntry> (), quint16 lPort = 0, QHostAddress::SpecialAddress lBindAddress = QHostAddress::Null, QObject* rParent = nullptr);
+      NCoreService(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel = ELogLevel::eLogWarning, const QUrl& lServiceManagerUrl = QUrl(), QList<QNetworkAddressEntry> lAllowedNetworks = QList<QNetworkAddressEntry> (), quint16 lPort = 0, QHostAddress::SpecialAddress lBindAddress = QHostAddress::Null, QObject* rParent = nullptr);
       virtual ~NCoreService();
 
-      virtual void fConnectToServiceManager(const QUrl& lUrl);
+      virtual QString fName() = 0;
+      virtual QString fVersion() = 0;
+      virtual QString fDomain() = 0;
+      virtual QString fApiRole() = 0;
+      virtual QString fApiVersion() = 0;
+
+      virtual void fConnectToServiceManager();
       virtual bool fAddWebSocketServer(const QString& lName, const QString& lLabel, quint16 lPort, QHostAddress::SpecialAddress lBindAddress, bool lStartImmediatly = false);
       void fAddMethodFunctionDescription(const QString& lMethodName, const QString& lDescription) { mApiMethodDescription[lMethodName] = lDescription; }
       NResponse fMaxConnections(quint64 lID, QString lExternalID, const QString &lName);
@@ -44,7 +50,7 @@ namespace NulstarNS {
       virtual void fFillMethodDescriptions() { }
 
     private:
-      QHostAddress mServiceManagerIP;
+      QUrl mServiceManagerUrl;
       QWebSocketServer::SslMode mSslMode;
       QWebSocket mWebSocket;
       QMap<QString, NWebSocketServer*> mWebServers;
@@ -56,7 +62,8 @@ namespace NulstarNS {
       virtual bool fControlWebServer(const QString& lName, EServiceAction lAction); // If lName is empty then it controls all web sockets servers      
 
     protected Q_SLOTS:
-      virtual void fBuildApi();
+      virtual QJsonDocument fBuildApi();
+      void fOnConnectionError(QAbstractSocket::SocketError lErrorCode);
 
     private Q_SLOTS:
       virtual void fOnConnected();

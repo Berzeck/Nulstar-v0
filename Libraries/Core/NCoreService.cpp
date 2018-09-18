@@ -3,19 +3,18 @@
 #include "NCoreService.h"
 #include "NApiBuilder.h"
 
+#include <QDebug>
+
 const QString lCommServerLabel = "Nulstar Internal Communication";
 const QString lCommServerName = "WebCommServer";
 
 namespace NulstarNS {
-  NCoreService::NCoreService(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress& lServiceManagerIP, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lPort, QHostAddress::SpecialAddress lBindAddress, QObject *rParent)
-              : QObject(rParent), mLogLevel(lLogLevel), mServiceManagerIP(lServiceManagerIP), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks), pApiBuilder(new NApiBuilder(this)) {
-
-    if(mServiceManagerIP.isNull()) mServiceManagerIP = QHostAddress::LocalHost;
+  NCoreService::NCoreService(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QUrl& lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lPort, QHostAddress::SpecialAddress lBindAddress, QObject *rParent)
+              : QObject(rParent), mLogLevel(lLogLevel), mServiceManagerUrl(lServiceManagerUrl), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks), pApiBuilder(new NApiBuilder(this)) {
 
     fAddWebSocketServer(lCommServerName, lCommServerLabel, lPort, lBindAddress, false);
     fFillMethodDescriptions();
-// We use a timer so the function fBuildApi is executed when the application enters the main loop, therefor after the derived classes are created
-    QTimer::singleShot(0, this, &NCoreService::fBuildApi);
+    QTimer::singleShot(0, this, &NCoreService::fConnectToServiceManager);
   }
   NCoreService::~NCoreService() {
     for(NWebSocketServer* rWebServer : mWebServers)
@@ -34,10 +33,18 @@ namespace NulstarNS {
     return true;
   }
 
-  void NCoreService::fConnectToServiceManager(const QUrl& lUrl) {
-    connect(&mWebSocket, &QWebSocket::connected, this, &NCoreService::fOnConnected);
-    connect(&mWebSocket, &QWebSocket::disconnected, this, &NCoreService::sClosed);
-    mWebSocket.open(lUrl);
+  void NCoreService::fConnectToServiceManager() {
+    if(mServiceManagerUrl.isValid()) {
+        qDebug("!-----------------");
+      qDebug(mServiceManagerUrl.toString().toLatin1());
+      qDebug(fName().toLatin1());
+
+      connect(&mWebSocket, &QWebSocket::connected, this, &NCoreService::fOnConnected, Qt::UniqueConnection);
+      connect(&mWebSocket, &QWebSocket::disconnected, this, &NCoreService::sClosed, Qt::UniqueConnection);
+      connect(&mWebSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error), this, &NCoreService::fOnConnectionError);
+      mWebSocket.open(mServiceManagerUrl);
+   qDebug("-----------------!");
+    }
   }
 
   NResponse NCoreService::fSetMaxConnections(quint64 lID, QString lExternalID, const QString& lName, int lMaxconnections) {
@@ -88,18 +95,28 @@ namespace NulstarNS {
     NResponse lResponse(lID, lExternalID, false, 0, tr("Web server '%1' not found.").arg(lName));
     return lResponse;
   }
+
+  void NCoreService::fOnConnectionError(QAbstractSocket::SocketError lErrorCode) {
+    qDebug(QString::number(lErrorCode).toLatin1());
+    qDebug("ERRORR!!");
+    qDebug(mWebSocket.errorString().toLatin1());
+  }
+
   void NCoreService::fOnConnected() {
     connect(&mWebSocket, &QWebSocket::textMessageReceived, this, &NCoreService::fOnTextMessageReceived);
-    mWebSocket.sendTextMessage(QStringLiteral("Sending Roles!"));
-setProperty("CU", QString("111"));
+    QString lApi(fBuildApi().toJson(QJsonDocument::Indented));
+  qDebug(lApi.toLatin1());
+  qDebug("ppp");
+    mWebSocket.sendTextMessage(lApi);
   }
 
   void NCoreService::fOnTextMessageReceived(const QString &lTextMessage) {
     mWebSocket.sendTextMessage(QString("Receieved:\n%1").arg(lTextMessage));
   }
 
-  void NCoreService::fBuildApi() {
+  QJsonDocument NCoreService::fBuildApi() {
     pApiBuilder->fSetTargetObject(this);
-    pApiBuilder->fBuildApi();
+    QJsonDocument lApi(QJsonDocument::fromVariant(pApiBuilder->fBuildApi()));
+    return lApi;
   }
 }

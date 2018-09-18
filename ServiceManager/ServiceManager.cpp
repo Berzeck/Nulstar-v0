@@ -50,7 +50,12 @@ int main(int argc, char *argv[])
       lAllowedNetworks << lNetworkAddress;
     }
   }
-  NulstarNS::NServiceManagerController lController(static_cast<QWebSocketServer::SslMode> (lParser.value("sslmode").toUInt()), static_cast<NulstarNS::NServiceManagerController::ELogLevel> (lParser.value("loglevel").toUInt()), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::Any);
+
+  QString lLocalHostUrl(QString("://%1:%2").arg(QHostAddress(QHostAddress::LocalHost).toString()).arg(lParser.value("commport")));
+  if(lParser.value("sslmode").toUShort() == 0) lLocalHostUrl.prepend("ws");
+  if(lParser.value("sslmode").toUShort() == 1) lLocalHostUrl.prepend("wss");
+
+  NulstarNS::NServiceManagerController lController(static_cast<QWebSocketServer::SslMode> (lParser.value("sslmode").toUInt()), static_cast<NulstarNS::NServiceManagerController::ELogLevel> (lParser.value("loglevel").toUInt()), QUrl(lLocalHostUrl), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::Any);
   lController.fControlWebServer(QString(), NulstarNS::NServiceManagerController::EServiceAction::eStartService);  // Start all web sockets servers
   return lApp.exec();
 }

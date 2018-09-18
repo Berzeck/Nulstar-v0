@@ -6,8 +6,8 @@
 #include "NConnectionController.h"
 
 namespace NulstarNS {
-  NConnectionController::NConnectionController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress& lServiceManagerIP, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, quint16 lAdminPort, quint16 lClientPort, QHostAddress::SpecialAddress lBindAddress, QObject* rParent)
-                       : NCoreService(lSslMode, lLogLevel, lServiceManagerIP, lAllowedNetworks, lCommPort, lBindAddress, rParent), mRequestID(0), mCompressionLevel(0) {
+  NConnectionController::NConnectionController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QUrl &lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, quint16 lAdminPort, quint16 lClientPort, QHostAddress::SpecialAddress lBindAddress, QObject* rParent)
+                       : NCoreService(lSslMode, lLogLevel, lServiceManagerUrl, lAllowedNetworks, lCommPort, lBindAddress, rParent), mRequestID(0), mCompressionLevel(0) {
 
     fAddWebSocketServer(lAdminServerName, lAdminServerLabel, lAdminPort, QHostAddress::Any, false);
     fAddWebSocketServer(lClientServerName, lClientServerLabel, lClientPort, QHostAddress::Any, false);
@@ -15,6 +15,7 @@ namespace NulstarNS {
     NResponse fMaxConnections(quint64 lID, QString lExternalID, const QString &lName);
     NResponse fTotalConnections(quint64 lID, QString lExternalID, const QString &lName);
     NResponse fSetMaxConnections(quint64 lID, QString lExternalID, const QString& lName, int lMaxconnections);
+
   }
 
   NResponse NConnectionController::setcompressionlevel(quint64 lID, QString lExternalID, quint8 lCompressionLevel) {
