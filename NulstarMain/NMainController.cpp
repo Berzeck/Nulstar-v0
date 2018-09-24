@@ -33,7 +33,7 @@ namespace NulstarNS {
     }
     bool lServiceExecuted(QProcess::startDetached(lAppName, lParameterList, QString("%1/%2/").arg(QCoreApplication::applicationDirPath()).arg(lComponentsDirectory)));
     if(!lServiceExecuted) {
-qDebug("Execution failed!");
+
     }
   }
 

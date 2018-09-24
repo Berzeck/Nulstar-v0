@@ -38,14 +38,14 @@ int main(int argc, char *argv[])
   QList<QNetworkAddressEntry> lAllowedNetworks;
   QHostAddress lHostAddress;
   QHostAddress::SpecialAddress lBindAddress;
-  QString lCommunicationPort, lLogLevel, lSslMode;
+  QString lCommunicationPort, lLogLevel, lSslModeStr;
   QSettings lSettings(lConfigFile, QSettings::IniFormat);
   QStringList  lNetworks, lGroups(lSettings.childGroups());
   lSettings.beginGroup(lControllerName);
-  lCommunicationPort = lSettings.value(QString("CommunicationPort")).toString();
+  lCommunicationPort = lSettings.value(QString("CommPort")).toString();
   lLogLevel = lSettings.value(QString("LogLevel")).toString();
   lHostAddress.setAddress(lSettings.value(QString("MainControllerIP")).toString());
-  lSslMode = lSettings.value(QString("SslMode")).toString();
+  lSslModeStr = lSettings.value(QString("SslMode"), "0").toString();
   lNetworks = lSettings.value(QString("AllowedNetworks")).toString().split(",");
   lSettings.endGroup();
 
@@ -56,9 +56,22 @@ int main(int argc, char *argv[])
     if(lParams.size() > 1) lNetworkAddress.setPrefixLength(lParams.at(1).simplified().toInt());
     lAllowedNetworks << lNetworkAddress;
   }
+  QSettings lServiceManagerSettings(lConfigFile, QSettings::IniFormat);
+  lServiceManagerSettings.beginGroup("ServiceManager");
+  QString lServiceManagerPort = lServiceManagerSettings.value("CommPort").toString();
+  lServiceManagerSettings.endGroup();
+  QString lServiceManagerUrl = QHostAddress(QHostAddress::LocalHost).toString();
+  lServiceManagerUrl.append(QString(":%1").arg(lServiceManagerPort));
+  QWebSocketServer::SslMode lSslMode = QWebSocketServer::SslMode::NonSecureMode;
+  if(lSslModeStr.toUShort() == 0) lServiceManagerUrl.prepend("ws://");
+  if(lSslModeStr.toUShort() == 1) {
+    lServiceManagerUrl.prepend("wss://");
+    lSslMode = QWebSocketServer::SslMode::SecureMode;
+  }
   if(lHostAddress.isNull() || lHostAddress.isLoopback()) lBindAddress = QHostAddress::LocalHost;
   else lBindAddress = QHostAddress::Any;
-  NulstarNS::NMainController lController(static_cast<QWebSocketServer::SslMode> (lSslMode.toUInt()), static_cast<NulstarNS::NMainController::ELogLevel> (lLogLevel.toUInt()), QUrl(QHostAddress(QHostAddress::LocalHost).toString()), lAllowedNetworks, lCommunicationPort.toUShort(), lBindAddress);
+
+  NulstarNS::NMainController lController(lSslMode, static_cast<NulstarNS::NMainController::ELogLevel> (lLogLevel.toUInt()), QUrl(lServiceManagerUrl), lAllowedNetworks, lCommunicationPort.toUShort(), lBindAddress);
   lController.fControlWebServer(QString(), NulstarNS::NMainController::EServiceAction::eStartService);  // Start all web sockets servers
 
   for(const QString& lGroup : lGroups) {
@@ -78,12 +91,8 @@ int main(int argc, char *argv[])
         }
         if(lGroup != "ServiceManager") {
           QPair<QString, QString> lServiceManagerUrl;
-          QSettings lServiceManagerSettings(lConfigFile, QSettings::IniFormat);
-          lServiceManagerSettings.beginGroup("ServiceManager");
-          QString lPort = lServiceManagerSettings.value("CommPort").toString();
           lServiceManagerUrl.first = lServiceManagerUrlParameter;
-          lServiceManagerUrl.second = QString("%1:%2").arg(lHostAddress.toString()).arg(lPort);
-          lServiceManagerSettings.endGroup();
+          lServiceManagerUrl.second = QString("%1:%2").arg(lHostAddress.toString()).arg(lServiceManagerPort);
           lParameters << lServiceManagerUrl;
         }
         lController.fSetComponent(lGroup, lParameters);

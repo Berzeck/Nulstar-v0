@@ -9,7 +9,7 @@ SOURCES += NMainController.cpp \
 
 TARGET = Nulstar
 VERSION = 0.0.1.1
-DEFINES += APP_DOMAIN=\\\"Nulstar\\\" APP_ROLE=\\\"Role_ServiceController\\\" APP_ROLE_VERSION=\\\"0.1.0\\\" APP_NAME=\\\"Nulstar_Main_Controller\\\" APP_VERSION=\\\"$$VERSION\\\" APP_VERSION_NAME=\\\"OneEye_Baby_Ninja_Egg\\\"
+DEFINES += APP_DOMAIN=\\\"nulstar.com\\\" APP_ROLE=\\\"Role_ServiceController\\\" APP_ROLE_VERSION=\\\"0.1.0\\\" APP_NAME=\\\"Nulstar_Main_Controller\\\" APP_VERSION=\\\"$$VERSION\\\" APP_VERSION_NAME=\\\"OneEye_Baby_Ninja_Egg\\\"
 
 LIBS += -L$$DESTDIR/Libraries/ -lNetwork -L$$DESTDIR/Libraries/ -lCore
 

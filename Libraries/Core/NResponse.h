@@ -9,13 +9,16 @@
 namespace NulstarNS {
   class NResponse {
     public:
-      NResponse(quint64 lID, QString lExternalID, bool lSuccess, const QVariant& lReturnValue, const QString& lDescription = QString());
+      NResponse(bool lSuccess, const QVariant& lReturnValue, const QString& lDescription = QString());
       bool fSuccess() { return mSuccess; }
       quint64 fID() { return mID; }
       QString lExternalID() { return mExternalID; }
       QDate fProcessDate() { return mProcessDate; }
       QTime fProcesstime() { return mProcessTime; }
       QVariant fReturnValue() { return mReturnValue; }
+
+      void fSetID(quint64 lID) { mID = lID; }
+      void fSetExternalID(QString lExternalID) { mExternalID = lExternalID; }
 
     private:
       bool mSuccess;

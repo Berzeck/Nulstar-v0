@@ -11,10 +11,9 @@ const QString lCommServerName = "WebCommServer";
 namespace NulstarNS {
   NCoreService::NCoreService(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QUrl& lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lPort, QHostAddress::SpecialAddress lBindAddress, QObject *rParent)
               : QObject(rParent), mLogLevel(lLogLevel), mServiceManagerUrl(lServiceManagerUrl), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks), pApiBuilder(new NApiBuilder(this)) {
-
     fAddWebSocketServer(lCommServerName, lCommServerLabel, lPort, lBindAddress, false);
     fFillMethodDescriptions();
-    QTimer::singleShot(0, this, &NCoreService::fConnectToServiceManager);
+    QTimer::singleShot(500, this, &NCoreService::fConnectToServiceManager);
   }
   NCoreService::~NCoreService() {
     for(NWebSocketServer* rWebServer : mWebServers)
@@ -35,25 +34,20 @@ namespace NulstarNS {
 
   void NCoreService::fConnectToServiceManager() {
     if(mServiceManagerUrl.isValid()) {
-        qDebug("!-----------------");
-      qDebug(mServiceManagerUrl.toString().toLatin1());
-      qDebug(fName().toLatin1());
-
       connect(&mWebSocket, &QWebSocket::connected, this, &NCoreService::fOnConnected, Qt::UniqueConnection);
       connect(&mWebSocket, &QWebSocket::disconnected, this, &NCoreService::sClosed, Qt::UniqueConnection);
       connect(&mWebSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error), this, &NCoreService::fOnConnectionError);
       mWebSocket.open(mServiceManagerUrl);
-   qDebug("-----------------!");
     }
   }
 
-  NResponse NCoreService::fSetMaxConnections(quint64 lID, QString lExternalID, const QString& lName, int lMaxconnections) {
+  NResponse NCoreService::fSetMaxConnections(const QString& lName, int lMaxconnections) {
     if(mWebServers.contains(lName)) {
       mWebServers[lName]->fSetMaxConnections(lMaxconnections);
-      NResponse lResponse(lID, lExternalID, true, true);
+      NResponse lResponse(true, true);
       return lResponse;
     }
-    NResponse lResponse(lID, lExternalID, false, false, tr("Web server '%1' not found.").arg(lName));
+    NResponse lResponse(false, false, tr("Web server '%1' not found.").arg(lName));
     return lResponse;
   }
 
@@ -63,7 +57,6 @@ namespace NulstarNS {
     else lWebServerNames << lName;
     for( const QString& lCurrentName : lWebServerNames) {
       if(!mWebServers.contains(lCurrentName)) return false;
-
       if(lAction == EServiceAction::eStartService) {
         mWebServers[lCurrentName]->fListen();
       }
@@ -78,21 +71,21 @@ namespace NulstarNS {
     return true;
   }
 
-  NResponse NCoreService::fMaxConnections(quint64 lID, QString lExternalID, const QString &lName) {
+  NResponse NCoreService::fMaxConnections(const QString &lName) {
     if(mWebServers.contains(lName)) {
-      NResponse lResponse(lID, lExternalID, true, mWebServers[lName]->fMaxConnections());
+      NResponse lResponse(true, mWebServers[lName]->fMaxConnections());
       return lResponse;
     }
-    NResponse lResponse(lID, lExternalID, false, 0, tr("Web server '%1' not found.").arg(lName));
+    NResponse lResponse(false, 0, tr("Web server '%1' not found.").arg(lName));
     return lResponse;
   }
 
-  NResponse NCoreService::fTotalConnections(quint64 lID, QString lExternalID, const QString &lName) {
+  NResponse NCoreService::fTotalConnections(const QString &lName) {
     if(mWebServers.contains(lName)) {
-      NResponse lResponse(lID, lExternalID, true, mWebServers[lName]->fTotalConnections());
+      NResponse lResponse(true, mWebServers[lName]->fTotalConnections());
       return lResponse;
     }
-    NResponse lResponse(lID, lExternalID, false, 0, tr("Web server '%1' not found.").arg(lName));
+    NResponse lResponse(false, 0, tr("Web server '%1' not found.").arg(lName));
     return lResponse;
   }
 
@@ -103,15 +96,15 @@ namespace NulstarNS {
   }
 
   void NCoreService::fOnConnected() {
-    connect(&mWebSocket, &QWebSocket::textMessageReceived, this, &NCoreService::fOnTextMessageReceived);
+    connect(&mWebSocket, &QWebSocket::textMessageReceived, this, &NCoreService::fOnTextMessageReceived, Qt::UniqueConnection);
     QString lApi(fBuildApi().toJson(QJsonDocument::Indented));
-  qDebug(lApi.toLatin1());
-  qDebug("ppp");
+  qDebug(lApi.toLatin1());  
     mWebSocket.sendTextMessage(lApi);
   }
 
   void NCoreService::fOnTextMessageReceived(const QString &lTextMessage) {
-    mWebSocket.sendTextMessage(QString("Receieved:\n%1").arg(lTextMessage));
+   // mWebSocket.sendTextMessage(QString("Receieved:\n%1").arg(lTextMessage));
+qDebug(lTextMessage.toLatin1());
   }
 
   QJsonDocument NCoreService::fBuildApi() {

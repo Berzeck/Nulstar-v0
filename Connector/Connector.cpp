@@ -24,7 +24,6 @@ int main(int argc, char *argv[])
   QList<QNetworkAddressEntry> lAllowedNetworks;
   QCommandLineParser lParser;
   QString lServiceManagerUrl;
-  unsigned short lSslMode = 0;
   lParser.setApplicationDescription(lAppName);
   lParser.addHelpOption();
   lParser.addVersionOption();
@@ -42,11 +41,11 @@ int main(int argc, char *argv[])
     fputs(qPrintable(QString("Wrong debug level! [1-5]\n\n%1\n").arg(lParser.helpText())), stderr);
     return 1;
   }
-  if(!lParser.isSet("sslmode") || (lParser.value("sslmode").toUShort() != 0 && lParser.value("sslmode").toUShort() != 1)) {
+  QString lSslModeStr(lParser.value("sslmode"));
+  if(!lParser.isSet("sslmode") || (lSslModeStr.toUShort() != 0 && lSslModeStr.toUShort() != 1)) {
     fputs(qPrintable(QString("Wrong security type! [0-1]\n\n%1\n").arg(lParser.helpText())), stderr);
     return 2;
-  }
-  lSslMode = lParser.value("sslmode").toUShort();
+  }  
   if(!lParser.isSet("adminport")) {
     fputs(qPrintable(QString("Admin port not set!\n\n%1\n").arg(lParser.helpText())), stderr);
     return 3;
@@ -59,12 +58,15 @@ int main(int argc, char *argv[])
     fputs(qPrintable(QString("Communication port not set!\n\n%1\n").arg(lParser.helpText())), stderr);
     return 5;
   }
+  QWebSocketServer::SslMode lSslMode = QWebSocketServer::SslMode::NonSecureMode;
   if(lParser.isSet("managerurl")) {
     lServiceManagerUrl = lParser.value("managerurl");
-    if(lSslMode == 0) lServiceManagerUrl.prepend("ws://");
-    if(lSslMode == 1) lServiceManagerUrl.prepend("wss://");
+    if(lSslModeStr.toUInt() == 0) lServiceManagerUrl.prepend("ws://");
+    if(lSslModeStr.toUInt() == 1) {
+      lServiceManagerUrl.prepend("wss://");
+      lSslMode = QWebSocketServer::SslMode::SecureMode;
+    }
   }
-qDebug(lServiceManagerUrl.toLatin1());
   if(lParser.isSet("allowednetworks")) {
     QStringList lNetworks(lParser.value("allowednetworks").split(","));
     for(const QString& lNetwork : lNetworks) {
@@ -75,8 +77,8 @@ qDebug(lServiceManagerUrl.toLatin1());
       lAllowedNetworks << lNetworkAddress;
     }
   }
-  NulstarNS::NConnectionController lController(static_cast<QWebSocketServer::SslMode> (lParser.value("sslmode").toUInt()), static_cast<NulstarNS::NConnectionController::ELogLevel> (lParser.value("loglevel").toUInt()), QUrl(lServiceManagerUrl),
-                                   lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::Any);
+  NulstarNS::NConnectionController lController(lSslMode, static_cast<NulstarNS::NConnectionController::ELogLevel> (lParser.value("loglevel").toUInt()), QUrl(lServiceManagerUrl),
+                                   lAllowedNetworks, lParser.value("commport").toUShort(), lParser.value("adminport").toUShort(), lParser.value("clientport").toUShort(), QHostAddress::Any);
   lController.fControlWebServer(QString(), NulstarNS::NConnectionController::EServiceAction::eStartService);  // Start all web sockets servers
   return lApp.exec();
 }

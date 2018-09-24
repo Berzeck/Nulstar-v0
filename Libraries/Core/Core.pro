@@ -12,11 +12,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 HEADERS += Core.h \
            NCoreService.h \
     NApiBuilder.h \
-    NResponse.h
+    NResponse.h \
+    NRequest.h
 
 SOURCES += NCoreService.cpp \
     NApiBuilder.cpp \
-    NResponse.cpp
+    NResponse.cpp \
+    NRequest.cpp
 LIBS += -L$$DESTDIR/Libraries/ -lNetwork
 
 INCLUDEPATH += $$PWD/../Network

@@ -32,7 +32,8 @@ int main(int argc, char *argv[])
     fputs(qPrintable(QString("Wrong debug level! [1-5]\n\n%1\n").arg(lParser.helpText())), stderr);
     return 1;
   }
-  if(!lParser.isSet("sslmode") || (lParser.value("sslmode").toUShort() != 0 && lParser.value("sslmode").toUShort() != 1)) {
+  QString lSslModeStr(lParser.value("sslmode"));
+  if(!lParser.isSet("sslmode") || (lSslModeStr.toUShort() != 0 && lSslModeStr.toUShort() != 1)) {
     fputs(qPrintable(QString("Wrong security type! [0-1]\n\n%1\n").arg(lParser.helpText())), stderr);
     return 2;
   }
@@ -50,12 +51,15 @@ int main(int argc, char *argv[])
       lAllowedNetworks << lNetworkAddress;
     }
   }
-
+  QWebSocketServer::SslMode lSslMode = QWebSocketServer::SslMode::NonSecureMode;
   QString lLocalHostUrl(QString("://%1:%2").arg(QHostAddress(QHostAddress::LocalHost).toString()).arg(lParser.value("commport")));
-  if(lParser.value("sslmode").toUShort() == 0) lLocalHostUrl.prepend("ws");
-  if(lParser.value("sslmode").toUShort() == 1) lLocalHostUrl.prepend("wss");
+  if(lSslModeStr.toUShort() == 0) lLocalHostUrl.prepend("ws");
+  if(lSslModeStr.toUShort() == 1) {
+    lLocalHostUrl.prepend("wss");
+    lSslMode = QWebSocketServer::SslMode::SecureMode;
+  }
 
-  NulstarNS::NServiceManagerController lController(static_cast<QWebSocketServer::SslMode> (lParser.value("sslmode").toUInt()), static_cast<NulstarNS::NServiceManagerController::ELogLevel> (lParser.value("loglevel").toUInt()), QUrl(lLocalHostUrl), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::Any);
+  NulstarNS::NServiceManagerController lController(lSslMode, static_cast<NulstarNS::NServiceManagerController::ELogLevel> (lParser.value("loglevel").toUInt()), QUrl(lLocalHostUrl), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::Any);
   lController.fControlWebServer(QString(), NulstarNS::NServiceManagerController::EServiceAction::eStartService);  // Start all web sockets servers
   return lApp.exec();
 }

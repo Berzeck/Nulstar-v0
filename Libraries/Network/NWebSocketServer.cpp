@@ -17,7 +17,8 @@ namespace NulstarNS {
       return false;
     fSetPort(lPort);
     fSetBindAddress(lBindAddress);
-    if((lSuccess = listen(mBindAddress, mPort)))
+    lSuccess = listen(mBindAddress, mPort);
+    if(lSuccess)
       connect(this, &NWebSocketServer::QWebSocketServer::newConnection, this, &NWebSocketServer::fOnNewConnection, static_cast<Qt::ConnectionType>(Qt::UniqueConnection | Qt::AutoConnection));
     return lSuccess;
   }
@@ -34,8 +35,7 @@ namespace NulstarNS {
 
   void NWebSocketServer::fProcessTextMessage(QString lMessage) {
     QWebSocket* rClient = qobject_cast<QWebSocket*>(sender());
-qDebug() << "Message received:" << lMessage;
-    if (rClient) rClient->sendTextMessage(QString("Nulstar - ") + lMessage );
+ //   if (rClient) rClient->sendTextMessage(QString("Nulstar - ") + lMessage );
   }
 
   void NWebSocketServer::fProcessBinaryMessage(QByteArray lMessage) {

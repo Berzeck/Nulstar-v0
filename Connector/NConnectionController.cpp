@@ -11,25 +11,20 @@ namespace NulstarNS {
 
     fAddWebSocketServer(lAdminServerName, lAdminServerLabel, lAdminPort, QHostAddress::Any, false);
     fAddWebSocketServer(lClientServerName, lClientServerLabel, lClientPort, QHostAddress::Any, false);
-
-    NResponse fMaxConnections(quint64 lID, QString lExternalID, const QString &lName);
-    NResponse fTotalConnections(quint64 lID, QString lExternalID, const QString &lName);
-    NResponse fSetMaxConnections(quint64 lID, QString lExternalID, const QString& lName, int lMaxconnections);
-
   }
 
-  NResponse NConnectionController::setcompressionlevel(quint64 lID, QString lExternalID, quint8 lCompressionLevel) {
+  NResponse NConnectionController::setcompressionlevel(quint8 lCompressionLevel) {
     if(lCompressionLevel > 9) {
-      NResponse lResponse(lID, lExternalID, false, false, tr("Compression level should be in the range [0-9]"));
+      NResponse lResponse(false, false, tr("Compression level should be in the range [0-9]"));
       return lResponse;
     }
     mCompressionLevel = lCompressionLevel;
-    NResponse lResponse(lID, lExternalID, true, true, tr("Compression level is set to '%1'").arg(mCompressionLevel));
+    NResponse lResponse(true, true, tr("Compression level is set to '%1'").arg(mCompressionLevel));
     return lResponse;
   }
 
-  NResponse NConnectionController::getcompressionlevel(quint64 lID, QString lExternalID) {
-    NResponse lResponse(lID, lExternalID, true, mCompressionLevel, tr("Compression level is '%1'").arg(mCompressionLevel));
+  NResponse NConnectionController::getcompressionlevel() {
+    NResponse lResponse(true, mCompressionLevel, tr("Compression level is '%1'").arg(mCompressionLevel));
     return lResponse;
   }
 

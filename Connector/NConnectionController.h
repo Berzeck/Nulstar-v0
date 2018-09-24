@@ -1,3 +1,4 @@
+
 #ifndef NCONNECTIONCONTROLLER_H
 #define NCONNECTIONCONTROLLER_H
 
@@ -36,11 +37,11 @@ namespace NulstarNS {
       quint8 mCompressionLevel;
 
     public Q_SLOTS:
-      API_ADMIN_FUNCTION NResponse setmaxconnections(quint64 lID, QString lExternalID, int lMaxConnections) { return fSetMaxConnections(lID, lExternalID, lClientServerName, lMaxConnections); }
-      API_ADMIN_FUNCTION NResponse getmaxconnections(quint64 lID, QString lExternalID) { return fMaxConnections(lID, lExternalID,lClientServerName); }
-      API_ADMIN_FUNCTION NResponse gettotalconnections(quint64 lID, QString lExternalID) { return fTotalConnections(lID, lExternalID, lClientServerName); }
-      API_ADMIN_FUNCTION NResponse setcompressionlevel(quint64 lID, QString lExternalID, quint8 lCompressionLevel);
-      API_PUBLIC_FUNCTION NResponse getcompressionlevel(quint64 lID, QString lExternalID);
+      API_ADMIN_FUNCTION NResponse setmaxconnections(int lMaxConnections) { return fSetMaxConnections(lClientServerName, lMaxConnections); }
+      API_ADMIN_FUNCTION NResponse getmaxconnections() { return fMaxConnections(lClientServerName); }
+      API_ADMIN_FUNCTION NResponse gettotalconnections() { return fTotalConnections(lClientServerName); }
+      API_ADMIN_FUNCTION NResponse setcompressionlevel(quint8 lCompressionLevel);
+      API_PUBLIC_FUNCTION NResponse getcompressionlevel();
 
   };
 }

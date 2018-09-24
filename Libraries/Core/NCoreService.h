@@ -40,9 +40,9 @@ namespace NulstarNS {
       virtual void fConnectToServiceManager();
       virtual bool fAddWebSocketServer(const QString& lName, const QString& lLabel, quint16 lPort, QHostAddress::SpecialAddress lBindAddress, bool lStartImmediatly = false);
       void fAddMethodFunctionDescription(const QString& lMethodName, const QString& lDescription) { mApiMethodDescription[lMethodName] = lDescription; }
-      NResponse fMaxConnections(quint64 lID, QString lExternalID, const QString &lName);
-      NResponse fTotalConnections(quint64 lID, QString lExternalID, const QString &lName);
-      NResponse fSetMaxConnections(quint64 lID, QString lExternalID, const QString& lName, int lMaxconnections);
+      NResponse fMaxConnections(const QString &lName);
+      NResponse fTotalConnections(const QString &lName);
+      NResponse fSetMaxConnections(const QString& lName, int lMaxconnections);
 
 
     protected:
