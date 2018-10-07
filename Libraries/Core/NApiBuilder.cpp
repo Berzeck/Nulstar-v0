@@ -27,15 +27,15 @@ namespace NulstarNS {
 
   }
 
-  QMap<QString, QVariant> NApiBuilder::fBuildApi() {
+  QVariantMap NApiBuilder::fBuildApi(NCoreService *rTargetObject) {
     QMap<QString, QVariant> lApiMap;
-    if(pTargetObject != nullptr) {
-      const QMetaObject* lMetaObject = pTargetObject->metaObject();
-      lApiMap = fExtractHeader();
+    if(rTargetObject != nullptr) {
+      const QMetaObject* lMetaObject = rTargetObject->metaObject();
+      lApiMap = fExtractHeader(rTargetObject);
       QList<QVariant> lMethods;
       for(int i = lMetaObject->methodOffset(); i < lMetaObject->methodCount(); ++i) {
         QMap<QString, QVariant> lMethodDetail;
-        QMetaMethod lApiMethod = pTargetObject->metaObject()->method(i);
+        QMetaMethod lApiMethod = rTargetObject->metaObject()->method(i);
         lMethodDetail[lApiMethodNameField] = lApiMethod.name();
         if((QString(lApiMethod.tag()) == lApiAdminFunctionMacro) || (QString(lApiMethod.tag()) == lApiPrivateFunctionMacro) || (QString(lApiMethod.tag()) == lApiPublicFunctionMacro))  {
           lMethodDetail[lApiMethodScopeField] = QString(lApiMethod.tag()).section("_",1,1).toLower();
@@ -55,7 +55,7 @@ namespace NulstarNS {
     return lApiMap;
   }
 
-  QMap<QString, QVariant> NApiBuilder::fExtractHeader() {
+  QVariantMap NApiBuilder::fExtractHeader(NCoreService *pTargetObject) {
     QMap<QString, QVariant> lApiHeader;
     if(pTargetObject != nullptr) {
       lApiHeader[lServiceNameFieldName] = pTargetObject->fName();

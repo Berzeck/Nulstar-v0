@@ -11,9 +11,13 @@ CONFIG += c++11 skip_target_version_ext
 DEFINES += QT_DEPRECATED_WARNINGS
 
 HEADERS += Network.h \
+           NResponse.h \
+           NRequest.h \
            NWebSocketServer.h
 
-SOURCES += NWebSocketServer.cpp
+SOURCES += NResponse.cpp \
+           NRequest.cpp \
+           NWebSocketServer.cpp
 
 unix:QMAKE_LFLAGS_RELEASE += -s
 TEMPLATE = lib

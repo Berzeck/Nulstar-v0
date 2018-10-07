@@ -19,7 +19,7 @@ namespace NulstarNS {
     mComponents[lComponentName] = lParameters;
   }
 
-  void NMainController::fStartComponent(const QString& lComponentName) {
+  void NMainController::fStartComponent(const QString& lComponentName) const {
     QString lAppName(QString("%1/%2/%3").arg(QCoreApplication::applicationDirPath()).arg(lComponentsDirectory).arg(lComponentName));
 #ifdef Q_OS_WIN
   lAppName.append(".exe");

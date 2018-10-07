@@ -23,11 +23,11 @@ namespace NulstarNS {
                                      quint16 lAdminPort = 0, quint16 lClientPort = 0, QHostAddress::SpecialAddress lBindAddress = QHostAddress::Null, QObject* rParent = nullptr);
       ~NConnectionController() override {}
 
-      QString fName() override { return QString(APP_NAME).replace("_"," "); }
-      QString fVersion() override { return QString(APP_VERSION); }
-      QString fDomain() override { return QString(APP_DOMAIN); }
-      QString fApiRole() override { return QString(APP_ROLE); }
-      QString fApiVersion() override { return QString(APP_ROLE_VERSION); }
+      QString fName() const override { return QString(APP_NAME).replace("_"," "); }
+      QString fVersion() const override { return QString(APP_VERSION); }
+      QString fDomain() const override { return QString(APP_DOMAIN); }
+      QString fApiRole() const override { return QString(APP_ROLE); }
+      QString fApiVersion() const override { return QString(APP_ROLE_VERSION); }
 
     protected:
       void fFillMethodDescriptions() override;

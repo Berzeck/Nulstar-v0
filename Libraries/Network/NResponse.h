@@ -10,12 +10,12 @@ namespace NulstarNS {
   class NResponse {
     public:
       NResponse(bool lSuccess, const QVariant& lReturnValue, const QString& lDescription = QString());
-      bool fSuccess() { return mSuccess; }
-      quint64 fID() { return mID; }
-      QString lExternalID() { return mExternalID; }
-      QDate fProcessDate() { return mProcessDate; }
-      QTime fProcesstime() { return mProcessTime; }
-      QVariant fReturnValue() { return mReturnValue; }
+      bool fSuccess() const { return mSuccess; }
+      quint64 fID() const { return mID; }
+      QString lExternalID() const { return mExternalID; }
+      QDate fProcessingDate() const { return mProcessDate; }
+      QTime fProcessingTime() const { return mProcessTime; }
+      QVariant fReturnValue() const { return mReturnValue; }
 
       void fSetID(quint64 lID) { mID = lID; }
       void fSetExternalID(QString lExternalID) { mExternalID = lExternalID; }

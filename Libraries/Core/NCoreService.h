@@ -13,29 +13,32 @@
 #include <QNetworkAddressEntry>
 #include <QObject>
 #include <QUrl>
+#include <QVariant>
 #include <QWebSocket>
 #include <QWebSocketServer>
+#include <NRequest.h>
+#include <NResponse.h>
+#include "NApiBuilder.h"
+#include "NPacketProcessor.h"
 #include "Core.h"
-#include "NResponse.h"
 
 namespace NulstarNS {  
-  class NApiBuilder;
   class NWebSocketServer;
   class CORESHARED_EXPORT NCoreService : public QObject {
     Q_OBJECT
 
     public:
       enum class ELogLevel {eLogCritical = 1, eLogImportant = 2, eLogWarning = 3, eLogInfo = 4, eLogEverything = 5};
-      enum class EServiceAction {eStartService = 0, eStopService = 1, eRestartService = 2};
+      enum class EServiceAction {eStartService = 0, eStopService = 1, eRestartService = 2};      
 
       NCoreService(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel = ELogLevel::eLogWarning, const QUrl& lServiceManagerUrl = QUrl(), QList<QNetworkAddressEntry> lAllowedNetworks = QList<QNetworkAddressEntry> (), quint16 lPort = 0, QHostAddress::SpecialAddress lBindAddress = QHostAddress::Null, QObject* rParent = nullptr);
       virtual ~NCoreService();
 
-      virtual QString fName() = 0;
-      virtual QString fVersion() = 0;
-      virtual QString fDomain() = 0;
-      virtual QString fApiRole() = 0;
-      virtual QString fApiVersion() = 0;
+      virtual QString fName() const = 0;
+      virtual QString fVersion() const = 0;
+      virtual QString fDomain() const = 0;
+      virtual QString fApiRole() const = 0;
+      virtual QString fApiVersion() const = 0;
 
       virtual void fConnectToServiceManager();
       virtual bool fAddWebSocketServer(const QString& lName, const QString& lLabel, quint16 lPort, QHostAddress::SpecialAddress lBindAddress, bool lStartImmediatly = false);
@@ -47,22 +50,26 @@ namespace NulstarNS {
 
     protected:
       ELogLevel mLogLevel;
-      virtual void fFillMethodDescriptions() { }
+      virtual void fFillMethodDescriptions() { }      
 
     private:
+      quint64 mLastID;
       QUrl mServiceManagerUrl;
       QWebSocketServer::SslMode mSslMode;
       QWebSocket mWebSocket;
       QMap<QString, NWebSocketServer*> mWebServers;
       QMap<QString, QString> mApiMethodDescription;
       QList<QNetworkAddressEntry> mAllowedNetworks;
-      NApiBuilder* pApiBuilder;
+      NApiBuilder mApiBuilder;
+      NPacketProcessor mPacketProcessor;
 
     public Q_SLOTS:
       virtual bool fControlWebServer(const QString& lName, EServiceAction lAction); // If lName is empty then it controls all web sockets servers      
 
     protected Q_SLOTS:
-      virtual QJsonDocument fBuildApi();
+      virtual void fBuildApi();
+      virtual void fSendRequest(NRequest& lRequest);
+      virtual void fSendResponse(NResponse& lResponse);
       void fOnConnectionError(QAbstractSocket::SocketError lErrorCode);
 
     private Q_SLOTS:

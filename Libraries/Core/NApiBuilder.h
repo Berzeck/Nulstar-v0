@@ -2,9 +2,8 @@
 #define NAPIBUILDER_H
 
 #include <QObject>
-#include <QMap>
 #include <QString>
-#include <QVariant>
+#include <QVariantMap>
 #include "Core.h"
 
 
@@ -17,16 +16,11 @@ namespace NulstarNS {
     public:
       explicit NApiBuilder(QObject* rParent = nullptr);
 
-      void fSetTargetObject(NCoreService* rTargetObject) { pTargetObject = rTargetObject; }
-
-   protected:
-      QMap<QString, QVariant> fExtractHeader();
-
-    private:
-      NCoreService* pTargetObject;
+    protected:
+      QVariantMap fExtractHeader(NCoreService* pTargetObject);
 
     public Q_SLOTS:
-      QMap<QString, QVariant> fBuildApi();
+      QVariantMap fBuildApi(NCoreService* pTargetObject);
   };
 }
 #endif // NAPIBUILDER_H
