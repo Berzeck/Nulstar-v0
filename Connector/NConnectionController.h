@@ -30,7 +30,8 @@ namespace NulstarNS {
       QString fApiVersion() const override { return QString(APP_ROLE_VERSION); }
 
     protected:
-      void fFillMethodDescriptions() override;
+      void fFillMethodDescriptions();
+      void fFillMethodMinEventAndMinPeriod();
 
     private:
       quint64 mRequestID;

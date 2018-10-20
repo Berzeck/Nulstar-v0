@@ -1,4 +1,5 @@
 #include <QWebSocket>
+#include "NRequest.h"
 #include "NWebSocketServer.h"
 
 namespace NulstarNS {
@@ -7,8 +8,12 @@ namespace NulstarNS {
 
   }
 
-  NWebSocketServer::~NWebSocketServer() {
-    qDeleteAll(mConnections.begin(), mConnections.end());
+  NWebSocketServer::~NWebSocketServer() {      
+    QMapIterator<qint64, QWebSocket*> i1(mConnections);
+    while(i1.hasNext()) {
+      i1.next();
+      i1.value()->deleteLater();
+    }
   }
 
   bool NWebSocketServer::fListen(const QHostAddress& lBindAddress, quint16 lPort) {
@@ -30,12 +35,13 @@ namespace NulstarNS {
     connect(rSocket, &QWebSocket::textMessageReceived, this, &NWebSocketServer::fProcessTextMessage);
     connect(rSocket, &QWebSocket::binaryMessageReceived, this, &NWebSocketServer::fProcessBinaryMessage);
     connect(rSocket, &QWebSocket::disconnected, this, &NWebSocketServer::fSocketDisconnected);
-    mConnections << rSocket;
+    qint64 lMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch());
+    rSocket->setProperty("ID", lMSecsSinceEpoch);
+    mConnections[lMSecsSinceEpoch] = rSocket;
   }
 
-  void NWebSocketServer::fProcessTextMessage(QString lMessage) {
-    QWebSocket* rClient = qobject_cast<QWebSocket*>(sender());
- //   if (rClient) rClient->sendTextMessage(QString("Nulstar - ") + lMessage );
+  void NWebSocketServer::fProcessTextMessage(QString lMessage) {    
+    emit fTextMessageArrived(mName, lMessage);
   }
 
   void NWebSocketServer::fProcessBinaryMessage(QByteArray lMessage) {
@@ -48,7 +54,8 @@ qDebug() << "Binary Message received:" << lMessage;
     QWebSocket* rClient = qobject_cast<QWebSocket*>(sender());
 qDebug() << "socketDisconnected:" << rClient;
     if(rClient) {
-      mConnections.removeAll(rClient);
+      qint64 lSocketID = rClient->property("ID").toLongLong();
+      mConnections.remove(lSocketID);
       rClient->deleteLater();
     }
   }

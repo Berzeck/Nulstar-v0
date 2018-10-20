@@ -8,7 +8,7 @@
 #include <QString>
 #include <QVariant>
 
-namespace NulstarNS {
+namespace NulstarNS { 
   class NRequest {
     public:
       enum class ERequestStatus {eRequestNew = 1, eRequestSent = 2, eRequestAkwdReceived = 3, eRequestProcessed = 4, eRequestSentError = 5};
@@ -19,7 +19,6 @@ namespace NulstarNS {
       QTime fRequestTime() const { return mRequestTime; }
       QVariant fRequest() const { return mRequest; }
       QVariantMap& fAdd(const QVariantMap& lRequest) { return mRequest.unite(lRequest); }
-      void fSetID(qint64 lID) { mID = lID; }
       void fSetExternalID(QString lExternalID) { mExternalID = lExternalID; }
       void fSetStatus(ERequestStatus lStatus) { mStatus = lStatus; }
       QJsonDocument fToJson() const { return QJsonDocument::fromVariant(mRequest); }

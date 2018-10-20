@@ -4,17 +4,17 @@
 
 #include <QDebug>
 
-const QString lCommServerLabel = "Nulstar Internal Communication";
-const QString lCommServerName = "WebCommServer";
-
 namespace NulstarNS {
+  const QString lCommServerLabel = "Nulstar Internal Communication";
+  const QString lCommServerName = "WebCommServer";
+  const QString lDefaultMinEventAndMinPeriod = "0,0";
+
   NCoreService::NCoreService(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QUrl& lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lPort, QHostAddress::SpecialAddress lBindAddress, QObject *rParent)
               : QObject(rParent), mLogLevel(lLogLevel), mServiceManagerUrl(lServiceManagerUrl), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks) {
     fAddWebSocketServer(lCommServerName, lCommServerLabel, lPort, lBindAddress, false);
-    fFillMethodDescriptions();
     connect(&mPacketProcessor, &NPacketProcessor::sRequestProcessed, this, &NCoreService::fSendRequest);
     connect(&mPacketProcessor, &NPacketProcessor::sResponseProcessed, this, &NCoreService::fSendResponse);
-    QTimer::singleShot(500, this, &NCoreService::fConnectToServiceManager);
+    QTimer::singleShot(100, this, &NCoreService::fConnectToServiceManager);
   }
   NCoreService::~NCoreService() {
     for(NWebSocketServer* rWebServer : mWebServers)
@@ -48,7 +48,7 @@ namespace NulstarNS {
       NResponse lResponse(true, true);
       return lResponse;
     }
-    NResponse lResponse(false, false, tr("Web server '%1' not found.").arg(lName));
+    NResponse lResponse(false, false, QDate::currentDate().toString("yyyy-MM-dd"), QTime::currentTime().toString("hh:mm:ss"), tr("Web server '%1' not found.").arg(lName));
     return lResponse;
   }
 
@@ -81,6 +81,15 @@ namespace NulstarNS {
     return lResponse;
   }
 
+  QString NCoreService::fMethodDescription(const QString& lMethodName) const {
+    return mApiMethodDescription.value(lMethodName);
+  }
+
+  QString NCoreService::fMethodMinEventAndMinPeriod(const QString& lMethodName) const {
+    if(mApiMethodMinEventAndMinPeriod.contains(lMethodName)) return mApiMethodMinEventAndMinPeriod.value(lMethodName);
+    else return lDefaultMinEventAndMinPeriod;
+  }
+
   NResponse NCoreService::fTotalConnections(const QString &lName) {
     if(mWebServers.contains(lName)) {
       NResponse lResponse(true, mWebServers[lName]->fTotalConnections());
@@ -111,7 +120,7 @@ qDebug(lTextMessage.toLatin1());
   //     QString lApi(fBuildApi().toJson(QJsonDocument::Indented));
     NRequest lApiRegister(QDate::currentDate(), QTime::currentTime(), mApiBuilder.fBuildApi(this));
     mPacketProcessor.fProcessRequest(lApiRegister);
-//    qDebug(lApiRegister.toLatin1());
+    qDebug(lApiRegister.fToJsonString(QJsonDocument::Indented).toLatin1());
 //      mWebSocket.sendTextMessage(lApi);
 
  //   return pApiBuilder->fBuildApi(this);

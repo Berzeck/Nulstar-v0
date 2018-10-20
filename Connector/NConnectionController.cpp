@@ -11,6 +11,8 @@ namespace NulstarNS {
 
     fAddWebSocketServer(lAdminServerName, lAdminServerLabel, lAdminPort, QHostAddress::Any, false);
     fAddWebSocketServer(lClientServerName, lClientServerLabel, lClientPort, QHostAddress::Any, false);
+    fFillMethodDescriptions();
+    fFillMethodMinEventAndMinPeriod();
   }
 
   NResponse NConnectionController::setcompressionlevel(quint8 lCompressionLevel) {
@@ -34,6 +36,14 @@ namespace NulstarNS {
     fAddMethodFunctionDescription("gettotalconnections", tr("Gets the total connection count currently established.\nReturn: [0- ]"));
     fAddMethodFunctionDescription("getcompressionlevel", tr("Gets the current compression level for client connections.\nReturn: [0-9] - 0 is no compression, while 9 means maximum compression."));
     fAddMethodFunctionDescription("setcompressionlevel", tr("Sets the compression level that packets will have with client communication channels.\nParameters:\n  compressionlevel [0-9] - 0 means no compression while 9 is maximum compression."));
+  }
+
+  void NConnectionController::fFillMethodMinEventAndMinPeriod() {
+    fAddMethodMinEventAndMinPeriod("setmaxconnections", QString("0,0"));
+    fAddMethodMinEventAndMinPeriod("getmaxconnections", QString("1,0"));
+    fAddMethodMinEventAndMinPeriod("gettotalconnections", QString("1,0"));
+    fAddMethodMinEventAndMinPeriod("getcompressionlevel", QString("1,0"));
+    fAddMethodMinEventAndMinPeriod("setcompressionlevel", QString("0,0"));
   }
 }
 

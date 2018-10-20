@@ -43,14 +43,15 @@ namespace NulstarNS {
       virtual void fConnectToServiceManager();
       virtual bool fAddWebSocketServer(const QString& lName, const QString& lLabel, quint16 lPort, QHostAddress::SpecialAddress lBindAddress, bool lStartImmediatly = false);
       void fAddMethodFunctionDescription(const QString& lMethodName, const QString& lDescription) { mApiMethodDescription[lMethodName] = lDescription; }
+      void fAddMethodMinEventAndMinPeriod(const QString& lMethodName, const QString& lApiMethodMinEventAndMinPeriod ) { mApiMethodMinEventAndMinPeriod[lMethodName] = lApiMethodMinEventAndMinPeriod; }
       NResponse fMaxConnections(const QString &lName);
       NResponse fTotalConnections(const QString &lName);
       NResponse fSetMaxConnections(const QString& lName, int lMaxconnections);
-
+      QString fMethodDescription(const QString& lMethodName) const;
+      QString fMethodMinEventAndMinPeriod(const QString& lMethodName) const;
 
     protected:
       ELogLevel mLogLevel;
-      virtual void fFillMethodDescriptions() { }      
 
     private:
       quint64 mLastID;
@@ -59,6 +60,7 @@ namespace NulstarNS {
       QWebSocket mWebSocket;
       QMap<QString, NWebSocketServer*> mWebServers;
       QMap<QString, QString> mApiMethodDescription;
+      QMap<QString, QString> mApiMethodMinEventAndMinPeriod;
       QList<QNetworkAddressEntry> mAllowedNetworks;
       NApiBuilder mApiBuilder;
       NPacketProcessor mPacketProcessor;

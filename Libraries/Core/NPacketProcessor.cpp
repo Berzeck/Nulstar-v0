@@ -1,4 +1,3 @@
-#include <QDateTime>
 #include "NPacketProcessor.h"
 
 namespace NulstarNS {
@@ -8,12 +7,7 @@ namespace NulstarNS {
   }
 
   void NPacketProcessor::fProcessRequest(NRequest& lRequest) {
-    while(mPendingRequests.contains(QDateTime::currentMSecsSinceEpoch()))
-      continue;
-    qint64 lMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch());
-    lRequest.fSetID(lMSecsSinceEpoch);
-
-    mPendingRequests.insert(lMSecsSinceEpoch, lRequest);
+    mPendingRequests.insert(lRequest.fID(), lRequest);
     emit sRequestProcessed(lRequest);
   }
 

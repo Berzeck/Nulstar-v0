@@ -2,6 +2,7 @@
 #define NWEBSOCKETSERVER_H
 
 #include <QHostAddress>
+#include <QMap>
 #include <QObject>
 #include <QWebSocketServer>
 #include "Network.h"
@@ -30,7 +31,7 @@ namespace NulstarNS {
       quint16 mPort;
       QString mName;      
       QHostAddress mBindAddress;
-      QList<QWebSocket* > mConnections;
+      QMap<qint64, QWebSocket* > mConnections;
       bool listen(const QHostAddress &address = QHostAddress::Any, quint16 port = 0) { return QWebSocketServer::listen(address, port); }
       void setServerName(const QString& serverName) { QWebSocketServer::setServerName(serverName); }
 
@@ -39,6 +40,9 @@ namespace NulstarNS {
       void fProcessTextMessage(QString lMessage);
       void fProcessBinaryMessage(QByteArray lMessage);
       void fSocketDisconnected();
+
+    Q_SIGNALS:
+      void fTextMessageArrived(QString lWebServerName, QString lMessage);
   };
 }
 

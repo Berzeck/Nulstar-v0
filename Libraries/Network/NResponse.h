@@ -9,12 +9,14 @@
 namespace NulstarNS {
   class NResponse {
     public:
-      NResponse(bool lSuccess, const QVariant& lReturnValue, const QString& lDescription = QString());
+      NResponse(bool lSuccess, const QVariant& lReturnValue, const QString& lRequestDate = QDate::currentDate().toString("yyyy-MM-dd"), const QString& lRequestTime = QTime::currentTime().toString("hh:mm:ss"), const QString& lDescription = QString());
       bool fSuccess() const { return mSuccess; }
       quint64 fID() const { return mID; }
       QString lExternalID() const { return mExternalID; }
       QDate fProcessingDate() const { return mProcessDate; }
       QTime fProcessingTime() const { return mProcessTime; }
+      QString fRequestDate() const { return mRequestDate; }
+      QString fRequestTime() const { return mRequestTime; }
       QVariant fReturnValue() const { return mReturnValue; }
 
       void fSetID(quint64 lID) { mID = lID; }
@@ -26,6 +28,8 @@ namespace NulstarNS {
       QString mExternalID;
       QDate mProcessDate;
       QTime mProcessTime;
+      QString mRequestDate;
+      QString mRequestTime;
       QString mDescription;
       QVariant mReturnValue;
   };

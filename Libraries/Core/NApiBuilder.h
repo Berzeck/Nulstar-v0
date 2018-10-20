@@ -17,7 +17,7 @@ namespace NulstarNS {
       explicit NApiBuilder(QObject* rParent = nullptr);
 
     protected:
-      QVariantMap fExtractHeader(NCoreService* pTargetObject);
+      QVariantMap fBuildApiHeader(NCoreService* pTargetObject);
 
     public Q_SLOTS:
       QVariantMap fBuildApi(NCoreService* pTargetObject);

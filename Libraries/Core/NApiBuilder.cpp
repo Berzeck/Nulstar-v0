@@ -6,21 +6,26 @@
 #include "NCoreService.h"
 
 namespace NulstarNS {
+  const QString lApiPeriodField("Period");
+  const QString lApiEventField("Event");
   const QString lApiParametersField("Parameters");
   const QString lApiParameterNameField("ParameterName");
   const QString lApiParameterTypeField("ParameterType");
   const QString lApiMethodsField("Methods");
   const QString lApiMethodNameField("MethodName");
-  const QString lApiMethodScopeField("MethodScope");
+  const QString lApiMethodScopeField("MethodScope");  
+  const QString lApiMethodDescriptionField("MethodDescription");
+  const QString lApiMethodMinEventField("MethodMinEvent");
+  const QString lApiMethodMinPeriodField("MethodMinPeriod");
   const QString lApiAdminFunctionMacro("API_ADMIN_FUNCTION");
   const QString lApiPublicFunctionMacro("API_PUBLIC_FUNCTION");
   const QString lApiPrivateFunctionMacro("API_PRIVATE_FUNCTION");
-
+  const QString lRegisterApiField("RegisterAPI");
   const QString lServiceNameFieldName("ServiceName");
   const QString lServiceVersionFieldName("ServiceVersion");
   const QString lServiceDomainFieldName("ServiceDomain");
   const QString lServiceRoleFieldName("ServiceRole");
-  const QString lServiceApiVersionFieldName("ServiceAPIVersion");
+  const QString lServiceApiVersionFieldName("ServiceAPIVersion");  
 
   NApiBuilder::NApiBuilder(QObject* rParent)
              : QObject(rParent) {
@@ -29,9 +34,10 @@ namespace NulstarNS {
 
   QVariantMap NApiBuilder::fBuildApi(NCoreService *rTargetObject) {
     QMap<QString, QVariant> lApiMap;
+    QMap<QString, QVariant> lRegisterApiMap;
     if(rTargetObject != nullptr) {
       const QMetaObject* lMetaObject = rTargetObject->metaObject();
-      lApiMap = fExtractHeader(rTargetObject);
+      lApiMap = fBuildApiHeader(rTargetObject);
       QList<QVariant> lMethods;
       for(int i = lMetaObject->methodOffset(); i < lMetaObject->methodCount(); ++i) {
         QMap<QString, QVariant> lMethodDetail;
@@ -47,15 +53,22 @@ namespace NulstarNS {
             lParameters << lParameterDetail;
           }
           lMethodDetail[lApiParametersField] = lParameters;
-        }
-        lMethods << lMethodDetail;
+          lMethodDetail[lApiMethodDescriptionField] = rTargetObject->fMethodDescription(lApiMethod.name());
+          lMethodDetail[lApiMethodMinEventField] = rTargetObject->fMethodMinEventAndMinPeriod(lApiMethod.name()).split(",").at(0).simplified();
+          lMethodDetail[lApiMethodMinPeriodField] = rTargetObject->fMethodMinEventAndMinPeriod(lApiMethod.name()).split(",").at(1).simplified();
+          lMethods << lMethodDetail;
+        }        
       }
       lApiMap[lApiMethodsField] = lMethods;
+      lApiMap[lApiPeriodField] = QString("0");
+      lApiMap[lApiEventField] = QString("0");
     }
-    return lApiMap;
+
+    lRegisterApiMap[lRegisterApiField] = lApiMap;
+    return lRegisterApiMap;
   }
 
-  QVariantMap NApiBuilder::fExtractHeader(NCoreService *pTargetObject) {
+  QVariantMap NApiBuilder::fBuildApiHeader(NCoreService *pTargetObject) {
     QMap<QString, QVariant> lApiHeader;
     if(pTargetObject != nullptr) {
       lApiHeader[lServiceNameFieldName] = pTargetObject->fName();
