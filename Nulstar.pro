@@ -4,8 +4,7 @@ SUBDIRS += Connector \
            NulstarMain \
            ServiceManager
 
-Connector.depends = Libraries
-ServiceManager.depends = Libraries
-NulstarMain.depends = ServiceManager
-NulstarMain.depends = Connector
+Connector.depends += Libraries
+ServiceManager.depends += Libraries
+NulstarMain.depends += ServiceManager Connector
 

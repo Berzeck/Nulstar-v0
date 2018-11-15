@@ -1,5 +1,5 @@
 TEMPLATE = subdirs
-SUBDIRS += Core \
-           Network
+SUBDIRS += NCore \
+           NNetwork
 
-Core.depends = Network
+Core.depends = NNetwork

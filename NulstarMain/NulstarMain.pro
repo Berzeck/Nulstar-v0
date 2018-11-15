@@ -1,28 +1,33 @@
+# Base Settings
+include($$TOP_SRCDIR/common.pri)
+
+# Project Settings
 QT -= gui
 QT += websockets
 CONFIG += c++11 console
-CONFIG -= app_bundle
-DEFINES += QT_DEPRECATED_WARNINGS
-HEADERS += NMainController.h
-SOURCES += NMainController.cpp \
-           NulstarMain.cpp
+
+# Target Settings
 
 TARGET = Nulstar
 VERSION = 0.0.1.1
 DEFINES += APP_DOMAIN=\\\"nulstar.com\\\" APP_ROLE=\\\"Role_ServiceController\\\" APP_ROLE_VERSION=\\\"0.1.0\\\" APP_NAME=\\\"Nulstar_Main_Controller\\\" APP_VERSION=\\\"$$VERSION\\\" APP_VERSION_NAME=\\\"OneEye_Baby_Ninja_Egg\\\"
 
-LIBS += -L$$DESTDIR/Libraries/ -lNetwork -L$$DESTDIR/Libraries/ -lCore
 
-unix:QMAKE_LFLAGS_RELEASE += -s
-INCLUDEPATH += $$PWD/../Libraries/Network $$PWD/../Libraries/Core
-DEPENDPATH += $$PWD/../Libraries/Network $$PWD/../Libraries/Core
-QMAKE_RPATHDIR = $$DESTDIR/Libraries/
+# Source Files
 
-config_files.files = $$PWD/Nulstar.cfg $$PWD/Constants.ncf
-config_files.path = $$DESTDIR
-INSTALLS += config_files
+HEADERS += NMainController.h
+SOURCES += NMainController.cpp \
+           NulstarMain.cpp
 
-# Default rules for deployment.
-#qnx: target.path = /tmp/$${TARGET}/bin
-#else: unix:!android: target.path = /opt/$${TARGET}/bin
-#!isEmpty(target.path): INSTALLS += target
+# Dependencies
+
+INCLUDEPATH += $$LIBRARIES_PATH/NNetwork $$LIBRARIES_PATH/NCore
+LIBS += -lNNetwork -lNCore
+
+# Install Settings
+
+QMAKE_POST_LINK += $$QMAKE_COPY \"$$PWD/Nulstar.cfg\" \"$$DESTDIR\"
+#QMAKE_POST_LINK += $$quote($$QMAKE_COPY \"$$PWD/Nulstar.cfg\" \"$$DESTDIR\")
+
+# Clean Settings
+QMAKE_CLEAN += -r $$DESTDIR
