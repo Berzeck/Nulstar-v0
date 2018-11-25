@@ -26,7 +26,8 @@ LIBS += -lNNetwork -lNCore
 
 # Install Settings
 
-QMAKE_POST_LINK += $$QMAKE_COPY \"$$PWD/Nulstar.cfg\" \"$$DESTDIR\"
-
+QMAKE_POST_LINK += $$quote($$QMAKE_COPY \"$$PWD/Nulstar.cfg\" \"$$DESTDIR\" $$escape_expand(\n\t))
+QMAKE_POST_LINK += $$quote($$QMAKE_COPY \"$$PWD/Constants.ncf\" \"$$DESTDIR\")
+message($$QMAKE_POST_LINK)
 # Clean Settings
 QMAKE_CLEAN += -r $$DESTDIR

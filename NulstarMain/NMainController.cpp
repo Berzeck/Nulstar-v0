@@ -6,7 +6,7 @@
 #include "NMainController.h"
 
 const QString lServiceManager("ServiceManager");
-const QString lComponentsDirectory("MainComponents");
+const QString lComponentsDirectory("MainModules");
 
 namespace NulstarNS {
   NMainController::NMainController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QUrl &lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, QHostAddress::SpecialAddress lBindAddress, QObject* rParent)

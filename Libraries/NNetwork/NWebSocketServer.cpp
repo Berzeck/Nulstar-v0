@@ -1,4 +1,6 @@
 #include <QWebSocket>
+#include <NMessage.h>
+
 #include "NRequest.h"
 #include "NWebSocketServer.h"
 

@@ -16,14 +16,18 @@ DESTDIR=$$LIBRARIES_OUTDIR
 
 # Source Files
 
-HEADERS += Network.h \
+HEADERS += NNetwork.h \
            NResponse.h \
            NRequest.h \
-           NWebSocketServer.h
+           NWebSocketServer.h \
+    NMessage.h \
+    NMessageNegotiateConnection.h
 
 SOURCES += NResponse.cpp \
            NRequest.cpp \
-           NWebSocketServer.cpp
+           NWebSocketServer.cpp \
+    NMessage.cpp \
+    NMessageNegotiateConnection.cpp
 
 
 # Dependencies

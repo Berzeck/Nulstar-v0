@@ -9,10 +9,10 @@
 #include <QUrl>
 #include "NMainController.h"
 
-const QString lConstantsFile("Constants.ncf");
 const QString lControllerName("ServiceController");
 const QString lManageParameter("Managed");
 const QString lServiceManagerUrlParameter("managerurl");
+const QString lConstantsFile("Constants.ncf");
 
 int main(int argc, char *argv[])
 {

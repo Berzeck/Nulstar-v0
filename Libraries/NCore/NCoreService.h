@@ -19,10 +19,12 @@
 #include <NRequest.h>
 #include <NResponse.h>
 #include "NApiBuilder.h"
-#include "NPacketProcessor.h"
+#include "NMessageProcessor.h"
 #include "Core.h"
 
-namespace NulstarNS {  
+namespace NulstarNS {    
+  const QString lConstantsFile("Constants.ncf");
+
   class NWebSocketServer;
   class CORESHARED_EXPORT NCoreService : public QObject {
     Q_OBJECT
@@ -57,21 +59,21 @@ namespace NulstarNS {
       quint64 mLastID;
       QUrl mServiceManagerUrl;
       QWebSocketServer::SslMode mSslMode;
-      QWebSocket mWebSocket;
+      QMap<QString, QWebSocket* > mWebSockets;  // Module Name, Connection
       QMap<QString, NWebSocketServer*> mWebServers;
       QMap<QString, QString> mApiMethodDescription;
       QMap<QString, QString> mApiMethodMinEventAndMinPeriod;
       QList<QNetworkAddressEntry> mAllowedNetworks;
       NApiBuilder mApiBuilder;
-      NPacketProcessor mPacketProcessor;
+      NMessageProcessor mMessageProcessor;
 
     public Q_SLOTS:
       virtual bool fControlWebServer(const QString& lName, EServiceAction lAction); // If lName is empty then it controls all web sockets servers      
 
     protected Q_SLOTS:
-      virtual void fBuildApi();
-      virtual void fSendRequest(NRequest& lRequest);
-      virtual void fSendResponse(NResponse& lResponse);
+      virtual void fRegisterApi();
+      virtual void fOnMessageStatusChanged(NMessage* rMessage, NMessage::EMessageStatus eMessageStatus);
+      virtual void fSendMessage(NMessage& lMessage);
       void fOnConnectionError(QAbstractSocket::SocketError lErrorCode);
 
     private Q_SLOTS:
