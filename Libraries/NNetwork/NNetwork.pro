@@ -21,14 +21,15 @@ HEADERS += NNetwork.h \
            NRequest.h \
            NWebSocketServer.h \
     NMessage.h \
-    NMessageNegotiateConnection.h
+    NMessageNegotiateConnection.h \
+    NMessageNegotiateConnectionResponse.h
 
 SOURCES += NResponse.cpp \
            NRequest.cpp \
            NWebSocketServer.cpp \
     NMessage.cpp \
-    NMessageNegotiateConnection.cpp
-
+    NMessageNegotiateConnection.cpp \
+    NMessageNegotiateConnectionResponse.cpp
 
 # Dependencies
 
