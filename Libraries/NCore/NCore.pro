@@ -5,7 +5,7 @@ include($$TOP_SRCDIR/common.pri)
 
 QT -= gui
 QT += network websockets
-CONFIG += c++11
+CONFIG += c++11 skip_target_version_ext
 
 TEMPLATE = lib
 TARGET = NCore

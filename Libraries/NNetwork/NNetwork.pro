@@ -5,7 +5,7 @@ include($$TOP_SRCDIR/common.pri)
 QT -= gui
 QT += websockets
 
-CONFIG += c++11
+CONFIG += c++11 skip_target_version_ext
 
 TEMPLATE = lib
 TARGET = NNetwork
@@ -30,6 +30,7 @@ SOURCES += NResponse.cpp \
     NMessage.cpp \
     NMessageNegotiateConnection.cpp \
     NMessageNegotiateConnectionResponse.cpp
+
 
 # Dependencies
 

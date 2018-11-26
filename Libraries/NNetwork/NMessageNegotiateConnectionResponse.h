@@ -12,11 +12,12 @@ namespace NulstarNS {
     Q_OBJECT
 
     public:
+      enum class ENegotiationStatus { eNegotiationError = 0, eNegotiationSuccessful = 1 };
 
-      explicit NMessageNegotiateConnectionResponse(const QString& lConnectionName, const QString& lMessageID = QString(), QObject* rParent = nullptr, quint8 lNegotiationStatus = 0,const QString& lNegotiationComment = QString());
+      explicit NMessageNegotiateConnectionResponse(const QString& lConnectionName, const QString& lMessageID = QString(), ENegotiationStatus lNegotiationStatus = ENegotiationStatus::eNegotiationSuccessful, const QString& lNegotiationComment = QString(), QObject* rParent = nullptr);
       ~NMessageNegotiateConnectionResponse() override {}
 
-      quint8 fNegotiationStatus() const { return mNegotiationStatus; }
+      ENegotiationStatus fNegotiationStatus() const { return mNegotiationStatus; }
       QString fNegotiationComment() const { return mNegotiationComment; }
 
     protected:
@@ -24,7 +25,7 @@ namespace NulstarNS {
       QString fMessageType() const override { return QString("NegotiateConnectionResponse"); }
 
     private:
-      quint8 mNegotiationStatus;
+      ENegotiationStatus mNegotiationStatus;
       QString mNegotiationComment;
   };
 }
