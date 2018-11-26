@@ -5,7 +5,7 @@
 #include "NNetwork.h"
 
 namespace NulstarNS {
-class NRegisterCompoundMethod : public NMessage {
+class NETWORKSHARED_EXPORT NRegisterCompoundMethod : public NMessage {
     Q_OBJECT
 public:
     explicit NRegisterCompoundMethod(const QString& lConnectionName,
