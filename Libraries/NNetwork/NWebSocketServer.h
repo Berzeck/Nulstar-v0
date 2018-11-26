@@ -46,4 +46,4 @@ namespace NulstarNS {
   };
 }
 
-#endif // NNULSTARWEBSOCKETSERVER_H
+#endif // NWEBSOCKETSERVER_H

@@ -142,7 +142,7 @@ namespace NulstarNS {
   //     QString lApi(fBuildApi().toJson(QJsonDocument::Indented));
     NRequest lApiRegister(QDate::currentDate(), QTime::currentTime(), mApiBuilder.fBuildApi(this));
  //****   mPacketProcessor.fProcessRequest(lApiRegister);
-    qDebug(lApiRegister.fToJsonString(QJsonDocument::Indented).toLatin1());
+    qDebug() << lApiRegister.fToJsonString(QJsonDocument::Indented).toLatin1();
 //      mWebSocket.sendTextMessage(lApi);
 
  //   return pApiBuilder->fBuildApi(this);

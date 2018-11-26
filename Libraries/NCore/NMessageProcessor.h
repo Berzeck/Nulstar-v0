@@ -1,5 +1,5 @@
 #ifndef NMESSAGEPROCESSOR_H
-#define NMESSAGEROCESSOR_H
+#define NMESSAGEPROCESSOR_H
 
 #include <QMap>
 #include <QMultiMap>
@@ -32,4 +32,4 @@ namespace NulstarNS {
   };
 }
 
-#endif // NPACKETBUILDER_H
+#endif // NMESSAGEPROCESSOR_H
