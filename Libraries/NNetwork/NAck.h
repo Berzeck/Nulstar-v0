@@ -10,6 +10,7 @@ class NETWORKSHARED_EXPORT NAck : public NMessage {
     Q_OBJECT
 public:
     explicit NAck(const QString& lConnectionName, const QString& lMessageID = QString(), const QString& lRequestID = QString(), QObject* rParent = nullptr);
+    ~NAck() override {}
 
     QString fRequestID() const { return mRequestID; }
 

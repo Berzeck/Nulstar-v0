@@ -12,6 +12,7 @@ public:
         const QString& lMessageID = QString(),
         const QString& lUnregisterCompoundMethodName = QString(),
         QObject* rParent = nullptr);
+    ~NUnregisterCompoundMethod() override {}
 
     QString fUnregisterCompoundMethodName() const { return mUnregisterCompoundMethodName; }
 

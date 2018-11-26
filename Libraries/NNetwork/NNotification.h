@@ -15,6 +15,7 @@ public:
         const QString& lNotificationComment = QString(),
         const QVariantMap& lNotificationData = QVariantMap(),
         QObject* rParent = nullptr);
+    ~NNotification() override {}
 
     QString fNotificationAck() const { return mNotificationAck; }
     QString fNotificationType() const { return mNotificationType; }

@@ -14,6 +14,7 @@ public:
         const QString& lCompoundMethodDescription = QString(),
         const QVariantMap& lCompoundMethods = QVariantMap(),
         QObject* rParent = nullptr);
+    ~NRegisterCompoundMethod() override {}
 
     QString fCompoundMethodName() const { return mCompoundMethodName; }
     QString fCompoundMethodDescription() const { return mCompoundMethodDescription; }

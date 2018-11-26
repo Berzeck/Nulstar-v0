@@ -11,6 +11,7 @@ public:
         const QString& lMessageID = QString(),
         const QStringList& lUnscribeMethods = QStringList(),
         QObject* rParent = nullptr);
+    ~NUnsubscribe() override {}
 
     QStringList fUnsubscribeMethods() const { return mUnscribeMethods; }
 

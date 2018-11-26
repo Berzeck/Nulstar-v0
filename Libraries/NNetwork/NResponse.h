@@ -16,6 +16,7 @@ public:
         const QString& lResponseMaxSize = QString(),
         const QVariantMap& lResponseData = QVariantMap(),
         QObject* rParent = nullptr);
+    ~NResponse() override {}
 
     QString fRequestID() const { return mRequestID; }
     QString fResponseProcessingTime() const { return mResponseProcessingTime; }
