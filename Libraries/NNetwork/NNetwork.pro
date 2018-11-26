@@ -22,14 +22,16 @@ HEADERS += NNetwork.h \
            NWebSocketServer.h \
     NMessage.h \
     NMessageNegotiateConnection.h \
-    NMessageNegotiateConnectionResponse.h
+    NMessageNegotiateConnectionResponse.h \
+    NMessageUnregisterCompoundMethod.h
 
 SOURCES += NResponse.cpp \
            NRequest.cpp \
            NWebSocketServer.cpp \
     NMessage.cpp \
     NMessageNegotiateConnection.cpp \
-    NMessageNegotiateConnectionResponse.cpp
+    NMessageNegotiateConnectionResponse.cpp \
+    NMessageUnregisterCompoundMethod.cpp
 
 
 # Dependencies
