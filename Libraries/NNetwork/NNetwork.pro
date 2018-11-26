@@ -25,6 +25,7 @@ HEADERS += NNetwork.h \
     NMessage.h \
     NMessageNegotiateConnection.h \
     NMessageNegotiateConnectionResponse.h \
+    NMessageUnregisterCompoundMethod.h  \
     NNotification.h \
     NRegisterCompoundMethod.h \
     NUnregisterCompoundMethod.h
@@ -37,8 +38,10 @@ SOURCES += NResponse.cpp \
     NMessage.cpp \
     NMessageNegotiateConnection.cpp \
     NMessageNegotiateConnectionResponse.cpp \
+    NMessageUnregisterCompoundMethod.cpp  \
     NNotification.cpp \
     NRegisterCompoundMethod.cpp \
     NUnregisterCompoundMethod.cpp
+
 # Dependencies
 
