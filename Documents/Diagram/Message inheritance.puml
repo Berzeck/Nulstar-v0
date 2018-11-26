@@ -1,0 +1,19 @@
+@startuml MessageInherit
+class NMessage {
+    String MessageID
+    String Timestamp
+    String TimeZone
+    String MessageType
+}
+
+NMessage <|-- NegotiateConnection
+NMessage <|-- NegotiateConnectionResponse
+NMessage <|-- Request
+NMessage <|-- Unsubscribe
+NMessage <|-- Response
+NMessage <|-- ACK
+NMessage <|-- Notificatioin
+NMessage  <|-- RegisterCompoundMethod
+NMessage <|-- UnregisterCompoundMethod
+
+@enduml

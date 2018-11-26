@@ -20,19 +20,28 @@ HEADERS += NNetwork.h \
            NResponse.h \
            NRequest.h \
            NWebSocketServer.h \
+    NAck.h \
+    NUnsubscribe.h \
     NMessage.h \
     NMessageNegotiateConnection.h \
     NMessageNegotiateConnectionResponse.h \
-    NMessageUnregisterCompoundMethod.h
+    NMessageUnregisterCompoundMethod.h  \
+    NNotification.h \
+    NRegisterCompoundMethod.h \
+    NUnregisterCompoundMethod.h
 
 SOURCES += NResponse.cpp \
            NRequest.cpp \
            NWebSocketServer.cpp \
+    NAck.cpp \
+    NUnsubscribe.cpp \
     NMessage.cpp \
     NMessageNegotiateConnection.cpp \
     NMessageNegotiateConnectionResponse.cpp \
-    NMessageUnregisterCompoundMethod.cpp
-
+    NMessageUnregisterCompoundMethod.cpp  \
+    NNotification.cpp \
+    NRegisterCompoundMethod.cpp \
+    NUnregisterCompoundMethod.cpp
 
 # Dependencies
 

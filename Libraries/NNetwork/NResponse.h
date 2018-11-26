@@ -1,38 +1,42 @@
 #ifndef NRESPONSE_H
 #define NRESPONSE_H
 
-#include <QDate>
-#include <QTime>
-#include <QString>
-#include <QVariant>
+#include "NMessage.h"
 
 namespace NulstarNS {
-  class NResponse {
-    public:
-      NResponse(bool lSuccess, const QVariant& lReturnValue, const QString& lRequestDate = QDate::currentDate().toString("yyyy-MM-dd"), const QString& lRequestTime = QTime::currentTime().toString("hh:mm:ss"), const QString& lDescription = QString());
-      bool fSuccess() const { return mSuccess; }
-      quint64 fID() const { return mID; }
-      QString lExternalID() const { return mExternalID; }
-      QDate fProcessingDate() const { return mProcessDate; }
-      QTime fProcessingTime() const { return mProcessTime; }
-      QString fRequestDate() const { return mRequestDate; }
-      QString fRequestTime() const { return mRequestTime; }
-      QVariant fReturnValue() const { return mReturnValue; }
+class NETWORKSHARED_EXPORT NResponse : public NMessage {
+    Q_OBJECT
+public:
+    explicit NResponse(const QString& lConnectionName,
+        const QString& lMessageID = QString(),
+        const QString& lRequestID = QString(),
+        const QString& lResponseProcessingTime = QString(),
+        const QString& lResponseStatus = QString(),
+        const QString& lResponseComment = QString(),
+        const QString& lResponseMaxSize = QString(),
+        const QVariantMap& lResponseData = QVariantMap(),
+        QObject* rParent = nullptr);
+    ~NResponse() override {}
 
-      void fSetID(quint64 lID) { mID = lID; }
-      void fSetExternalID(QString lExternalID) { mExternalID = lExternalID; }
+    QString fRequestID() const { return mRequestID; }
+    QString fResponseProcessingTime() const { return mResponseProcessingTime; }
+    QString fResponseStatus() const { return mResponseStatus; }
+    QString fResponseComment() const { return mResponseComment; }
+    QString fResponseMaxSize() const { return mResponseMaxSize; }
+    QVariantMap fResponseData() const { return mResponseData; }
 
-    private:
-      bool mSuccess;
-      quint64 mID;
-      QString mExternalID;
-      QDate mProcessDate;
-      QTime mProcessTime;
-      QString mRequestDate;
-      QString mRequestTime;
-      QString mDescription;
-      QVariant mReturnValue;
-  };
-}
+protected:
+    QVariantMap fMessageData() const override;
+    QString fMessageType() const override { return QString("Response"); }
+
+private:
+    QString mRequestID;
+    QString mResponseProcessingTime;
+    QString mResponseStatus;
+    QString mResponseComment;
+    QString mResponseMaxSize;
+    QVariantMap mResponseData;
+};
+} // namespace NulstarNS
 
 #endif // NRESPONSE_H
