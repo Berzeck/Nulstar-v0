@@ -19,6 +19,9 @@ HEADERS += NMainController.h
 SOURCES += NMainController.cpp \
            NulstarMain.cpp
 
+OTHER_FILES += Nulstar.cfg \
+            Constants.ncf
+
 # Dependencies
 
 INCLUDEPATH += $$LIBRARIES_PATH/NNetwork $$LIBRARIES_PATH/NCore
@@ -28,6 +31,6 @@ LIBS += -lNNetwork -lNCore
 
 QMAKE_POST_LINK += $$quote($$QMAKE_COPY \"$$PWD/Nulstar.cfg\" \"$$DESTDIR\" $$escape_expand(\n\t))
 QMAKE_POST_LINK += $$quote($$QMAKE_COPY \"$$PWD/Constants.ncf\" \"$$DESTDIR\")
-message($$QMAKE_POST_LINK)
+
 # Clean Settings
 QMAKE_CLEAN += -r $$DESTDIR
