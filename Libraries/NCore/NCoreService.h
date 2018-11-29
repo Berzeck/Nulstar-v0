@@ -16,8 +16,8 @@
 #include <QVariant>
 #include <QWebSocket>
 #include <QWebSocketServer>
-#include <NRequest.h>
-#include <NResponse.h>
+#include <NMessageRequest.h>
+#include <NMessageResponse.h>
 #include "NApiBuilder.h"
 #include "NMessageProcessor.h"
 #include "Core.h"
@@ -46,9 +46,9 @@ namespace NulstarNS {
       virtual bool fAddWebSocketServer(const QString& lName, const QString& lLabel, quint16 lPort, QHostAddress::SpecialAddress lBindAddress, bool lStartImmediatly = false);
       void fAddMethodFunctionDescription(const QString& lMethodName, const QString& lDescription) { mApiMethodDescription[lMethodName] = lDescription; }
       void fAddMethodMinEventAndMinPeriod(const QString& lMethodName, const QString& lApiMethodMinEventAndMinPeriod ) { mApiMethodMinEventAndMinPeriod[lMethodName] = lApiMethodMinEventAndMinPeriod; }
-      NResponse fMaxConnections(const QString &lName);
+   /***   NMessageResponse fMaxConnections(const QString &lName);
       NResponse fTotalConnections(const QString &lName);
-      NResponse fSetMaxConnections(const QString& lName, int lMaxconnections);
+      NResponse fSetMaxConnections(const QString& lName, int lMaxconnections); ***/
       QString fMethodDescription(const QString& lMethodName) const;
       QString fMethodMinEventAndMinPeriod(const QString& lMethodName) const;
 

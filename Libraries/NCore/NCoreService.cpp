@@ -62,7 +62,7 @@ namespace NulstarNS {
     }
   }
 
-  NResponse NCoreService::fSetMaxConnections(const QString& lName, int lMaxconnections) {
+  /*** NResponse NCoreService::fSetMaxConnections(const QString& lName, int lMaxconnections) {
     if(mWebServers.contains(lName)) {
       mWebServers[lName]->fSetMaxConnections(lMaxconnections);
       NResponse lResponse(true, true);
@@ -70,7 +70,7 @@ namespace NulstarNS {
     }
     NResponse lResponse(false, false, QDate::currentDate().toString("yyyy-MM-dd"), QTime::currentTime().toString("hh:mm:ss"), tr("Web server '%1' not found.").arg(lName));
     return lResponse;
-  }
+  } ***/
 
   bool NCoreService::fControlWebServer(const QString &lName, EServiceAction lAction) {
     QStringList lWebServerNames;
@@ -92,14 +92,14 @@ namespace NulstarNS {
     return true;
   }
 
-  NResponse NCoreService::fMaxConnections(const QString &lName) {
+ /*** NResponse NCoreService::fMaxConnections(const QString &lName) {
     if(mWebServers.contains(lName)) {
       NResponse lResponse(true, mWebServers[lName]->fMaxConnections());
       return lResponse;
     }
     NResponse lResponse(false, 0, tr("Web server '%1' not found.").arg(lName));
     return lResponse;
-  }
+  }***/
 
   QString NCoreService::fMethodDescription(const QString& lMethodName) const {
     return mApiMethodDescription.value(lMethodName);
@@ -110,14 +110,14 @@ namespace NulstarNS {
     else return lDefaultMinEventAndMinPeriod;
   }
 
-  NResponse NCoreService::fTotalConnections(const QString &lName) {
+/***  NResponse NCoreService::fTotalConnections(const QString &lName) {
     if(mWebServers.contains(lName)) {
       NResponse lResponse(true, mWebServers[lName]->fTotalConnections());
       return lResponse;
     }
     NResponse lResponse(false, 0, tr("Web server '%1' not found.").arg(lName));
     return lResponse;
-  }
+  } ***/
 
   void NCoreService::fOnConnectionError(QAbstractSocket::SocketError lErrorCode) {
     qDebug("%s", qUtf8Printable(QString::number(lErrorCode)));
@@ -140,9 +140,9 @@ namespace NulstarNS {
   void NCoreService::fRegisterApi() {
   //  QJsonDocument lApi(QJsonDocument::fromVariant(pApiBuilder->fBuildApi(this)));
   //     QString lApi(fBuildApi().toJson(QJsonDocument::Indented));
-    NRequest lApiRegister(QDate::currentDate(), QTime::currentTime(), mApiBuilder.fBuildApi(this));
+ //***   NMessageRequest lApiRegister(QDate::currentDate(), QTime::currentTime(), mApiBuilder.fBuildApi(this));
  //****   mPacketProcessor.fProcessRequest(lApiRegister);
-    qDebug() << lApiRegister.fToJsonString(QJsonDocument::Indented).toLatin1();
+ //***   qDebug() << lApiRegister.fToJsonString(QJsonDocument::Indented).toLatin1();
 //      mWebSocket.sendTextMessage(lApi);
 
  //   return pApiBuilder->fBuildApi(this);

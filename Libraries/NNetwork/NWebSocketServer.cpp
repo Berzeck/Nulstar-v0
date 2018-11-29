@@ -1,7 +1,7 @@
 #include <QWebSocket>
 #include <NMessage.h>
 
-#include "NRequest.h"
+#include "NMessageRequest.h"
 #include "NWebSocketServer.h"
 
 namespace NulstarNS {

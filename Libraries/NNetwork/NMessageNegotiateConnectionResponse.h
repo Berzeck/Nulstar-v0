@@ -2,6 +2,7 @@
 #define NMESSAGENEGOTIATECONNECTIONRESPONSE_H
 
 #include <QObject>
+#include <QString>
 #include <QVariantMap>
 
 #include "NMessage.h"

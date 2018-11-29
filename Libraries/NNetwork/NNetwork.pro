@@ -17,31 +17,29 @@ DESTDIR=$$LIBRARIES_OUTDIR
 # Source Files
 
 HEADERS += NNetwork.h \
-           NResponse.h \
-           NRequest.h \
-           NWebSocketServer.h \
-    NAck.h \
-    NUnsubscribe.h \
-    NMessage.h \
-    NMessageNegotiateConnection.h \
-    NMessageNegotiateConnectionResponse.h \
-    NMessageUnregisterCompoundMethod.h  \
-    NNotification.h \
-    NRegisterCompoundMethod.h \
-    NUnregisterCompoundMethod.h
+           NMessageResponse.h \
+           NMessageRequest.h \
+           NMessageAck.h \
+           NMessageUnsubscribe.h \
+           NMessage.h \
+           NMessageNegotiateConnection.h \
+           NMessageNegotiateConnectionResponse.h \
+           NMessageUnregisterCompoundMethod.h  \
+           NMessageNotification.h \
+           NMessageRegisterCompoundMethod.h \
+           NWebSocketServer.h
 
-SOURCES += NResponse.cpp \
-           NRequest.cpp \
-           NWebSocketServer.cpp \
-    NAck.cpp \
-    NUnsubscribe.cpp \
-    NMessage.cpp \
-    NMessageNegotiateConnection.cpp \
-    NMessageNegotiateConnectionResponse.cpp \
-    NMessageUnregisterCompoundMethod.cpp  \
-    NNotification.cpp \
-    NRegisterCompoundMethod.cpp \
-    NUnregisterCompoundMethod.cpp
+SOURCES += NMessageResponse.cpp \
+           NMessageRequest.cpp \
+           NMessageAck.cpp \
+           NMessageUnsubscribe.cpp \
+           NMessage.cpp \
+           NMessageNegotiateConnection.cpp \
+           NMessageNegotiateConnectionResponse.cpp \
+           NMessageUnregisterCompoundMethod.cpp  \
+           NMessageNotification.cpp \
+           NMessageRegisterCompoundMethod.cpp \
+           NWebSocketServer.cpp
 
 # Dependencies
 

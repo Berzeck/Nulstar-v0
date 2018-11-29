@@ -6,7 +6,7 @@
 #include <QObject>
 #include <QUrl>
 #include <NCoreService.h>
-#include <NResponse.h>
+//***#include <NResponse.h>
 
 namespace NulstarNS {
   const QString lAdminServerLabel = "Nulstar Management";
@@ -38,11 +38,11 @@ namespace NulstarNS {
       quint8 mCompressionLevel;
 
     public Q_SLOTS:
-      API_ADMIN_FUNCTION NResponse setmaxconnections(int lMaxConnections) { return fSetMaxConnections(lClientServerName, lMaxConnections); }
+  /***    API_ADMIN_FUNCTION NResponse setmaxconnections(int lMaxConnections) { return fSetMaxConnections(lClientServerName, lMaxConnections); }
       API_ADMIN_FUNCTION NResponse getmaxconnections() { return fMaxConnections(lClientServerName); }
       API_ADMIN_FUNCTION NResponse gettotalconnections() { return fTotalConnections(lClientServerName); }
       API_ADMIN_FUNCTION NResponse setcompressionlevel(quint8 lCompressionLevel);
-      API_PUBLIC_FUNCTION NResponse getcompressionlevel();
+      API_PUBLIC_FUNCTION NResponse getcompressionlevel();  ***/
 
   };
 }

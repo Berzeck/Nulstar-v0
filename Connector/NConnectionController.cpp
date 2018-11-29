@@ -14,7 +14,7 @@ namespace NulstarNS {
     fFillMethodDescriptions();
     fFillMethodMinEventAndMinPeriod();
   }
-
+/***
   NResponse NConnectionController::setcompressionlevel(quint8 lCompressionLevel) {
     if(lCompressionLevel > 9) {
       NResponse lResponse(false, false, tr("Compression level should be in the range [0-9]"));
@@ -28,7 +28,7 @@ namespace NulstarNS {
   NResponse NConnectionController::getcompressionlevel() {
     NResponse lResponse(true, mCompressionLevel, tr("Compression level is '%1'").arg(mCompressionLevel));
     return lResponse;
-  }
+  } ***/
 
   void NConnectionController::fFillMethodDescriptions() {
     fAddMethodFunctionDescription("setmaxconnections", tr("Sets the maximum number of client connections that should be accepted.\nParameters:\n  maxconnections [0- ]: Maximum connections allowed. 0 means no limit."));

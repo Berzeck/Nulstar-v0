@@ -7,7 +7,6 @@
 #include <QString>
 #include <QVariant>
 #include <NMessage.h>
-#include <NResponse.h>
 
 #include "Core.h"
 
