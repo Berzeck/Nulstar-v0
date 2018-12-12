@@ -10,17 +10,27 @@ CONFIG += c++11 console
 
 TARGET = Nulstar
 VERSION = 0.0.1.1
-DEFINES += APP_DOMAIN=\\\"nulstar.com\\\" APP_ROLE=\\\"Role_ServiceController\\\" APP_ROLE_VERSION=\\\"0.1.0\\\" APP_NAME=\\\"Nulstar_Main_Controller\\\" APP_VERSION=\\\"$$VERSION\\\" APP_VERSION_NAME=\\\"OneEye_Baby_Ninja_Egg\\\"
+APP_DOMAIN=nulstar.com
+APP_ROLE=Role ServiceController
+APP_ROLE_VERSION=0.1.0
+APP_NAME=Nulstar Main Controller
+APP_VERSION=$$VERSION
+APP_VERSION_NAME=OneEye Baby Ninja Egg
 
 
 # Source Files
 
-HEADERS += NMainController.h
+QMAKE_SUBSTITUTES += AppVersion.h.in
+
+HEADERS += NMainController.h \
+    NPluginManger.h
 SOURCES += NMainController.cpp \
-           NulstarMain.cpp
+           NulstarMain.cpp \
+    NPluginManger.cpp
 
 OTHER_FILES += Nulstar.cfg \
-            Constants.ncf
+            Constants.ncf \
+            AppVersion.h.in
 
 # Dependencies
 
