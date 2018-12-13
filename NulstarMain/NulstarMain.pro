@@ -23,10 +23,15 @@ APP_VERSION_NAME=OneEye Baby Ninja Egg
 QMAKE_SUBSTITUTES += AppVersion.h.in
 
 HEADERS += NMainController.h \
-    NPluginManger.h
+           NPluginManger.h \
+           NModulesManager.h \
+           NModuleInfo.h
+
 SOURCES += NMainController.cpp \
            NulstarMain.cpp \
-    NPluginManger.cpp
+           NPluginManger.cpp \
+           NModulesManager.cpp \
+           NModuleInfo.cpp
 
 OTHER_FILES += Nulstar.cfg \
             Constants.ncf \
