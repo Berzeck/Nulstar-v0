@@ -1,7 +1,8 @@
 #ifndef _APPVERSION_H
 #define _APPVERSION_H
+#pragma once
 
-#define APP_NAME '"$$APP_DOMAIN"'
+#define APP_NAME '"$$APP_NAME"'
 #define APP_VERSION '"$$APP_VERSION"'
 #define APP_VERSION_NAME '"$$APP_VERSION_NAME"'
 
