@@ -1,8 +1,6 @@
 #include <QCoreApplication>
-#include <QHostAddress>
-#include <QProcess>
-#include <QTimer>
-#include <QWebSocket>
+
+
 #include "NModulesManager.h"
 
 
@@ -41,8 +39,47 @@ namespace NulstarNS {
     }
 
     void NModulesManager::fMoudlesReadConfig() {
-       QString lModulesDir =  QString("%1/%2/").arg(QCoreApplication::applicationDirPath()).arg(lModulesDirectory);
+       QString lModulesDirPath =  QString("%1/%2/").arg(QCoreApplication::applicationDirPath()).arg(lModulesDirectory);
+       QDir lModulesDir(lModulesDirPath);
+       if(!lModulesDir.exists())
+       {
+           qDebug() << "Modules directory %s is not exist" << lModulesDirPath;
+           return;
+       }
+       //get namespaces
+       QStringList lNameSpaceList = fFoldersNameList(lModulesDir);
+       if (lNameSpaceList.isEmpty()){
+           qDebug() << "Namespace directory is not exist under Module directory %s" << lModulesDirPath;
+           return;
+       }
+
+
+
+
     }
 
+    QStringList NModulesManager::fFoldersNameList(QDir lDir){
+        QStringList lFolderNameList = QStringList();
+        QFileInfoList lFolderFilesList = lDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+        for(int i = 0; i != lFolderFilesList.size(); i++)
+        {
+             lFolderNameList.append(lFolderFilesList.at(i).fileName());
+        }
+        return lFolderNameList;
+    }
 
-}
+    void NModulesManager::fSetNamespaceModules(QString lNamespace, QStringList lModules) {
+      mNamespaceModules[lNamespace] = lModules;
+    }
+
+    void NModulesManager::fSetModuleVersions(QString lModule, QStringList lVersions) {
+      mModuleVersions[lModule] = lVersions;
+    }
+
+    void NModulesManager::fSetModuleConfig(QString lModule, QString lVersion, QList<QPair<QString, QString>> lParams){
+        QPair<QString, QString> lModuleVersion;
+        lModuleVersion.first = lModule.toLower();
+        lModuleVersion.second = lVersion.toLower();
+        mModuleConfig[lModuleVersion] = lParams;
+    }
+ }

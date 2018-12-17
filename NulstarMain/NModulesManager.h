@@ -5,7 +5,8 @@
 #include <QMap>
 #include <QObject>
 #include <QPair>
-
+#include <QDir>
+#include <QDebug>
 
 namespace NulstarNS {
   class NModulesManager : public QObject {
@@ -19,10 +20,16 @@ namespace NulstarNS {
      NModuleInfo fModuleInfo(QString lModuleName, QString lVersion);
 
 
-    private:      
-        QMap<QString, QList<QPair<QString, QString>> > mModuleConfig;
+    private:
+        QMap<QString, QStringList > mNamespaceModules;    //NameSpace, Modules
+        QMap<QString, QStringList > mModuleVersions;      //Module, Versions
+        QMap<QPair<QString, QString>, QList<QPair<QString, QString>> > mModuleConfig;    //Module + Version, parameters pairs
 
         void fMoudlesReadConfig();
+        QStringList fFoldersNameList(QDir lDir);
+        void fSetNamespaceModules(QString lNamespace, QStringList lModules);
+        void fSetModuleVersions(QString lModule, QStringList lVersions);
+        void fSetModuleConfig(QString lModule, QString lVersion, QList<QPair<QString, QString>> lParams);
 
   };
 }
