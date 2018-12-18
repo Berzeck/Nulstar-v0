@@ -16,21 +16,23 @@ namespace NulstarNS {
       explicit NModulesManager(QObject *rParent = nullptr);
       ~NModulesManager() override { }
 
-
      NModuleInfo fModuleInfo(QString lModuleName, QString lVersion);
-
 
     private:
         QMap<QString, QStringList > mNamespaceModules;    //NameSpace, Modules
         QMap<QString, QStringList > mModuleVersions;      //Module, Versions
         QMap<QPair<QString, QString>, QList<QPair<QString, QString>> > mModuleConfig;    //Module + Version, parameters pairs
 
-        void fMoudlesReadConfig();
-        QStringList fFoldersNameList(QDir lDir);
-        void fSetNamespaceModules(QString lNamespace, QStringList lModules);
-        void fSetModuleVersions(QString lModule, QStringList lVersions);
-        void fSetModuleConfig(QString lModule, QString lVersion, QList<QPair<QString, QString>> lParams);
-
+        void fLoadModlesConfig();
+        void fReadModuleNcf(const QString lNamespace, const QString lModule, const QString lVersion);
+        void fScanModulesDirectory();
+        QStringList fFoldersNameList(QString lDirPath);
+        void fSetNamespaceModules(const QString lNamespace, QStringList lModules);
+        void fSetModuleVersions(const QString lModule, QStringList lVersions);
+        void fSetModuleConfig(const QString lModule, const QString lVersion, QList<QPair<QString, QString>> lParams);
+        QStringList fGetNamespaceModules(const QString lNamespace);
+        QStringList fGetModuleVersions(const QString lModule);
+        QList<QPair<QString, QString>>  fGetModuleConfig(const QString lModule, const QString lVersion);
   };
 }
 
