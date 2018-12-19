@@ -49,7 +49,7 @@ namespace NulstarNS {
     }
 
     void NModulesManager::fReadModuleNcf(QString lNamespace, QString lModule, QString lVersion){
-        QString lModuleNcfPath =  QString("%1/../../%2/%3/%4/%5").arg(QCoreApplication::applicationDirPath()).arg(lNamespace).arg(lModule).arg(lVersion).arg(lModuleConfigFile);
+        QString lModuleNcfPath =  QString("%1/../%2/%3/%4/%5").arg(QCoreApplication::applicationDirPath()).arg(lNamespace).arg(lModule).arg(lVersion).arg(lModuleConfigFile);
         QFileInfo lModuleNcfFileInfo(lModuleNcfPath);
         if (!lModuleNcfFileInfo.exists()){
             qDebug("Module(namespace %s, name %s, version %s) NCF file not exists",
@@ -84,7 +84,7 @@ namespace NulstarNS {
     }
 
     void NModulesManager::fScanModulesDirectory() {
-       QString lModulesDirPath =  QString("%1/%2/").arg(QCoreApplication::applicationDirPath()).arg(lModulesDirectory);
+       QString lModulesDirPath =  QString("%1/../../%2/").arg(QCoreApplication::applicationDirPath()).arg(lModulesDirectory);
        QStringList lNameSpaceList = fFoldersNameList(lModulesDirPath);
        if (lNameSpaceList.isEmpty()){
            qDebug() << "Namespace directory not exist under Modules directory " << lModulesDirPath;
@@ -95,7 +95,7 @@ namespace NulstarNS {
        QString lNSModulesDirPath = QString();
        QStringList lNSModulesList = QStringList();
        for (lNSIterator = lNameSpaceList.begin(); lNSIterator != lNameSpaceList.end(); ++lNSIterator) {
-            lNSModulesDirPath = lModulesDirPath.append("/%1/").arg(*lNSIterator);
+            lNSModulesDirPath = lModulesDirPath.append("%1/").arg(*lNSIterator);
             lNSModulesList = fFoldersNameList(lNSModulesDirPath);
             if (lNSModulesList.isEmpty()){
                 qDebug() << "Module directory not exist under Namespace directory " << lNSModulesDirPath;
@@ -107,7 +107,7 @@ namespace NulstarNS {
             QString lModuleVersionsDirPath = QString();
             QStringList lModuleVersionsList = QStringList();
             for (lModuleIterator = lNSModulesList.begin(); lModuleIterator != lNSModulesList.end(); ++lModuleIterator) {
-                 lModuleVersionsDirPath = lNSModulesDirPath.append("/%1/").arg(*lModuleIterator);
+                 lModuleVersionsDirPath = lNSModulesDirPath.append("%1/").arg(*lModuleIterator);
                  lModuleVersionsList = fFoldersNameList(lModuleVersionsDirPath);
                  if (lModuleVersionsList.isEmpty()){
                      qDebug() << "Versions directory not exist under Module directory " << lModuleVersionsDirPath;
