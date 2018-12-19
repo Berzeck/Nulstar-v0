@@ -23,7 +23,7 @@ namespace NulstarNS {
       void fChangeMessagestatus(NMessage& lMessage, const NMessage::EMessageStatus& lMessageStatus);
 
     private:
-      QMultiMap<NMessage::EMessageStatus, NMessage* > mMessageQueue; // Message Status, Message
+      QMultiMap<QString, NMessage* > mMessageQueue; // Connection Name, Message
       QMap<quint64, NMessage* > mMessageResponses; // MessageID, Message Pointer
 
     Q_SIGNALS:

@@ -27,7 +27,8 @@ HEADERS += NNetwork.h \
            NMessageUnregisterCompoundMethod.h  \
            NMessageNotification.h \
            NMessageRegisterCompoundMethod.h \
-           NWebSocketServer.h
+           NWebSocketServer.h \
+    NWebSocket.h
 
 SOURCES += NMessageResponse.cpp \
            NMessageRequest.cpp \
@@ -39,7 +40,8 @@ SOURCES += NMessageResponse.cpp \
            NMessageUnregisterCompoundMethod.cpp  \
            NMessageNotification.cpp \
            NMessageRegisterCompoundMethod.cpp \
-           NWebSocketServer.cpp
+           NWebSocketServer.cpp \
+    NWebSocket.cpp
 
 # Dependencies
 

@@ -9,20 +9,11 @@ namespace NulstarNS {
   }
 
   void NMessageProcessor::fChangeMessagestatus(NMessage &lMessage, const NMessage::EMessageStatus& lMessageStatus) {
-    QMapIterator<NMessage::EMessageStatus, NMessage*> i1(mMessageQueue);
-    while(i1.hasNext()) {
-      i1.next();
-      QString lMessageID = i1.value()->fMessageID();
-      if(lMessageID == lMessage.fMessageID()) {
-        mMessageQueue.remove(i1.key(), i1.value());
-        mMessageQueue.insert(lMessageStatus, &lMessage);
-        return;
-      }
-    }
+    lMessage.fSetStatus(lMessageStatus);
   }
 
   void NMessageProcessor::fQueueMessage(NMessage* lMessage) {
-    mMessageQueue.insertMulti(NMessage::EMessageStatus::eAwaitingDelivery, lMessage);
+    mMessageQueue.insertMulti(lMessage->fConnectionName(), lMessage);
     mMessageResponses.insert(lMessage->fMessageID().toULongLong(), lMessage);
     emit sMessageStatusChanged(lMessage, NMessage::EMessageStatus::eAwaitingDelivery);
   }

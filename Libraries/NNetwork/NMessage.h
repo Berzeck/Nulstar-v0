@@ -19,10 +19,12 @@ namespace NulstarNS {
       virtual ~NMessage() {}
 
       QString fConnectionName() const { return mConnectionName; }
-      QString fMessageID() const { return mMessageID; }      
+      QString fMessageID() const { return mMessageID; }
+      EMessageStatus fStatus() const { return mStatus; }
       qint64 fTimeStamp() const { return mTimeStamp; }
       qint32 fTimeZone() const { return mTimeZone; }
       virtual QString fToJsonString(QJsonDocument::JsonFormat lFormat = QJsonDocument::Compact) const;
+      void fSetStatus(const EMessageStatus lStatus) { mStatus = lStatus; }
 
     protected:
       virtual QVariantMap fMessageData() const = 0;
@@ -32,6 +34,7 @@ namespace NulstarNS {
       static qint64 mLastMessageID;
       QString mConnectionName;
       QString mMessageID;
+      EMessageStatus mStatus;
       qint64 mTimeStamp;
       qint32 mTimeZone;
   };

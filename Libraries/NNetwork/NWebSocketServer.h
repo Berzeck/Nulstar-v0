@@ -5,6 +5,7 @@
 #include <QMap>
 #include <QObject>
 #include <QWebSocketServer>
+
 #include "NNetwork.h"
 
 QT_FORWARD_DECLARE_CLASS(QWebSocket)

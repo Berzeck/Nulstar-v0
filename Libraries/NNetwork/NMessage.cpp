@@ -14,6 +14,7 @@ namespace NulstarNS {
 
   NMessage::NMessage(const QString& lConnectionName, const QString& lMessageID, QObject *rParent)
           : QObject(rParent), mConnectionName(lConnectionName), mMessageID(lMessageID) {
+    mStatus = EMessageStatus::eAwaitingDelivery;
     mTimeStamp = QDateTime::currentDateTime().currentMSecsSinceEpoch();
     mTimeZone = QDateTime::currentDateTime().offsetFromUtc() / 3600;
 

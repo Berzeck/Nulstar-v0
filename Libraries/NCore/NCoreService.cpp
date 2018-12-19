@@ -1,30 +1,32 @@
 #include <QTimer>
-#include <QWebSocket>
 #include <NMessageNegotiateConnection.h>
-#include <NWebSocketServer.h>
 #include "NCoreService.h"
 
 #include <QDebug>
 
 namespace NulstarNS {
+  const quint8 lConnectionRetrialPeriod = 5;
   const QString lCommServerLabel("Nulstar Internal Communication");
   const QString lCommServerName("WebCommServer");
   const QString lDefaultMinEventAndMinPeriod("0,0");
   const QString lServiceManagerName("ServiceManager") ;
 
-  NCoreService::NCoreService(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QUrl& lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lPort, QHostAddress::SpecialAddress lBindAddress, QObject *rParent)
+  NCoreService::NCoreService(NWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QUrl& lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lPort, QHostAddress::SpecialAddress lBindAddress, QObject *rParent)
               : QObject(rParent), mLogLevel(lLogLevel), mServiceManagerUrl(lServiceManagerUrl), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks) {
     fAddWebSocketServer(lCommServerName, lCommServerLabel, lPort, lBindAddress, false);
     connect(&mMessageProcessor, &NMessageProcessor::sMessageStatusChanged, this, &NCoreService::fOnMessageStatusChanged);
     mMessageProcessor.fQueueMessage(new  NMessageNegotiateConnection(lServiceManagerName, QString(), 0, NMessageNegotiateConnection::ECompressionAlgorithm::eZlib, this));
-    QTimer::singleShot(0, this, &NCoreService::fConnectToServiceManager);
+    QTimer* rTimer = new QTimer(this);
+    connect(rTimer, SIGNAL(timeout()), this, SLOT(fConnectToServiceManager()));
+    rTimer->start(lConnectionRetrialPeriod * 1000);
   }
+
   NCoreService::~NCoreService() {
     for(NWebSocketServer* rWebServer : mWebServers) {
       if(rWebServer->isListening()) rWebServer->close();
       rWebServer->deleteLater();
     }
-    for(QWebSocket* rWebSocket : mWebSockets) {
+    for(NWebSocket* rWebSocket : mWebSockets) {
       if(rWebSocket->isValid()) rWebSocket->close(QWebSocketProtocol::CloseCodeGoingAway, tr("Shutting Down"));
       rWebSocket->deleteLater();
     }
@@ -44,19 +46,19 @@ namespace NulstarNS {
 
   void NCoreService::fConnectToServiceManager() {
     if(mServiceManagerUrl.isValid()) {
-      QWebSocket* rWebSocket = nullptr;
+      NWebSocket* rWebSocket = nullptr;
       if(mWebSockets.contains(lServiceManagerName)) {
         rWebSocket = mWebSockets.value(lServiceManagerName);
         if(rWebSocket->state() == QAbstractSocket::UnconnectedState)
           rWebSocket->open(mServiceManagerUrl);
       }
       else {
-        rWebSocket = new QWebSocket();
+        rWebSocket = new NWebSocket();
         mWebSockets.insert(lServiceManagerName, rWebSocket);
-        connect(rWebSocket, &QWebSocket::connected, this, &NCoreService::fOnConnected, Qt::UniqueConnection);
-        connect(rWebSocket, &QWebSocket::disconnected, this, &NCoreService::sClosed, Qt::UniqueConnection);
-        connect(rWebSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error), this, &NCoreService::fOnConnectionError, Qt::UniqueConnection);
-        connect(rWebSocket, &QWebSocket::textMessageReceived, this, &NCoreService::fOnTextMessageReceived, Qt::UniqueConnection);
+        connect(rWebSocket, &NWebSocket::connected, this, &NCoreService::fOnConnected, Qt::UniqueConnection);
+        connect(rWebSocket, &NWebSocket::disconnected, this, &NCoreService::fOnSocketDisconnection, Qt::UniqueConnection);
+        connect(rWebSocket, QOverload<QAbstractSocket::SocketError>::of(&NWebSocket::error), this, &NCoreService::fOnConnectionError, Qt::UniqueConnection);
+        connect(rWebSocket, &NWebSocket::textMessageReceived, this, &NCoreService::fOnTextMessageReceived, Qt::UniqueConnection);
         rWebSocket->open(mServiceManagerUrl);
       }
     }
@@ -126,15 +128,29 @@ namespace NulstarNS {
   }
 
   void NCoreService::fOnConnected() {
-    QWebSocket* lWebSocket = qobject_cast<QWebSocket* > (sender());
+    NWebSocket* lWebSocket = qobject_cast<NWebSocket* > (sender());
     if(lWebSocket != nullptr) {
-      fRegisterApi();
+      if(lWebSocket->fConnectionState() == NWebSocket::EConnectionState::eConnectionNotNegotiated)
+        fNegotiateConnection();
+      if(lWebSocket->fConnectionState() == NWebSocket::EConnectionState::eConnectionAuthorized)
+        fRegisterApi();
+    }
+  }
+
+  void NCoreService::fOnSocketDisconnection() {
+    NWebSocket* lWebSocket = qobject_cast<NWebSocket* > (sender());
+    if(lWebSocket != nullptr) {
+      lWebSocket->fSetConnectionState(NWebSocket::EConnectionState::eConnectionNotNegotiated);
     }
   }
 
   void NCoreService::fOnTextMessageReceived(const QString &lTextMessage) {
    // mWebSocket.sendTextMessage(QString("Receieved:\n%1").arg(lTextMessage));
       qDebug("%s", qUtf8Printable(lTextMessage));
+  }
+
+  void NCoreService::fNegotiateConnection() {
+
   }
 
   void NCoreService::fRegisterApi() {

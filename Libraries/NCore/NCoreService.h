@@ -14,8 +14,8 @@
 #include <QObject>
 #include <QUrl>
 #include <QVariant>
-#include <QWebSocket>
-#include <QWebSocketServer>
+#include <NWebSocket.h>
+#include <NWebSocketServer.h>
 #include <NMessageRequest.h>
 #include <NMessageResponse.h>
 #include "NApiBuilder.h"
@@ -58,8 +58,8 @@ namespace NulstarNS {
     private:
       quint64 mLastID;
       QUrl mServiceManagerUrl;
-      QWebSocketServer::SslMode mSslMode;
-      QMap<QString, QWebSocket* > mWebSockets;  // Module Name, Connection
+      NWebSocketServer::SslMode mSslMode;
+      QMap<QString, NWebSocket* > mWebSockets;  // Module Name, Connection
       QMap<QString, NWebSocketServer*> mWebServers;
       QMap<QString, QString> mApiMethodDescription;
       QMap<QString, QString> mApiMethodMinEventAndMinPeriod;
@@ -71,17 +71,19 @@ namespace NulstarNS {
       virtual bool fControlWebServer(const QString& lName, EServiceAction lAction); // If lName is empty then it controls all web sockets servers      
 
     protected Q_SLOTS:
+      virtual void fNegotiateConnection();
       virtual void fRegisterApi();
       virtual void fOnMessageStatusChanged(NMessage* rMessage, NMessage::EMessageStatus eMessageStatus);
+      virtual void fOnSocketDisconnection();
       virtual void fSendMessage(NMessage& lMessage);
       void fOnConnectionError(QAbstractSocket::SocketError lErrorCode);
 
     private Q_SLOTS:
       virtual void fOnConnected();
-      virtual void fOnTextMessageReceived(const QString& lTextMessage);      
+      virtual void fOnTextMessageReceived(const QString& lTextMessage);            
 
-    Q_SIGNALS:
-      void sClosed();
+  //  Q_SIGNALS:
+  //    void sClosed();
   };
 }
 
