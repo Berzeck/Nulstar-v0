@@ -9,7 +9,7 @@ CONFIG += c++11 console
 # Target Settings
 
 TARGET = Nulstar
-VERSION = 0.0.1.1
+VERSION = $$LIBRARIES_VERSION
 APP_DOMAIN=nulstar.com
 APP_ROLE=Role ServiceController
 APP_ROLE_VERSION=0.1.0
