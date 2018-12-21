@@ -8,15 +8,17 @@
 #include <QDir>
 #include <QDebug>
 
+#include "NModuleInfo.h"
+
 namespace NulstarNS {
   class NModulesManager : public QObject {
     Q_OBJECT
-    class NModuleInfo;
+
     public:      
       explicit NModulesManager(QObject *rParent = nullptr);
       ~NModulesManager() override { }
 
-     NModuleInfo fModuleInfo(QString lModuleName, QString lVersion);
+     NModuleInfo fModuleInfo(const QString lSpacename, const QString lModuleName, const QString lVersion);
 
     private:
         QMap<QString, QStringList > mNamespaceModules;    //NameSpace, Modules

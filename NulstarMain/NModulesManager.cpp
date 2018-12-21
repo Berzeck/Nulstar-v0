@@ -32,6 +32,57 @@ namespace NulstarNS {
         fLoadModlesConfig();
     }
 
+    NModuleInfo NModulesManager::fModuleInfo(const QString lSpacename, const QString lModuleName, const QString lVersion){
+        NModuleInfo lModuleInfo;
+        QList<QPair<QString, QString>>  lModuleConfig = fGetModuleConfig(lModuleName, lVersion);
+        if (0 == lModuleConfig.size()) {
+            qDebug("Module(name %s, version %s) has not config params", lModuleName.toStdString().data(), lVersion.toStdString().data());
+            return lModuleInfo;
+        }
+
+        QString lModuleAppName(QString("%1/../%2/%3/%4/%5").arg(QCoreApplication::applicationDirPath()).arg(lSpacename).arg(lModuleName).arg(lVersion).arg(lModuleName));
+#ifdef Q_OS_WIN
+        lModuleAppName.append(".exe");
+#endif
+        QStringList lModuleParametersList;
+        QString lModuleLibDirPath(QString("%1/../../%2/").arg(QCoreApplication::applicationDirPath()).arg(lSpacename).arg(lModuleConfigGroupLibs));
+        QString lModuleWorkingDirectory(QString("%1/../%2/%3/%4/").arg(QCoreApplication::applicationDirPath()).arg(lSpacename).arg(lModuleName).arg(lVersion));
+
+        QString lNustarVersion;
+        QString lQtVersion;
+
+        for (int i = 0; i < lModuleConfig.size(); ++i) {
+            QPair<QString, QString> lParamPair = lModuleConfig.at(i);
+            if (lParamPair.first == lModuleConfigGroupCoreLang) {
+                lModuleLibDirPath.append(lParamPair.second);
+            }
+            else if (lParamPair.first == lModuleConfigGroupLibsNulstar) {
+                lNustarVersion = lParamPair.second;
+            }
+            else if (lParamPair.first == lModuleConfigGroupLibsQt) {
+                lQtVersion = lParamPair.second;
+            }
+            else if ((lParamPair.first == lModuleConfigGroupLibsAllowedNetworks) || (lParamPair.first == lModuleConfigGroupLibsCommPort) ||
+                     (lParamPair.first == lModuleConfigGroupOutputLogLevel) || (lParamPair.first == lModuleConfigGroupSecuritySslMode))
+            {
+                QString lFormattedParameter(lParamPair.first);
+                lFormattedParameter.prepend("--");
+                lModuleParametersList << lFormattedParameter << lParamPair.second;
+            }
+        }
+
+        QString lModuleEnvLibsPath(QString("%1/%2/%3/").arg(lModuleLibDirPath).arg(lModuleConfigGroupLibsQt).arg(lQtVersion));
+        lModuleEnvLibsPath.append(";");
+        lModuleEnvLibsPath.append(QString("/%1/%2/%3/").arg(lModuleLibDirPath).arg(lModuleConfigGroupLibsNulstar).arg(lNustarVersion));
+
+        lModuleInfo.mModuleAppName = lModuleAppName;
+        lModuleInfo.mModuleParametersList = lModuleParametersList;
+        lModuleInfo.mModuleEnvLibsPath = lModuleEnvLibsPath;
+        lModuleInfo.mModuleWorkingDirectory = lModuleWorkingDirectory;
+
+        return lModuleInfo;
+    }
+
     void NModulesManager::fLoadModlesConfig() {
         fScanModulesDirectory();
 

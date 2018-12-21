@@ -1,21 +1,15 @@
 #ifndef NMODULEINFO_H
 #define NMODULEINFO_H
 
-#include <QList>
-#include <QMap>
-#include <QObject>
-#include <QPair>
+#include <QString>
+#include <QStringList>
 
 namespace NulstarNS {
-  class NModuleInfo : public QObject {
-    Q_OBJECT
+  class NModuleInfo{
 
     public:
-      explicit NModuleInfo(QObject *rParent = nullptr);
-      ~NModuleInfo() override { }
-
       QString mModuleAppName;
-      QString mModuleParameters;
+      QStringList mModuleParametersList;
       QString mModuleEnvLibsPath;
       QString mModuleWorkingDirectory;
   };

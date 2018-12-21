@@ -4,12 +4,5 @@
 
 
 namespace NulstarNS {
-  NModuleInfo::NModuleInfo( QObject *rParent)
-                : QObject(rParent) {
-
-
-  }
-
-
 
 }
