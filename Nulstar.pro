@@ -1,8 +1,8 @@
 TEMPLATE = subdirs
-SUBDIRS += Connector \
-           Libraries \
+SUBDIRS += Libraries \
            NulstarMain \
-           ServiceManager
+           ServiceManager \
+           Connector
 
 Connector.depends += Libraries
 ServiceManager.depends += Libraries

@@ -12,7 +12,9 @@ TARGET = ServiceManager
 VERSION = 0.0.1.1
 DEFINES += APP_DOMAIN=\\\"nulstar.com\\\" APP_ROLE=\\\"Role_ServiceManager\\\" APP_ROLE_VERSION=\\\"0.1.0\\\" APP_NAME=\\\"Nulstar_Service_Manager\\\" APP_VERSION=\\\"$$VERSION\\\" APP_VERSION_NAME=\\\"Baby_Apple_I\\\"
 
-DESTDIR=$$MAIN_MODULES_OUTDIR
+DESTDIR=$$MODULES_OUTDIR/$$TARGET/$$VERSION
+LIBS += -L$$LIBRARIES_OUTDIR/NNetwork/0.0.1.1/
+LIBS += -L$$LIBRARIES_OUTDIR/NCore/0.0.1.1/
 
 # Source Files
 
