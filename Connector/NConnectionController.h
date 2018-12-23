@@ -6,6 +6,8 @@
 #include <QObject>
 #include <QUrl>
 #include <NCoreService.h>
+
+#include "../AppVersion.h"
 //***#include <NResponse.h>
 
 namespace NulstarNS {
@@ -23,7 +25,7 @@ namespace NulstarNS {
                                      quint16 lAdminPort = 0, quint16 lClientPort = 0, QHostAddress::SpecialAddress lBindAddress = QHostAddress::Null, QObject* rParent = nullptr);
       ~NConnectionController() override {}
 
-      QString fName() const override { return QString(APP_NAME).replace("_"," "); }
+      QString fName() const override { return QString(APP_NAME); }
       QString fVersion() const override { return QString(APP_VERSION); }
       QString fDomain() const override { return QString(APP_DOMAIN); }
       QString fApiRole() const override { return QString(APP_ROLE); }

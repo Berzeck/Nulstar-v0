@@ -6,6 +6,8 @@
 #include <NCoreService.h>
 #include <NWebSocketServer.h>
 
+#include "../AppVersion.h"
+
 namespace NulstarNS {
   class NWebSocketServer;
   class NServiceManagerController : public NCoreService {
@@ -16,7 +18,7 @@ namespace NulstarNS {
                                          QHostAddress::SpecialAddress lBindAddress = QHostAddress::Null, QObject* rParent = nullptr);
       ~NServiceManagerController() override {}
 
-      QString fName() const override { return QString(APP_NAME).replace("_"," "); }
+      QString fName() const override { return QString(APP_NAME); }
       QString fVersion() const override { return QString(APP_VERSION); }
       QString fDomain() const override { return QString(APP_DOMAIN); }
       QString fApiRole() const override { return QString(APP_ROLE); }

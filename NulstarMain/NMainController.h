@@ -1,7 +1,7 @@
 #ifndef NMAINCONTROLLER_H
 #define NMAINCONTROLLER_H
 
-#include "AppVersion.h"
+#include "../AppVersion.h"
 
 #include <NCoreService.h>
 #include <NWebSocketServer.h>
@@ -22,7 +22,7 @@ public:
         QHostAddress::SpecialAddress lBindAddress = QHostAddress::Null, QObject* rParent = nullptr);
     ~NMainController() override {}
 
-    QString fName() const override { return QString(APP_NAME).replace("_", " "); }
+    QString fName() const override { return QString(APP_NAME); }
     QString fVersion() const override { return QString(APP_VERSION); }
     QString fDomain() const override { return QString(APP_DOMAIN); }
     QString fApiRole() const override { return QString(APP_ROLE); }

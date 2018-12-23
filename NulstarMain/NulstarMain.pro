@@ -9,10 +9,10 @@ CONFIG += c++11 console
 # Target Settings
 
 TARGET = Nulstar
-VERSION = $$LIBRARIES_VERSION
+VERSION = 0.1.0
 APP_DOMAIN=nulstar.com
-APP_ROLE=Role ServiceController
-APP_ROLE_VERSION=0.1.0
+APP_ROLE=Role_ServiceController
+APP_ROLE_VERSION=0.1
 APP_NAME=Nulstar Main Controller
 APP_VERSION=$$VERSION
 APP_VERSION_NAME=OneEye Baby Ninja Egg
@@ -21,7 +21,7 @@ DESTDIR=$$MODULES_OUTDIR/$$TARGET/$$VERSION
 
 # Source Files
 
-QMAKE_SUBSTITUTES += AppVersion.h.in
+QMAKE_SUBSTITUTES += $$TOP_SRCDIR/AppVersion.h.in
 
 HEADERS += NMainController.h \
            NPluginManger.h \
@@ -35,8 +35,7 @@ SOURCES += NMainController.cpp \
            NModuleInfo.cpp
 
 OTHER_FILES += Nulstar.cfg \
-            Constants.ncf \
-            AppVersion.h.in
+            Constants.ncf
 
 # Dependencies
 
@@ -50,3 +49,26 @@ QMAKE_POST_LINK += $$quote($$QMAKE_COPY \"$$PWD/Constants.ncf\" \"$$DESTDIR\")
 
 # Clean Settings
 QMAKE_CLEAN += -r $$DESTDIR
+
+# Deploy Qt libs if it is compiled in release mode and files changed
+
+CONFIG(release,debug|release) {
+  unix:QT_LIBRARIES = $$[QT_INSTALL_LIBS]/libQt?WebSockets.so.? \
+                      $$[QT_INSTALL_LIBS]/libQt?Network.so.? \
+                      $$[QT_INSTALL_LIBS]/libQt?Core.so.? \
+                      $$[QT_INSTALL_LIBS]/libicui18n.so.?? \
+                      $$[QT_INSTALL_LIBS]/libicuuc.so.?? \
+                      $$[QT_INSTALL_LIBS]/libicudata.so.??
+
+  win32:QT_LIBRARIES = $$[QT_INSTALL_LIBS]/Qt?WebSockets.dll \
+                       $$[QT_INSTALL_LIBS]/Qt?Network.dll \
+                       $$[QT_INSTALL_LIBS]/Qt?Core.dll \
+  deploy_files.name = copy large files
+  deploy_files.input = QT_LIBRARIES
+  deploy_files.output = $${QT_LIBRARIES_OUTDIR}/${QMAKE_FILE_BASE}${QMAKE_FILE_EXT}
+  deploy_files.commands = ${COPY_FILE} ${QMAKE_FILE_IN} ${QMAKE_FILE_OUT}
+  deploy_files.CONFIG += no_link target_predeps
+
+  QMAKE_EXTRA_COMPILERS += deploy_files
+}
+

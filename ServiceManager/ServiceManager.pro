@@ -9,12 +9,19 @@ CONFIG += c++11 console
 # Target Settings
 
 TARGET = ServiceManager
-VERSION = $$LIBRARIES_VERSION
-DEFINES += APP_DOMAIN=\\\"nulstar.com\\\" APP_ROLE=\\\"Role_ServiceManager\\\" APP_ROLE_VERSION=\\\"0.1.0\\\" APP_NAME=\\\"Nulstar_Service_Manager\\\" APP_VERSION=\\\"$$VERSION\\\" APP_VERSION_NAME=\\\"Baby_Apple_I\\\"
+VERSION = 0.1.0
+APP_DOMAIN=nulstar.com
+APP_ROLE=Role_ServiceManager
+APP_ROLE_VERSION=0.1
+APP_NAME=Nulstar Service Manager
+APP_VERSION=$$VERSION
+APP_VERSION_NAME=Baby Apple I
 
 DESTDIR=$$MODULES_OUTDIR/$$TARGET/$$VERSION
 
 # Source Files
+
+QMAKE_SUBSTITUTES += $$TOP_SRCDIR/AppVersion.h.in
 
 HEADERS += NServiceManagerController.h
 

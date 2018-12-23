@@ -5,6 +5,7 @@
 #include <QString>
 #include <QStringList>
 #include <QTextStream>
+
 #include "NServiceManagerController.h"
 
 int main(int argc, char *argv[])

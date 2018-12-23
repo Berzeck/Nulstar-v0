@@ -1,5 +1,6 @@
 # Avoid SDK version warning
 CONFIG += sdk_no_version_check
+CONFIG += unversioned_soname
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -26,13 +27,23 @@ macos:CONFIG   -= app_bundle
 win32:DEFINES  += WIN32
 
 CONFIG(debug, debug|release) {
-	TOP_OUTDIR=$$shadowed($$PWD)/debug
+  isEmpty(CUSTOMDESTDIR){
+    TOP_OUTDIR=$$shadowed($$PWD)/debug
+  } else {
+    TOP_OUTDIR=$$CUSTOMDESTDIR
+  }
 } else {
-	TOP_OUTDIR=$$shadowed($$PWD)/release
-        DEFINES += QT_NO_DEBUG_OUTPUT
+  isEmpty(CUSTOMDESTDIR){
+    TOP_OUTDIR=$$shadowed($$PWD)/release
+  } else {
+    TOP_OUTDIR=$$CUSTOMDESTDIR
+  }
+  DEFINES += QT_NO_DEBUG_OUTPUT
 }
 
 DESTDIR=$$TOP_OUTDIR
-LIBRARIES_OUTDIR=$$TOP_OUTDIR/Libraries/CXX/Nulstar/$$LIBRARIES_VERSION
+LIBRARIES_OUTDIR=$$TOP_OUTDIR/Libraries/CXX/Nulstar/$$NULSTAR_LIBRARIES_VERSION
+QT_LIBRARIES_OUTDIR=$$TOP_OUTDIR/Libraries/CXX/Qt/$$[QT_VERSION]
 MODULES_OUTDIR=$$TOP_OUTDIR/Modules
 LIBS += -L$$LIBRARIES_OUTDIR
+
