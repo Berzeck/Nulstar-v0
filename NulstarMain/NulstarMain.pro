@@ -53,22 +53,28 @@ QMAKE_CLEAN += -r $$DESTDIR
 # Deploy Qt libs if it is compiled in release mode and files changed
 
 CONFIG(release,debug|release) {
-  unix:QT_LIBRARIES = $$[QT_INSTALL_LIBS]/libQt?WebSockets.so.? \
-                      $$[QT_INSTALL_LIBS]/libQt?Network.so.? \
-                      $$[QT_INSTALL_LIBS]/libQt?Core.so.? \
-                      $$[QT_INSTALL_LIBS]/libicui18n.so.?? \
-                      $$[QT_INSTALL_LIBS]/libicuuc.so.?? \
-                      $$[QT_INSTALL_LIBS]/libicudata.so.??
+  unix {
+    QT_LIBRARIES = $$[QT_INSTALL_LIBS]/libQt?WebSockets.so.? \
+                   $$[QT_INSTALL_LIBS]/libQt?Network.so.? \
+                   $$[QT_INSTALL_LIBS]/libQt?Core.so.? \
+                   $$[QT_INSTALL_LIBS]/libicui18n.so.?? \
+                   $$[QT_INSTALL_LIBS]/libicuuc.so.?? \
+                   $$[QT_INSTALL_LIBS]/libicudata.so.??
 
-  win32:QT_LIBRARIES = $$[QT_INSTALL_LIBS]/Qt?WebSockets.dll \
-                       $$[QT_INSTALL_LIBS]/Qt?Network.dll \
-                       $$[QT_INSTALL_LIBS]/Qt?Core.dll \
-  deploy_files.name = copy large files
-  deploy_files.input = QT_LIBRARIES
-  deploy_files.output = $${QT_LIBRARIES_OUTDIR}/${QMAKE_FILE_BASE}${QMAKE_FILE_EXT}
-  deploy_files.commands = ${COPY_FILE} ${QMAKE_FILE_IN} ${QMAKE_FILE_OUT}
-  deploy_files.CONFIG += no_link target_predeps
+ # win32:QT_LIBRARIES = $$[QT_INSTALL_LIBS]/Qt5WebSockets.dll \
+ #                      $$[QT_INSTALL_LIBS]/Qt5Network.dll \
+ #                      $$[QT_INSTALL_LIBS]/Qt5Core.dll
+    deploy_files.name = copy large files
+    deploy_files.input = QT_LIBRARIES
+    deploy_files.output = $${QT_LIBRARIES_OUTDIR}/${QMAKE_FILE_BASE}${QMAKE_FILE_EXT}
+    deploy_files.commands = ${COPY_FILE} ${QMAKE_FILE_IN} ${QMAKE_FILE_OUT}
+    deploy_files.CONFIG += no_link target_predeps
+    QMAKE_EXTRA_COMPILERS += deploy_files
+  }
+  win32 {
+    #QMAKE_POST_LINK = windeployqt $${QT_LIBRARIES_OUTDIR}/$${TARGET}.exe --no-translations
+    QMAKE_POST_LINK = windeployqt -core -network -websockets --no-compiler-runtime --dir $${QT_LIBRARIES_OUTDIR} $${DESTDIR}/$${TARGET}.exe --no-translations
+  }
 
-  QMAKE_EXTRA_COMPILERS += deploy_files
 }
 
