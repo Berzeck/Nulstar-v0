@@ -40,30 +40,30 @@ namespace NulstarNS {
             return lModuleInfo;
         }
 
-        QString lModuleAppName(QString("%1/../%2/%3/%4/%5").arg(QCoreApplication::applicationDirPath()).arg(lSpacename).arg(lModuleName).arg(lVersion).arg(lModuleName));
+        QString lModuleAppName(QString("%1/../../%2/%3/%4").arg(QCoreApplication::applicationDirPath()).arg(lModuleName).arg(lVersion).arg(lModuleName));
 #ifdef Q_OS_WIN
         lModuleAppName.append(".exe");
 #endif
         QStringList lModuleParametersList;
-        QString lModuleLibDirPath(QString("%1/../../%2/").arg(QCoreApplication::applicationDirPath()).arg(lSpacename).arg(lModuleConfigGroupLibs));
-        QString lModuleWorkingDirectory(QString("%1/../%2/%3/%4/").arg(QCoreApplication::applicationDirPath()).arg(lSpacename).arg(lModuleName).arg(lVersion));
+        QString lModuleLibDirPath(QString("%1/../../../%2/").arg(QCoreApplication::applicationDirPath()).arg(lModuleConfigGroupLibs));
+        QString lModuleWorkingDirectory(QString("%1/../../%2/%3/").arg(QCoreApplication::applicationDirPath()).arg(lModuleName).arg(lVersion));
 
         QString lNustarVersion;
         QString lQtVersion;
 
         for (int i = 0; i < lModuleConfig.size(); ++i) {
             QPair<QString, QString> lParamPair = lModuleConfig.at(i);
-            if (lParamPair.first == lModuleConfigGroupCoreLang) {
+            if (lParamPair.first == lModuleConfigGroupCoreLang.toLower()) {
                 lModuleLibDirPath.append(lParamPair.second);
             }
-            else if (lParamPair.first == lModuleConfigGroupLibsNulstar) {
+            else if (lParamPair.first == lModuleConfigGroupLibsNulstar.toLower()) {
                 lNustarVersion = lParamPair.second;
             }
-            else if (lParamPair.first == lModuleConfigGroupLibsQt) {
+            else if (lParamPair.first == lModuleConfigGroupLibsQt.toLower()) {
                 lQtVersion = lParamPair.second;
             }
-            else if ((lParamPair.first == lModuleConfigGroupLibsAllowedNetworks) || (lParamPair.first == lModuleConfigGroupLibsCommPort) ||
-                     (lParamPair.first == lModuleConfigGroupOutputLogLevel) || (lParamPair.first == lModuleConfigGroupSecuritySslMode))
+            else if ((lParamPair.first == lModuleConfigGroupLibsAllowedNetworks.toLower()) || (lParamPair.first == lModuleConfigGroupLibsCommPort.toLower()) ||
+                     (lParamPair.first == lModuleConfigGroupOutputLogLevel.toLower()) || (lParamPair.first == lModuleConfigGroupSecuritySslMode.toLower()))
             {
                 QString lFormattedParameter(lParamPair.first);
                 lFormattedParameter.prepend("--");
@@ -86,21 +86,31 @@ namespace NulstarNS {
     void NModulesManager::fLoadModlesConfig() {
         fScanModulesDirectory();
 
-        for (const QString& lNamespace : mNamespaceModules.keys()){
-            QStringList lModulesList = fGetNamespaceModules(lNamespace);
-            QStringList::Iterator lModulesIterator;
-            for (lModulesIterator = lModulesList.begin(); lModulesIterator != lModulesList.end(); ++lModulesIterator) {
-                QStringList lVersionsList = fGetModuleVersions(*lModulesIterator);
-                QStringList::Iterator lVersionsIterator;
-                for (lVersionsIterator = lVersionsList.begin(); lVersionsIterator != lVersionsList.end(); ++lVersionsIterator) {
-                    fReadModuleNcf(lNamespace, *lModulesIterator, *lVersionsIterator);
-                }
-            }
+        for (const QString& lModule : mModuleVersions.keys()){
+             QStringList lVersionsList = fGetModuleVersions(lModule);
+             QStringList::Iterator lVersionsIterator;
+             for (lVersionsIterator = lVersionsList.begin(); lVersionsIterator != lVersionsList.end(); ++lVersionsIterator) {
+                 fReadModuleNcf(lModule, lModule, *lVersionsIterator);
+             }
+
+
         }
+
+//        for (const QString& lNamespace : mNamespaceModules.keys()){
+//            QStringList lModulesList = fGetNamespaceModules(lNamespace);
+//            QStringList::Iterator lModulesIterator;
+//            for (lModulesIterator = lModulesList.begin(); lModulesIterator != lModulesList.end(); ++lModulesIterator) {
+//                QStringList lVersionsList = fGetModuleVersions(*lModulesIterator);
+//                QStringList::Iterator lVersionsIterator;
+//                for (lVersionsIterator = lVersionsList.begin(); lVersionsIterator != lVersionsList.end(); ++lVersionsIterator) {
+//                    fReadModuleNcf(lNamespace, *lModulesIterator, *lVersionsIterator);
+//                }
+//            }
+//        }
     }
 
     void NModulesManager::fReadModuleNcf(QString lNamespace, QString lModule, QString lVersion){
-        QString lModuleNcfPath =  QString("%1/../%2/%3/%4/%5").arg(QCoreApplication::applicationDirPath()).arg(lNamespace).arg(lModule).arg(lVersion).arg(lModuleConfigFile);
+        QString lModuleNcfPath =  QString("%1/../../%2/%3/%4").arg(QCoreApplication::applicationDirPath()).arg(lModule).arg(lVersion).arg(lModuleConfigFile);
         QFileInfo lModuleNcfFileInfo(lModuleNcfPath);
         if (!lModuleNcfFileInfo.exists()){
             qDebug("Module(namespace %s, name %s, version %s) NCF file not exists",
@@ -131,42 +141,61 @@ namespace NulstarNS {
         if (lManaged){
             fSetModuleConfig(lModule, lVersion, lParameters);
         }
-
     }
 
     void NModulesManager::fScanModulesDirectory() {
-       QString lModulesDirPath =  QString("%1/../../%2/").arg(QCoreApplication::applicationDirPath()).arg(lModulesDirectory);
-       QStringList lNameSpaceList = fFoldersNameList(lModulesDirPath);
-       if (lNameSpaceList.isEmpty()){
-           qDebug() << "Namespace directory not exist under Modules directory " << lModulesDirPath;
+       QString lModulesDirPath =  QString("%1/../../").arg(QCoreApplication::applicationDirPath());
+
+       QStringList lModulesList = fFoldersNameList(lModulesDirPath);
+       if (lModulesList.isEmpty()){
+           qDebug() << "Modules directory not exist under Modules directory " << lModulesDirPath;
            return;
        }
-
-       QStringList::Iterator lNSIterator;
-       QString lNSModulesDirPath = QString();
-       QStringList lNSModulesList = QStringList();
-       for (lNSIterator = lNameSpaceList.begin(); lNSIterator != lNameSpaceList.end(); ++lNSIterator) {
-            lNSModulesDirPath = lModulesDirPath.append("%1/").arg(*lNSIterator);
-            lNSModulesList = fFoldersNameList(lNSModulesDirPath);
-            if (lNSModulesList.isEmpty()){
-                qDebug() << "Module directory not exist under Namespace directory " << lNSModulesDirPath;
+       QStringList::Iterator lModuleIterator;
+       QString lModuleVersionsDirPath = QString();
+       QStringList lModuleVersionsList = QStringList();
+       for (lModuleIterator = lModulesList.begin(); lModuleIterator != lModulesList.end(); ++lModuleIterator) {
+            QString lModulesDirPathTemp = lModulesDirPath;
+            lModuleVersionsDirPath = lModulesDirPathTemp.append("%1/").arg(*lModuleIterator);
+            lModuleVersionsList = fFoldersNameList(lModuleVersionsDirPath);
+              if (lModuleVersionsList.isEmpty()){
+                qDebug() << "Versions directory not exist under Module directory " << lModuleVersionsDirPath;
                 continue;
             }
-            fSetNamespaceModules(*lNSIterator, lNSModulesList);
+            fSetModuleVersions(*lModuleIterator, lModuleVersionsList);
+       }
 
-            QStringList::Iterator lModuleIterator;
-            QString lModuleVersionsDirPath = QString();
-            QStringList lModuleVersionsList = QStringList();
-            for (lModuleIterator = lNSModulesList.begin(); lModuleIterator != lNSModulesList.end(); ++lModuleIterator) {
-                 lModuleVersionsDirPath = lNSModulesDirPath.append("%1/").arg(*lModuleIterator);
-                 lModuleVersionsList = fFoldersNameList(lModuleVersionsDirPath);
-                 if (lModuleVersionsList.isEmpty()){
-                     qDebug() << "Versions directory not exist under Module directory " << lModuleVersionsDirPath;
-                     continue;
-                 }
-                 fSetModuleVersions(*lModuleIterator, lModuleVersionsList);
-            }
-        }
+//       QStringList lNameSpaceList = fFoldersNameList(lModulesDirPath);
+//       if (lNameSpaceList.isEmpty()){
+//           qDebug() << "Namespace directory not exist under Modules directory " << lModulesDirPath;
+//           return;
+//       }
+
+//       QStringList::Iterator lNSIterator;
+//       QString lNSModulesDirPath = QString();
+//       QStringList lNSModulesList = QStringList();
+//       for (lNSIterator = lNameSpaceList.begin(); lNSIterator != lNameSpaceList.end(); ++lNSIterator) {
+//            lNSModulesDirPath = lModulesDirPath.append("%1/").arg(*lNSIterator);
+//            lNSModulesList = fFoldersNameList(lNSModulesDirPath);
+//            if (lNSModulesList.isEmpty()){
+//                qDebug() << "Module directory not exist under Namespace directory " << lNSModulesDirPath;
+//                continue;
+//            }
+//            fSetNamespaceModules(*lNSIterator, lNSModulesList);
+
+//            QStringList::Iterator lModuleIterator;
+//            QString lModuleVersionsDirPath = QString();
+//            QStringList lModuleVersionsList = QStringList();
+//            for (lModuleIterator = lNSModulesList.begin(); lModuleIterator != lNSModulesList.end(); ++lModuleIterator) {
+//                 lModuleVersionsDirPath = lNSModulesDirPath.append("%1/").arg(*lModuleIterator);
+//                 lModuleVersionsList = fFoldersNameList(lModuleVersionsDirPath);
+//                 if (lModuleVersionsList.isEmpty()){
+//                     qDebug() << "Versions directory not exist under Module directory " << lModuleVersionsDirPath;
+//                     continue;
+//                 }
+//                 fSetModuleVersions(*lModuleIterator, lModuleVersionsList);
+//            }
+//        }
     }
 
     QStringList NModulesManager::fFoldersNameList(QString lDirPath){
