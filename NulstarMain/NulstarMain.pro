@@ -44,8 +44,10 @@ LIBS += -lNNetwork -lNCore
 # Install Settings
 
 #QMAKE_POST_LINK += $$quote($$QMAKE_COPY \"$$PWD/Nulstar.cfg\" \"$$DESTDIR\" $$escape_expand(\n\t))
-QMAKE_POST_LINK += $$quote($$QMAKE_COPY \"$$PWD/Constants.ncf\" \"$$DESTDIR\")
-
+COPYPARAMS = \"$$PWD/Constants.ncf\" \"$$DESTDIR\"
+win32: COPYPARAMS ~= s,/,\\,g
+QMAKE_POST_LINK += $$QMAKE_COPY $$COPYPARAMS
+message($$QMAKE_POST_LINK)
 # Clean Settings
 QMAKE_CLEAN += -r $$DESTDIR
 
@@ -68,7 +70,7 @@ CONFIG(release,debug|release) {
     QMAKE_EXTRA_COMPILERS += deploy_files
   }
   win32 {
-    QMAKE_POST_LINK = windeployqt -core -network -websockets --no-compiler-runtime --dir $${QT_LIBRARIES_OUTDIR} $${DESTDIR}/$${TARGET}.exe --no-translations
+    QMAKE_POST_LINK = $$QMAKE_POST_LINK & windeployqt -core -network -websockets --no-compiler-runtime --dir $${QT_LIBRARIES_OUTDIR} $${DESTDIR}/$${TARGET}.exe --no-translations
   }
 
 }
