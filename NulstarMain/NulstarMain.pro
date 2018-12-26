@@ -10,14 +10,14 @@ CONFIG += c++11 console
 
 TARGET = Nulstar
 VERSION = 0.1.0
-APP_DOMAIN=nulstar.com
+APP_DOMAIN=Nulstar
 APP_ROLE=Role_ServiceController
 APP_ROLE_VERSION=0.1
 APP_NAME=Nulstar Main Controller
 APP_VERSION=$$VERSION
 APP_VERSION_NAME=OneEye Baby Ninja Egg
 
-DESTDIR=$$MODULES_OUTDIR/$$TARGET/$$VERSION
+DESTDIR=$$MODULES_OUTDIR/$$APP_DOMAIN/$$TARGET/$$VERSION
 
 # Source Files
 
@@ -34,8 +34,7 @@ SOURCES += NMainController.cpp \
            NModulesManager.cpp \
            NModuleInfo.cpp
 
-OTHER_FILES += Nulstar.cfg \
-            Constants.ncf
+OTHER_FILES += Constants.ncf
 
 # Dependencies
 
@@ -44,7 +43,7 @@ LIBS += -lNNetwork -lNCore
 
 # Install Settings
 
-QMAKE_POST_LINK += $$quote($$QMAKE_COPY \"$$PWD/Nulstar.cfg\" \"$$DESTDIR\" $$escape_expand(\n\t))
+#QMAKE_POST_LINK += $$quote($$QMAKE_COPY \"$$PWD/Nulstar.cfg\" \"$$DESTDIR\" $$escape_expand(\n\t))
 QMAKE_POST_LINK += $$quote($$QMAKE_COPY \"$$PWD/Constants.ncf\" \"$$DESTDIR\")
 
 # Clean Settings
@@ -61,9 +60,6 @@ CONFIG(release,debug|release) {
                    $$[QT_INSTALL_LIBS]/libicuuc.so.?? \
                    $$[QT_INSTALL_LIBS]/libicudata.so.??
 
- # win32:QT_LIBRARIES = $$[QT_INSTALL_LIBS]/Qt5WebSockets.dll \
- #                      $$[QT_INSTALL_LIBS]/Qt5Network.dll \
- #                      $$[QT_INSTALL_LIBS]/Qt5Core.dll
     deploy_files.name = copy large files
     deploy_files.input = QT_LIBRARIES
     deploy_files.output = $${QT_LIBRARIES_OUTDIR}/${QMAKE_FILE_BASE}${QMAKE_FILE_EXT}
@@ -72,7 +68,6 @@ CONFIG(release,debug|release) {
     QMAKE_EXTRA_COMPILERS += deploy_files
   }
   win32 {
-    #QMAKE_POST_LINK = windeployqt $${QT_LIBRARIES_OUTDIR}/$${TARGET}.exe --no-translations
     QMAKE_POST_LINK = windeployqt -core -network -websockets --no-compiler-runtime --dir $${QT_LIBRARIES_OUTDIR} $${DESTDIR}/$${TARGET}.exe --no-translations
   }
 

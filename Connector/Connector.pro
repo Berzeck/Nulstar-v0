@@ -10,14 +10,14 @@ CONFIG += c++11 console
 
 TARGET = Connector
 VERSION = 0.1.0
-APP_DOMAIN=nulstar.com
+APP_DOMAIN=Nulstar
 APP_ROLE=Role_ConnectionManager
 APP_ROLE_VERSION=0.1
 APP_NAME=Nulstar Connection Manager
 APP_VERSION=$$VERSION
 APP_VERSION_NAME=Baby Piglet I
 
-DESTDIR=$$MODULES_OUTDIR/$$TARGET/$$VERSION
+DESTDIR=$$MODULES_OUTDIR/$$APP_DOMAIN/$$TARGET/$$VERSION
 
 # Source Files
 
