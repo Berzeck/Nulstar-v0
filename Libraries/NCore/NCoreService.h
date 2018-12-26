@@ -38,7 +38,7 @@ namespace NulstarNS {
       virtual QString fApiRole() const = 0;
       virtual QString fApiVersion() const = 0;
 
-      virtual void fConnectToServiceManager();
+
       virtual bool fAddWebSocketServer(const QString& lName, const QString& lLabel, quint16 lPort, QHostAddress::SpecialAddress lBindAddress, bool lStartImmediatly = false);
       void fAddMethodFunctionDescription(const QString& lMethodName, const QString& lDescription) { mApiMethodDescription[lMethodName] = lDescription; }
       void fAddMethodMinEventAndMinPeriod(const QString& lMethodName, const QString& lApiMethodMinEventAndMinPeriod ) { mApiMethodMinEventAndMinPeriod[lMethodName] = lApiMethodMinEventAndMinPeriod; }
@@ -63,6 +63,7 @@ namespace NulstarNS {
       NApiBuilder mApiBuilder;
 
     public Q_SLOTS:
+      virtual void fConnectToServiceManager();
       virtual bool fControlWebServer(const QString& lName, EServiceAction lAction); // If lName is empty then it controls all web sockets servers      
   };
 }
