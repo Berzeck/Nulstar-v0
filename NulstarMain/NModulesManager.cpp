@@ -79,7 +79,6 @@ namespace NulstarNS {
         lModuleInfo.mModuleParametersList = lModuleParametersList;
         lModuleInfo.mModuleEnvLibsPath = lModuleEnvLibsPath;
         lModuleInfo.mModuleWorkingDirectory = lModuleWorkingDirectory;
-
         return lModuleInfo;
     }
 
@@ -134,17 +133,17 @@ namespace NulstarNS {
     }
 
     void NModulesManager::fScanModulesDirectory() {
-       QString lModulesDirPath =  QString("%1/../../../").arg(QCoreApplication::applicationDirPath());
-       QStringList lNameSpaceList = fFoldersNameList(lModulesDirPath);
-       if (lNameSpaceList.isEmpty()){
-           qDebug() << "Namespace directory not exist under Modules directory " << lModulesDirPath;
-           return;
-       }
+        QString lModulesDirPath =  QString("%1/../../../").arg(QCoreApplication::applicationDirPath());
+        QStringList lNameSpaceList = fFoldersNameList(lModulesDirPath);
+        if (lNameSpaceList.isEmpty()){
+            qDebug() << "Namespace directory not exist under Modules directory " << lModulesDirPath;
+            return;
+        }
 
-       QStringList::Iterator lNSIterator;
-       QString lNSModulesDirPath = QString();
-       QStringList lNSModulesList = QStringList();
-       for (lNSIterator = lNameSpaceList.begin(); lNSIterator != lNameSpaceList.end(); ++lNSIterator) {
+        QStringList::Iterator lNSIterator;
+        QString lNSModulesDirPath = QString();
+        QStringList lNSModulesList = QStringList();
+        for (lNSIterator = lNameSpaceList.begin(); lNSIterator != lNameSpaceList.end(); ++lNSIterator) {
             QString lModulesDirPathTemp = lModulesDirPath;
             lNSModulesDirPath = lModulesDirPathTemp.append("%1/").arg(*lNSIterator);
             lNSModulesList = fFoldersNameList(lNSModulesDirPath);
@@ -158,14 +157,14 @@ namespace NulstarNS {
             QString lModuleVersionsDirPath = QString();
             QStringList lModuleVersionsList = QStringList();
             for (lModuleIterator = lNSModulesList.begin(); lModuleIterator != lNSModulesList.end(); ++lModuleIterator) {
-                 QString lNSModulesDirPathTemp = lNSModulesDirPath;
-                 lModuleVersionsDirPath = lNSModulesDirPathTemp.append("%1/").arg(*lModuleIterator);
-                 lModuleVersionsList = fFoldersNameList(lModuleVersionsDirPath);
-                 if (lModuleVersionsList.isEmpty()){
-                     qDebug() << "Versions directory not exist under Module directory " << lModuleVersionsDirPath;
-                     continue;
-                 }
-                 fSetModuleVersions(*lModuleIterator, lModuleVersionsList);
+                QString lNSModulesDirPathTemp = lNSModulesDirPath;
+                lModuleVersionsDirPath = lNSModulesDirPathTemp.append("%1/").arg(*lModuleIterator);
+                lModuleVersionsList = fFoldersNameList(lModuleVersionsDirPath);
+                if (lModuleVersionsList.isEmpty()){
+                    qDebug() << "Versions directory not exist under Module directory " << lModuleVersionsDirPath;
+                    continue;
+                }
+                fSetModuleVersions(*lModuleIterator, lModuleVersionsList);
             }
         }
     }
@@ -185,11 +184,11 @@ namespace NulstarNS {
     }
 
     void NModulesManager::fSetNamespaceModules(const QString lNamespace, QStringList lModules) {
-      mNamespaceModules[lNamespace] = lModules;
+        mNamespaceModules[lNamespace] = lModules;
     }
 
     void NModulesManager::fSetModuleVersions(const QString lModule, QStringList lVersions) {
-      mModuleVersions[lModule] = lVersions;
+        mModuleVersions[lModule] = lVersions;
     }
 
     void NModulesManager::fSetModuleConfig(const QString lModule, const QString lVersion, QList<QPair<QString, QString>> lParams){
@@ -200,18 +199,25 @@ namespace NulstarNS {
     }
 
     QStringList NModulesManager::fGetNamespaceModules(const QString lNamespace) {
-      return mNamespaceModules[lNamespace];
+        return mNamespaceModules[lNamespace];
     }
 
     QStringList NModulesManager::fGetModuleVersions(const QString lModule) {
-      return mModuleVersions[lModule];
+        return mModuleVersions[lModule];
     }
 
-     QList<QPair<QString, QString>>  NModulesManager::fGetModuleConfig(const QString lModule, const QString lVersion){
+    QList<QPair<QString, QString>>  NModulesManager::fGetModuleConfig(const QString lModule, const QString lVersion){
         QPair<QString, QString> lModuleVersion;
         lModuleVersion.first = lModule.toLower();
         lModuleVersion.second = lVersion.toLower();
         return mModuleConfig[lModuleVersion];
     }
 
+    QStringList NModulesManager::fGetNamespaces() {
+        QStringList lNamespacesList;
+        for (const QString& lNamespace : mNamespaceModules.keys()) {
+            lNamespacesList << lNamespace;
+        }
+        return lNamespacesList;
+    }
  }

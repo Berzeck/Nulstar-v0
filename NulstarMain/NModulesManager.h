@@ -11,14 +11,17 @@
 #include "NModuleInfo.h"
 
 namespace NulstarNS {
-  class NModulesManager : public QObject {
-    Q_OBJECT
+    class NModulesManager : public QObject {
+        Q_OBJECT
 
-    public:      
-      explicit NModulesManager(QObject *rParent = nullptr);
-      ~NModulesManager() override { }
+    public:
+        explicit NModulesManager(QObject *rParent = nullptr);
+        ~NModulesManager() override { }
 
-     NModuleInfo fModuleInfo(const QString lSpacename, const QString lModuleName, const QString lVersion);
+        NModuleInfo fModuleInfo(const QString lSpacename, const QString lModuleName, const QString lVersion);
+        QStringList fGetNamespaces();
+        QStringList fGetNamespaceModules(const QString lNamespace);
+        QStringList fGetModuleVersions(const QString lModule);
 
     private:
         QMap<QString, QStringList > mNamespaceModules;    //NameSpace, Modules
@@ -32,10 +35,8 @@ namespace NulstarNS {
         void fSetNamespaceModules(const QString lNamespace, QStringList lModules);
         void fSetModuleVersions(const QString lModule, QStringList lVersions);
         void fSetModuleConfig(const QString lModule, const QString lVersion, QList<QPair<QString, QString>> lParams);
-        QStringList fGetNamespaceModules(const QString lNamespace);
-        QStringList fGetModuleVersions(const QString lModule);
         QList<QPair<QString, QString>>  fGetModuleConfig(const QString lModule, const QString lVersion);
-  };
+    };
 }
 
 #endif // NMODULESMANAGER_H
