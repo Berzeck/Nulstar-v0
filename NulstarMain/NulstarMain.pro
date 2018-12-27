@@ -34,7 +34,7 @@ SOURCES += NMainController.cpp \
            NModulesManager.cpp \
            NModuleInfo.cpp
 
-OTHER_FILES += Constants.ncf
+OTHER_FILES += Constants.ncf Module.ncf
 
 # Dependencies
 
@@ -44,10 +44,14 @@ LIBS += -lNNetwork -lNCore
 # Install Settings
 
 #QMAKE_POST_LINK += $$quote($$QMAKE_COPY \"$$PWD/Nulstar.cfg\" \"$$DESTDIR\" $$escape_expand(\n\t))
-COPYPARAMS = \"$$PWD/Constants.ncf\" \"$$DESTDIR\"
-win32: COPYPARAMS ~= s,/,\\,g
-QMAKE_POST_LINK += $$QMAKE_COPY $$COPYPARAMS
-message($$QMAKE_POST_LINK)
+COPYFILE1 = \"$$PWD/Constants.ncf\" \"$$DESTDIR\"
+COPYFILE2 = \"$$PWD/Module.ncf\" \"$$DESTDIR\"
+win32: {
+  COPYFILE1 ~= s,/,\\,g
+  COPYFILE2 ~= s,/,\\,g
+}
+QMAKE_POST_LINK += $$QMAKE_COPY $$COPYFILE1 & $$QMAKE_COPY $$COPYFILE2
+
 # Clean Settings
 QMAKE_CLEAN += -r $$DESTDIR
 
@@ -72,6 +76,5 @@ CONFIG(release,debug|release) {
   win32 {
     QMAKE_POST_LINK = $$QMAKE_POST_LINK & windeployqt -core -network -websockets --no-compiler-runtime --dir $${QT_LIBRARIES_OUTDIR} $${DESTDIR}/$${TARGET}.exe --no-translations
   }
-
 }
 

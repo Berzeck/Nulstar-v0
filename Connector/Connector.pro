@@ -19,6 +19,13 @@ APP_VERSION_NAME=Baby Piglet I
 
 DESTDIR=$$MODULES_OUTDIR/$$APP_DOMAIN/$$TARGET/$$VERSION
 
+# Install Settings
+
+OTHER_FILES += Module.ncf
+COPYFILE1 = \"$$PWD/Module.ncf\" \"$$DESTDIR\"
+win32: COPYFILE1 ~= s,/,\\,g
+QMAKE_POST_LINK += $$QMAKE_COPY $$COPYFILE1
+
 # Source Files
 
 QMAKE_SUBSTITUTES += $$TOP_SRCDIR/AppVersion.h.in
@@ -33,4 +40,5 @@ SOURCES += Connector.cpp \
 
 INCLUDEPATH += $$LIBRARIES_PATH/NNetwork $$LIBRARIES_PATH/NCore
 LIBS += -lNNetwork -lNCore
+
 

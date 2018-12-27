@@ -9,9 +9,11 @@
 #include <QStringList>
 #include <QTextStream>
 #include <QUrl>
+#include "NModulesManager.h"
 
 const QString lControllerName("ServiceController");
 const QString lManageParameter("Managed");
+const QString lServiceManagerName("ServiceManager");
 const QString lServiceManagerUrlParameter("managerurl");
 const QString lConstantsFile("Constants.ncf");
 
@@ -21,8 +23,8 @@ int main(int argc, char* argv[])
     QString lAppName(QString(APP_NAME));
     lApp.setApplicationName(lAppName);
     lApp.setApplicationVersion(APP_VERSION);
-    lApp.setOrganizationDomain(QStringLiteral("nulstar.com"));
-    lApp.setOrganizationName(QStringLiteral("Nulstar"));
+    lApp.setOrganizationDomain(QStringLiteral(APP_DOMAIN));
+    lApp.setOrganizationName(QStringLiteral(APP_DOMAIN));
 
     QCommandLineParser lParser;
     lParser.setApplicationDescription(lAppName);
@@ -42,13 +44,11 @@ int main(int argc, char* argv[])
     QString lCommunicationPort, lLogLevel, lSslModeStr;
     QSettings lSettings(lConfigFile, QSettings::IniFormat);
     QStringList lNetworks, lGroups(lSettings.childGroups());
-    lSettings.beginGroup(lControllerName);
-    lCommunicationPort = lSettings.value(QString("CommPort")).toString();
-    lLogLevel = lSettings.value(QString("LogLevel")).toString();
-    lHostAddress.setAddress(lSettings.value(QString("MainControllerIP")).toString());
-    lSslModeStr = lSettings.value(QString("SslMode"), "0").toString();
-    lNetworks = lSettings.value(QString("AllowedNetworks")).toString().split(",");
-    lSettings.endGroup();
+    lCommunicationPort = lSettings.value(QString("Networks/CommPort")).toString();
+    lLogLevel = lSettings.value(QString("Output/LogLevel")).toString();
+    lHostAddress.setAddress(lSettings.value(QString("Networks/MainControllerIP")).toString());
+    lSslModeStr = lSettings.value(QString("Security/SslMode"), "0").toString();
+    lNetworks = lSettings.value(QString("Networks/AllowedNetworks")).toString().split(",");
 
     for (const QString& lNetwork : lNetworks) {
         QStringList lParams(lNetwork.split("/"));
@@ -58,8 +58,17 @@ int main(int argc, char* argv[])
             lNetworkAddress.setPrefixLength(lParams.at(1).simplified().toInt());
         lAllowedNetworks << lNetworkAddress;
     }
+
+    NulstarNS::NModulesManager lModulesManager;
+    QString lManagerLastVersion = lModulesManager.fGetModuleLastVersion(lServiceManagerName);
+    if(lManagerLastVersion.isEmpty()) {
+       qDebug("Module ServiceManager not found!");
+       return 1;
+    }
+ //   NulstarNS::NModuleInfo lServiceManagerInfo = lModulesManager.fModuleInfo(APP_DOMAIN, lServiceManagerName, lManagerLastVersion);
+
     QSettings lServiceManagerSettings(lConfigFile, QSettings::IniFormat);
-    lServiceManagerSettings.beginGroup("ServiceManager");
+    lServiceManagerSettings.beginGroup(lServiceManagerName);
     QString lServiceManagerPort = lServiceManagerSettings.value("CommPort").toString();
     lServiceManagerSettings.endGroup();
     QString lServiceManagerUrl = QHostAddress(QHostAddress::LocalHost).toString();
@@ -71,10 +80,11 @@ int main(int argc, char* argv[])
         lServiceManagerUrl.prepend("wss://");
         lSslMode = QWebSocketServer::SslMode::SecureMode;
     }
-    if (lHostAddress.isNull() || lHostAddress.isLoopback())
+
+   /* if (lHostAddress.isNull() || lHostAddress.isLoopback())
         lBindAddress = QHostAddress::LocalHost;
-    else
-        lBindAddress = QHostAddress::Any;
+    else*/
+    lBindAddress = QHostAddress::Any;
 
     NulstarNS::NMainController lController(lSslMode, static_cast<NulstarNS::NMainController::ELogLevel>(lLogLevel.toUInt()), QUrl(lServiceManagerUrl), lAllowedNetworks, lCommunicationPort.toUShort(), lBindAddress);
     lController.fControlWebServer(QString(), NulstarNS::NMainController::EServiceAction::eStartService); // Start all web sockets servers

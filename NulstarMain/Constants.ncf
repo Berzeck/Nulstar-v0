@@ -1,6 +1,2 @@
-[ServiceBaseLibrary]
-MessageQueueRetryTime = 10
-
 [ServiceController]
-
-ConfigFile = Nulstar.cfg
+ConfigFile = Module.ncf

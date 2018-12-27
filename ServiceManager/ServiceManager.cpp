@@ -14,8 +14,8 @@ int main(int argc, char *argv[])
   QString lAppName(QString(APP_NAME).replace("_"," "));
   lApp.setApplicationName(lAppName);
   lApp.setApplicationVersion(APP_VERSION);
-  lApp.setOrganizationDomain(QStringLiteral("nulstar.com"));
-  lApp.setOrganizationName(QStringLiteral("Nulstar"));
+  lApp.setOrganizationDomain(APP_DOMAIN);
+  lApp.setOrganizationName(APP_DOMAIN);
 
   QList<QNetworkAddressEntry> lAllowedNetworks;
   QCommandLineParser lParser;

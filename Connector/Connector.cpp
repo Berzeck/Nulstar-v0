@@ -10,8 +10,6 @@
 #include <Core.h>
 #include "NConnectionController.h"
 
-const QString lOrganizationName = "Nulstar";
-
 int main(int argc, char *argv[])
 {    
   QCoreApplication lApp(argc, argv);
@@ -19,7 +17,7 @@ int main(int argc, char *argv[])
   lApp.setApplicationName(lAppName);
   lApp.setApplicationVersion(APP_VERSION);
   lApp.setOrganizationDomain(APP_DOMAIN);
-  lApp.setOrganizationName(lOrganizationName);
+  lApp.setOrganizationName(APP_DOMAIN);
 
   QList<QNetworkAddressEntry> lAllowedNetworks;
   QCommandLineParser lParser;
