@@ -38,6 +38,8 @@ namespace NulstarNS {
         mModuleExeOptionList.append(lModuleConfigGroupNwMainControllerIP.toLower());
         mModuleExeOptionList.append(lModuleConfigGroupNwAdminPort.toLower());
         mModuleExeOptionList.append(lModuleConfigGroupNwClientPort.toLower());
+        mModuleExeOptionList.append(lModuleConfigGroupOutputLogLevel.toLower());
+        mModuleExeOptionList.append(lModuleConfigGroupSecuritySslMode.toLower());
     }
 
     NModuleInfo NModulesManager::fModuleInfo(const QString& lSpaceName, const QString& lModuleName, const QString& lVersion) {
