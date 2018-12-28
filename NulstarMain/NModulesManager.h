@@ -4,13 +4,17 @@
 #include <QList>
 #include <QMap>
 #include <QObject>
-#include <QPair>
-#include <QDir>
 #include <QDebug>
 
 #include "NModuleInfo.h"
 
 namespace NulstarNS {
+  struct SModuleConfigParams {
+    QString mGroupName;
+    QString mParamName;
+    QString mParamValue;
+  };
+
   class NModulesManager : public QObject {
     Q_OBJECT
 
@@ -29,7 +33,7 @@ namespace NulstarNS {
     bool mModulesConfigLoaded;
     QMap<QString, QStringList > mNamespaceModules;    //NameSpace, Modules
     QMap<QString, QStringList > mModuleVersions;      //Module, Versions
-    QMap<QString, QList<QPair<QString, QString>> > mModuleConfig;    //Module--Version, parameters pairs
+    QMap<QString, QList<SModuleConfigParams>> mModuleConfig;    //Module--Version, parameters strucutres
     QStringList mModuleExeOptionList;
 
     void fReadModuleNcf(const QString& lNamespace, const QString& lModule, const QString& lVersion);
@@ -37,8 +41,8 @@ namespace NulstarNS {
     QStringList fFoldersNameList(const QString& lDirPath) const;
     void fSetNamespaceModules(const QString& lNamespace, const QStringList& lModules);
     void fSetModuleVersions(const QString& lModule, const QStringList& lVersions);
-    void fSetModuleConfig(const QString& lModule, const QString& lVersion, const QList<QPair<QString, QString>>& lParams);
-    QList<QPair<QString, QString>>  fGetModuleConfig(const QString& lModule, const QString& lVersion) const;
+    void fSetModuleConfig(const QString& lModule, const QString& lVersion, const QList<SModuleConfigParams>& lParams);
+    QList<SModuleConfigParams> fGetModuleConfig(const QString& lModule, const QString& lVersion) const;
   };
 }
 

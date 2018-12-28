@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
        qDebug("Module ServiceManager not found!");
        return 1;
     }
- //   NulstarNS::NModuleInfo lServiceManagerInfo = lModulesManager.fModuleInfo(APP_DOMAIN, lServiceManagerName, lManagerLastVersion);
+    NulstarNS::NModuleInfo lServiceManagerInfo = lModulesManager.fModuleInfo(APP_DOMAIN, lServiceManagerName, lManagerLastVersion);
 
     QSettings lServiceManagerSettings(lConfigFile, QSettings::IniFormat);
     lServiceManagerSettings.beginGroup(lServiceManagerName);

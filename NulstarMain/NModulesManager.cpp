@@ -1,4 +1,5 @@
 #include <QCoreApplication>
+#include <QDir>
 #include <QSettings>
 #include <QVersionNumber>
 #include "NModulesManager.h"
@@ -32,21 +33,21 @@ namespace NulstarNS {
 
     NModulesManager::NModulesManager( QObject *rParent)
                    : QObject(rParent), mModulesConfigLoaded(false) {
-        mModuleExeOptionList.clear();
-        mModuleExeOptionList.append(lModuleConfigGroupNwAllowedNetworks.toLower());
-        mModuleExeOptionList.append(lModuleConfigGroupNwCommPort.toLower());
-        mModuleExeOptionList.append(lModuleConfigGroupNwMainControllerIP.toLower());
-        mModuleExeOptionList.append(lModuleConfigGroupNwAdminPort.toLower());
-        mModuleExeOptionList.append(lModuleConfigGroupNwClientPort.toLower());
-        mModuleExeOptionList.append(lModuleConfigGroupOutputLogLevel.toLower());
-        mModuleExeOptionList.append(lModuleConfigGroupSecuritySslMode.toLower());
+      mModuleExeOptionList.append(lModuleConfigGroupNwAllowedNetworks.toLower());
+      mModuleExeOptionList.append(lModuleConfigGroupNwCommPort.toLower());
+      mModuleExeOptionList.append(lModuleConfigGroupNwMainControllerIP.toLower());
+      mModuleExeOptionList.append(lModuleConfigGroupNwAdminPort.toLower());
+      mModuleExeOptionList.append(lModuleConfigGroupNwClientPort.toLower());
+      mModuleExeOptionList.append(lModuleConfigGroupOutputLogLevel.toLower());
+      mModuleExeOptionList.append(lModuleConfigGroupSecuritySslMode.toLower());
     }
 
     NModuleInfo NModulesManager::fModuleInfo(const QString& lSpaceName, const QString& lModuleName, const QString& lVersion) {
       if(!mModulesConfigLoaded)
         fLoadModulesConfig();
-      NModuleInfo lModuleInfo;
-      QList<QPair<QString, QString>>  lModuleConfig = fGetModuleConfig(lModuleName, lVersion);
+
+      NModuleInfo lModuleInfo(lModuleName);
+      QList<SModuleConfigParams> lModuleConfig = fGetModuleConfig(lModuleName, lVersion);
       if(lModuleConfig.size() == 0) {
          qDebug("Module(name %s, version %s) has not config params", lModuleName.toStdString().data(), lVersion.toStdString().data());
          return lModuleInfo;
@@ -56,39 +57,37 @@ namespace NulstarNS {
 #ifdef Q_OS_WIN
       lModuleAppName.append(".exe");
 #endif
-      QStringList lModuleParametersList;
+      QDir lModuleAppNameDir(lModuleAppName);
+
+      QMap<QString, QString> lModuleParameters;
       QString lModuleLibDirPath(QString("%1/../../../../%2/").arg(QCoreApplication::applicationDirPath()).arg(lModuleConfigGroupLibs));
       QString lModuleWorkingDirectory(QString("%1/../../../%2/%3/%4/").arg(QCoreApplication::applicationDirPath()).arg(lSpaceName).arg(lModuleName).arg(lVersion));
+      lModuleWorkingDirectory = QDir(lModuleWorkingDirectory).canonicalPath();
 
-      QString lNustarVersion;
-      QString lQtVersion;
+      QString lModuleLanguage;
+      QStringList lLibDirPaths;
 
-      for (int i = 0; i < lModuleConfig.size(); ++i) {
-        QPair<QString, QString> lParamPair = lModuleConfig.at(i);
-        if (lParamPair.first == lModuleConfigGroupCoreLang.toLower()) {
-          lModuleLibDirPath.append(lParamPair.second);
-        }
-        else if (lParamPair.first == lModuleConfigGroupLibsNulstar.toLower()) {
-          lNustarVersion = lParamPair.second;
-        }
-        else if (lParamPair.first == lModuleConfigGroupLibsQt.toLower()) {
-          lQtVersion = lParamPair.second;
-        }
-        else if (mModuleExeOptionList.contains(lParamPair.first)) {
-          QString lFormattedParameter(lParamPair.first);
-          lFormattedParameter.prepend("--");
-          lModuleParametersList << lFormattedParameter << lParamPair.second;
+      for (int i = 0; i < lModuleConfig.size(); ++i) { // Must ALWAYS find first!
+        SModuleConfigParams lParamStructure = lModuleConfig.at(i);
+        if((lParamStructure.mGroupName == lModuleConfigGroupCore) && (lParamStructure.mParamName == lModuleConfigGroupCoreLang)) {
+          lModuleLanguage = lParamStructure.mParamValue;
         }
       }
-
-      QString lModuleEnvLibsPath(QString("%1/%2/%3/").arg(lModuleLibDirPath).arg(lModuleConfigGroupLibsQt).arg(lQtVersion));
-      lModuleEnvLibsPath.append(";");
-      lModuleEnvLibsPath.append(QString("%1/%2/%3/").arg(lModuleLibDirPath).arg(lModuleConfigGroupLibsNulstar).arg(lNustarVersion));
-
-      lModuleInfo.mModuleAppName = lModuleAppName;
-      lModuleInfo.mModuleParametersList = lModuleParametersList;
-      lModuleInfo.mModuleEnvLibsPath = lModuleEnvLibsPath;
-      lModuleInfo.mModuleWorkingDirectory = lModuleWorkingDirectory;
+      for (int i = 0; i < lModuleConfig.size(); ++i) {
+        SModuleConfigParams lParamStructure = lModuleConfig.at(i);
+        if(lParamStructure.mGroupName == lModuleConfigGroupLibs) {
+          QDir lLibDir(QString("%1/%2/%3/%4/").arg(lModuleLibDirPath).arg(lModuleLanguage).arg(lParamStructure.mParamName).arg(lParamStructure.mParamValue));
+          if(lLibDir.exists())
+            lLibDirPaths.append(lLibDir.canonicalPath());
+        }
+        else if(mModuleExeOptionList.contains(lParamStructure.mParamName.toLower())) {
+           lModuleParameters[lParamStructure.mParamName] = lParamStructure.mParamValue;
+        }
+      }
+      lModuleInfo.fSetModuleLanguage(lModuleLanguage);
+      lModuleInfo.fSetModuleParameters(lModuleParameters);
+      lModuleInfo.fSetModuleEnvLibPaths(lLibDirPaths);
+      lModuleInfo.fSetModuleWorkingDirectory(lModuleWorkingDirectory);
       return lModuleInfo;
   }
 
@@ -119,7 +118,7 @@ namespace NulstarNS {
       return;
     }
 
-    QList<QPair<QString, QString>> lParameters;
+    QList<SModuleConfigParams> lParameters;
     bool lManaged = false;
     QSettings lModuleSettings(lModuleNcfPath, QSettings::IniFormat);
     QStringList lGroups(lModuleSettings.childGroups());
@@ -127,19 +126,20 @@ namespace NulstarNS {
       lModuleSettings.beginGroup(lGroup);
       QStringList lKeys(lModuleSettings.childKeys());
       for (const QString& lKey : lKeys) {
-         QPair<QString, QString> lParameterPair;
-         lParameterPair.first = lKey.toLower();
-         lParameterPair.second = lModuleSettings.value(lKey).toString();
-         lParameters << lParameterPair;
-       }
-       if(lGroup == lModuleConfigGroupCore) {
-         lManaged = lModuleSettings.value(lModuleConfigGroupCoreManaged, false).toBool();
-       }
-       lModuleSettings.endGroup();
-     }
-     if(lManaged){
-       fSetModuleConfig(lModule, lVersion, lParameters);
-     }
+         SModuleConfigParams lParameterStructure;
+         lParameterStructure.mGroupName = lGroup;
+         lParameterStructure.mParamName = lKey;
+         lParameterStructure.mParamValue = lModuleSettings.value(lKey).toString();
+         lParameters << lParameterStructure;
+      }
+      if(lGroup == lModuleConfigGroupCore) {
+        lManaged = lModuleSettings.value(lModuleConfigGroupCoreManaged, false).toBool();
+      }
+      lModuleSettings.endGroup();
+    }
+    if(lManaged){
+      fSetModuleConfig(lModule, lVersion, lParameters);
+    }
   }
 
   void NModulesManager::fScanModulesDirectory() {
@@ -173,17 +173,13 @@ namespace NulstarNS {
     }
   }
 
-  QStringList NModulesManager::fFoldersNameList(const QString& lDirPath) const {
-    QStringList lFolderNameList = QStringList();
+  QStringList NModulesManager::fFoldersNameList(const QString& lDirPath) const {    
     QDir lDir(lDirPath);
     if(!lDir.exists()) {
       qDebug("Modules directory %s not exist", lDirPath.toStdString().data());
-      return lFolderNameList;
+      return QStringList();
     }
-    QFileInfoList lFolderFilesList = lDir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
-    for(int i = 0; i != lFolderFilesList.size(); i++) {
-      lFolderNameList.append(lFolderFilesList.at(i).fileName());
-    }
+    QStringList lFolderNameList = QStringList(lDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot));
     return lFolderNameList;
   }
 
@@ -195,8 +191,8 @@ namespace NulstarNS {
     mModuleVersions[lModule] = lVersions;
   }
 
-  void NModulesManager::fSetModuleConfig(const QString& lModule, const QString& lVersion, const QList<QPair<QString, QString>>& lParams) {
-    QString lModuleVersion = QString("%1--%2").arg(lModule.toLower()).arg(lVersion.toLower());
+  void NModulesManager::fSetModuleConfig(const QString& lModule, const QString& lVersion, const QList<SModuleConfigParams>& lParams) {
+    QString lModuleVersion = QString("%1--%2").arg(lModule).arg(lVersion);
     mModuleConfig[lModuleVersion] = lParams;
   }
 
@@ -235,9 +231,9 @@ namespace NulstarNS {
     return lLastVersion.toString();
   }
 
-  QList<QPair<QString, QString>>  NModulesManager::fGetModuleConfig(const QString &lModule, const QString &lVersion) const{
-    QList<QPair<QString, QString>> lConfigList;
-    QString lModuleVersion = QString("%1--%2").arg(lModule.toLower()).arg(lVersion.toLower());
+  QList<SModuleConfigParams>  NModulesManager::fGetModuleConfig(const QString &lModule, const QString &lVersion) const{
+    QList<SModuleConfigParams> lConfigList;
+    QString lModuleVersion = QString("%1--%2").arg(lModule).arg(lVersion);
     if(mModuleConfig.contains(lModuleVersion))
       lConfigList = mModuleConfig.value(lModuleVersion);
     return lConfigList;
