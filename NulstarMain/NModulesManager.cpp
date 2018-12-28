@@ -17,8 +17,11 @@ namespace NulstarNS {
     const QString lModuleConfigGroupLibsQt("Qt");
 
     const QString lModuleConfigGroupNetwork("Network");
-    const QString lModuleConfigGroupLibsAllowedNetworks("AllowedNetworks");
-    const QString lModuleConfigGroupLibsCommPort("CommPort");
+    const QString lModuleConfigGroupNwAllowedNetworks("AllowedNetworks");
+    const QString lModuleConfigGroupNwCommPort("CommPort");
+    const QString lModuleConfigGroupNwMainControllerIP("MainControllerIP");
+    const QString lModuleConfigGroupNwAdminPort("AdminPort");
+    const QString lModuleConfigGroupNwClientPort("ClientPort");
 
     const QString lModuleConfigGroupOutput("Output");
     const QString lModuleConfigGroupOutputLogLevel("LogLevel");
@@ -29,7 +32,12 @@ namespace NulstarNS {
 
     NModulesManager::NModulesManager( QObject *rParent)
                    : QObject(rParent), mModulesConfigLoaded(false) {
-
+        mModuleExeOptionList.clear();
+        mModuleExeOptionList.append(lModuleConfigGroupNwAllowedNetworks.toLower());
+        mModuleExeOptionList.append(lModuleConfigGroupNwCommPort.toLower());
+        mModuleExeOptionList.append(lModuleConfigGroupNwMainControllerIP.toLower());
+        mModuleExeOptionList.append(lModuleConfigGroupNwAdminPort.toLower());
+        mModuleExeOptionList.append(lModuleConfigGroupNwClientPort.toLower());
     }
 
     NModuleInfo NModulesManager::fModuleInfo(const QString& lSpaceName, const QString& lModuleName, const QString& lVersion) {
@@ -64,8 +72,7 @@ namespace NulstarNS {
         else if (lParamPair.first == lModuleConfigGroupLibsQt.toLower()) {
           lQtVersion = lParamPair.second;
         }
-        else if ((lParamPair.first == lModuleConfigGroupLibsAllowedNetworks.toLower()) || (lParamPair.first == lModuleConfigGroupLibsCommPort.toLower()) ||
-                (lParamPair.first == lModuleConfigGroupOutputLogLevel.toLower()) || (lParamPair.first == lModuleConfigGroupSecuritySslMode.toLower())) {
+        else if (mModuleExeOptionList.contains(lParamPair.first)) {
           QString lFormattedParameter(lParamPair.first);
           lFormattedParameter.prepend("--");
           lModuleParametersList << lFormattedParameter << lParamPair.second;
@@ -89,6 +96,7 @@ namespace NulstarNS {
     mModuleConfig.clear();
 
     fScanModulesDirectory();
+    mModulesConfigLoaded = true;
     for(const QString& lNamespace : mNamespaceModules.keys()){
       QStringList lModuleList = fGetNamespaceModules(lNamespace);
       //for(lModulesIterator = lModulesList.begin(); lModulesIterator != lModulesList.end(); ++lModulesIterator) {
@@ -99,7 +107,6 @@ namespace NulstarNS {
         }
       }
     }
-    mModulesConfigLoaded = true;
   }
 
   void NModulesManager::fReadModuleNcf(const QString& lNamespace, const QString& lModule, const QString& lVersion){
@@ -210,6 +217,7 @@ namespace NulstarNS {
   }
 
   QString NModulesManager::fGetModuleLastVersion(const QString& lModule)  {
+    qDebug()<< "module " << lModule;
     if(!mModulesConfigLoaded)
       fLoadModulesConfig();
     QStringList lModuleVersions = fGetModuleVersions(lModule);

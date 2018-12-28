@@ -30,6 +30,7 @@ namespace NulstarNS {
     QMap<QString, QStringList > mNamespaceModules;    //NameSpace, Modules
     QMap<QString, QStringList > mModuleVersions;      //Module, Versions
     QMap<QString, QList<QPair<QString, QString>> > mModuleConfig;    //Module--Version, parameters pairs
+    QStringList mModuleExeOptionList;
 
     void fReadModuleNcf(const QString& lNamespace, const QString& lModule, const QString& lVersion);
     void fScanModulesDirectory();
