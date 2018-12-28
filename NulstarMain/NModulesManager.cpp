@@ -217,7 +217,6 @@ namespace NulstarNS {
   }
 
   QString NModulesManager::fGetModuleLastVersion(const QString& lModule)  {
-    qDebug()<< "module " << lModule;
     if(!mModulesConfigLoaded)
       fLoadModulesConfig();
     QStringList lModuleVersions = fGetModuleVersions(lModule);
