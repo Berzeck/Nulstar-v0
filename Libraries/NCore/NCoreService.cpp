@@ -2,19 +2,16 @@
 #include "NCoreService.h"
 
 namespace NulstarNS {
-  const quint8 lConnectionRetrialPeriod = 5;
   const QString lCommServerLabel("Nulstar Internal Communication");
   const QString lCommServerName("WebCommServer");
   const QString lDefaultMinEventAndMinPeriod("0,0");
   const QString lServiceManagerName("ServiceManager") ;
 
-  NCoreService::NCoreService(NWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QUrl& lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lPort, QHostAddress::SpecialAddress lBindAddress, QObject *rParent)
+  NCoreService::NCoreService(NWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QUrl& lServiceManagerUrl, const QList<QNetworkAddressEntry>& lAllowedNetworks,
+                             quint16 lPort, QHostAddress::SpecialAddress lBindAddress, QObject *rParent)
               : QObject(rParent), mLogLevel(lLogLevel), mServiceManagerUrl(lServiceManagerUrl), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks) {
-    fAddWebSocketServer(lCommServerName, lCommServerLabel, lPort, lBindAddress, false);
-
-    QTimer* rTimer = new QTimer(this);
-    connect(rTimer, SIGNAL(timeout()), this, SLOT(fConnectToServiceManager()));
-    rTimer->start(lConnectionRetrialPeriod * 1000);
+    if(lPort)
+      fAddWebSocketServer(lPort, lBindAddress, lCommServerName, lCommServerLabel, false);
   }
 
   NCoreService::~NCoreService() {
@@ -28,8 +25,16 @@ namespace NulstarNS {
     }
   }
 
-  bool NCoreService::fAddWebSocketServer(const QString& lName, const QString& lLabel, quint16 lPort, QHostAddress::SpecialAddress lBindAddress, bool lStartImmediatly) {
-    if(mWebServers.contains(lName)) return false;
+  bool NCoreService::fAddWebSocketServer(quint16 lPort, QHostAddress::SpecialAddress lBindAddress, const QString& lName, const QString& lLabel, bool lStartImmediatly) {
+    if(mWebServers.contains(lName))
+      return false;
+
+    QString lEffectiveName(lName);
+    QString lEffectiveLabel(lLabel);
+    if(lEffectiveName.isEmpty())
+      lEffectiveName = lCommServerName;
+    if(lEffectiveLabel.isEmpty())
+      lEffectiveLabel = lCommServerLabel;
 
     NWebSocketServer* pWebServer = new NWebSocketServer(lName, lLabel, mSslMode, nullptr);
     pWebServer->fSetPort(lPort);
@@ -41,19 +46,16 @@ namespace NulstarNS {
     return true;
   }
 
-  void NCoreService::fConnectToServiceManager() {
-    if(mServiceManagerUrl.isValid()) {
-      NWebSocket* rWebSocket = nullptr;
-      if(mWebSockets.contains(lServiceManagerName)) {
-        rWebSocket = mWebSockets.value(lServiceManagerName);
-        if(rWebSocket->state() == QAbstractSocket::UnconnectedState)
-          rWebSocket->open(mServiceManagerUrl);
-      }
-      else {
-        rWebSocket = new NWebSocket(lServiceManagerName);
-        mWebSockets.insert(lServiceManagerName, rWebSocket);
-        rWebSocket->open(mServiceManagerUrl);
-      }
+  void NCoreService::fConnectToServiceManager(quint8 lReconnectionTryInterval) {
+    NWebSocket* rWebSocket = nullptr;
+    if(mWebSockets.contains(lServiceManagerName)) {
+      rWebSocket = mWebSockets.value(lServiceManagerName);
+      rWebSocket->fConnect();
+    }
+    else {
+      rWebSocket = new NWebSocket(lServiceManagerName, mServiceManagerUrl, lReconnectionTryInterval);
+      mWebSockets.insert(lServiceManagerName, rWebSocket);
+      rWebSocket->fConnect();
     }
   }
 

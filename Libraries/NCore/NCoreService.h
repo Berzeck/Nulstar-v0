@@ -21,7 +21,6 @@
 namespace NulstarNS {    
   const QString lConstantsFile("Constants.ncf");
 
-  class NWebSocketServer;
   class CORESHARED_EXPORT NCoreService : public QObject {
     Q_OBJECT
 
@@ -29,7 +28,8 @@ namespace NulstarNS {
       enum class ELogLevel {eLogCritical = 1, eLogImportant = 2, eLogWarning = 3, eLogInfo = 4, eLogEverything = 5};
       enum class EServiceAction {eStartService = 0, eStopService = 1, eRestartService = 2};      
 
-      NCoreService(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel = ELogLevel::eLogWarning, const QUrl& lServiceManagerUrl = QUrl(), QList<QNetworkAddressEntry> lAllowedNetworks = QList<QNetworkAddressEntry> (), quint16 lPort = 0, QHostAddress::SpecialAddress lBindAddress = QHostAddress::Null, QObject* rParent = nullptr);
+      NCoreService(QWebSocketServer::SslMode lSslMode = QWebSocketServer::SslMode::NonSecureMode, ELogLevel lLogLevel = ELogLevel::eLogWarning, const QUrl& lServiceManagerUrl = QUrl(),
+                   const QList<QNetworkAddressEntry>& lAllowedNetworks = QList<QNetworkAddressEntry> (), quint16 lPort = 0, QHostAddress::SpecialAddress lBindAddress = QHostAddress::LocalHost, QObject* rParent = nullptr);
       virtual ~NCoreService();
 
       virtual QString fName() const = 0;
@@ -39,7 +39,7 @@ namespace NulstarNS {
       virtual QString fApiVersion() const = 0;
 
 
-      virtual bool fAddWebSocketServer(const QString& lName, const QString& lLabel, quint16 lPort, QHostAddress::SpecialAddress lBindAddress, bool lStartImmediatly = false);
+      virtual bool fAddWebSocketServer(quint16 lPort, QHostAddress::SpecialAddress lBindAddress, const QString& lName = QString(), const QString& lLabel = QString(), bool lStartImmediatly = false);
       void fAddMethodFunctionDescription(const QString& lMethodName, const QString& lDescription) { mApiMethodDescription[lMethodName] = lDescription; }
       void fAddMethodMinEventAndMinPeriod(const QString& lMethodName, const QString& lApiMethodMinEventAndMinPeriod ) { mApiMethodMinEventAndMinPeriod[lMethodName] = lApiMethodMinEventAndMinPeriod; }
    /***   NMessageResponse fMaxConnections(const QString &lName);
@@ -47,6 +47,10 @@ namespace NulstarNS {
       NResponse fSetMaxConnections(const QString& lName, int lMaxconnections); ***/
       QString fMethodDescription(const QString& lMethodName) const;
       QString fMethodMinEventAndMinPeriod(const QString& lMethodName) const;
+      void fSetSslMode(QWebSocketServer::SslMode lSslMode = QWebSocketServer::SslMode::NonSecureMode) { mSslMode = lSslMode; }
+      void fSetLogLevel(ELogLevel lLogLevel = ELogLevel::eLogWarning) { mLogLevel = lLogLevel; }
+      void fSetServiceManagerUrl(const QUrl& lServiceManagerUrl) { if(lServiceManagerUrl.isValid()) mServiceManagerUrl = lServiceManagerUrl; }
+      void fSetAllowedNetworks(const QList<QNetworkAddressEntry>& lAllowedNetworks) { mAllowedNetworks = lAllowedNetworks; }
 
     protected:
       ELogLevel mLogLevel;
@@ -63,7 +67,7 @@ namespace NulstarNS {
       NApiBuilder mApiBuilder;
 
     public Q_SLOTS:
-      virtual void fConnectToServiceManager();
+      virtual void fConnectToServiceManager(quint8 lReconnectionTryInterval);
       virtual bool fControlWebServer(const QString& lName, EServiceAction lAction); // If lName is empty then it controls all web sockets servers      
   };
 }

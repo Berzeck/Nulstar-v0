@@ -1,15 +1,26 @@
 #include <QJsonDocument>
+#include <QTimer>
+
 #include "NWebSocket.h"
 #include "NMessageNegotiateConnection.h"
 
 namespace NulstarNS {
-  NWebSocket::NWebSocket(const QString &lModuleName, QObject* rParent)
-            : QWebSocket(QString(), QWebSocketProtocol::VersionLatest, rParent), mConnectionState(EConnectionState::eConnectionNotNegotiated), mModuleName(lModuleName) {
+  NWebSocket::NWebSocket(const QString &lModuleName, const QUrl& lConnectionUrl, quint8 lConnectionRetryInterval, QObject* rParent)
+            : QWebSocket(QString(), QWebSocketProtocol::VersionLatest, rParent), mConnectionRetryInterval(lConnectionRetryInterval), mConnectionState(EConnectionState::eConnectionNotNegotiated),
+              mModuleName(lModuleName), mConnectionUrl(lConnectionUrl) {
     connect(this, &NWebSocket::connected, this, &NWebSocket::fOnConnected);
     connect(this, &NWebSocket::disconnected, this, &NWebSocket::fOnSocketDisconnection);
     connect(this, QOverload<QAbstractSocket::SocketError>::of(&NWebSocket::error), this, &NWebSocket::fOnConnectionError);
-    connect(this, &NWebSocket::textMessageReceived, this, &NWebSocket::fOnTextMessageReceived, Qt::UniqueConnection);
+    connect(this, &NWebSocket::textMessageReceived, this, &NWebSocket::fOnTextMessageReceived);
 
+    pRetryTimer = new QTimer(this);
+    connect(pRetryTimer, &QTimer::timeout, this, &NWebSocket::fConnect);
+  }
+
+  void NWebSocket::fConnect() {
+   if(state() == QAbstractSocket::UnconnectedState && mConnectionUrl.isValid()) {
+      open(mConnectionUrl);
+    }
   }
 
   void NWebSocket::fQueueMessage(NMessage* lMessage, EConnectionState lMinStateRequired) {
@@ -30,17 +41,18 @@ namespace NulstarNS {
 
   void NWebSocket::fOnConnectionError(QAbstractSocket::SocketError lErrorCode) {
     qDebug("%s", qUtf8Printable(QString::number(lErrorCode)));
-  //  qDebug() << "ERRORR!!";
-   // qDebug() << errorString();
+    pRetryTimer->start(mConnectionRetryInterval * 1000);
   }
 
   void NWebSocket::fOnConnected() {
     if(fConnectionState() == NWebSocket::EConnectionState::eConnectionNotNegotiated)
       fNegotiateConnection();
+    pRetryTimer->stop();
   }
 
   void NWebSocket::fOnSocketDisconnection() {
     fSetConnectionState(NWebSocket::EConnectionState::eConnectionNotNegotiated);
+    pRetryTimer->start(mConnectionRetryInterval * 1000);
   }
 
   void NWebSocket::fOnTextMessageReceived(const QString& lTextMessage) {

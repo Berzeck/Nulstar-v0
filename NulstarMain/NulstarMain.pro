@@ -13,7 +13,7 @@ VERSION = 0.1.0
 APP_DOMAIN=Nulstar
 APP_ROLE=Role_ServiceController
 APP_ROLE_VERSION=0.1
-APP_NAME=Nulstar Main Controller
+APP_NAME=$$TARGET
 APP_VERSION=$$VERSION
 APP_VERSION_NAME=OneEye Baby Ninja Egg
 
@@ -25,16 +25,16 @@ QMAKE_SUBSTITUTES += $$TOP_SRCDIR/AppVersion.h.in
 
 HEADERS += NMainController.h \
            NPluginManger.h \
-           NModulesManager.h \
+           NModuleManager.h \
            NModuleInfo.h
 
 SOURCES += NMainController.cpp \
            NulstarMain.cpp \
            NPluginManger.cpp \
-           NModulesManager.cpp \
+           NModuleManager.cpp \
            NModuleInfo.cpp
 
-OTHER_FILES += Constants.ncf Module.ncf
+OTHER_FILES += Module.ncf
 
 # Dependencies
 
@@ -43,14 +43,14 @@ LIBS += -lNNetwork -lNCore
 
 # Install Settings
 
-#QMAKE_POST_LINK += $$quote($$QMAKE_COPY \"$$PWD/Nulstar.cfg\" \"$$DESTDIR\" $$escape_expand(\n\t))
-COPYFILE1 = \"$$PWD/Constants.ncf\" \"$$DESTDIR\"
+#COPYFILE1 = \"$$PWD/Constants.ncf\" \"$$DESTDIR\"
 COPYFILE2 = \"$$PWD/Module.ncf\" \"$$DESTDIR\"
 win32: {
-  COPYFILE1 ~= s,/,\\,g
+#  COPYFILE1 ~= s,/,\\,g
   COPYFILE2 ~= s,/,\\,g
 }
-QMAKE_POST_LINK += $$QMAKE_COPY $$COPYFILE1 & $$QMAKE_COPY $$COPYFILE2
+#QMAKE_POST_LINK += $$QMAKE_COPY $$COPYFILE1 & $$QMAKE_COPY $$COPYFILE2
+QMAKE_POST_LINK += $$QMAKE_COPY $$COPYFILE2
 
 # Clean Settings
 QMAKE_CLEAN += -r $$DESTDIR

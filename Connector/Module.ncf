@@ -8,7 +8,6 @@ Qt=5.12.0
 
 [Networks]
 AllowedNetworks=127.0.0.1/32
-MainControllerIP=127.0.0.1
 CommPort=7770
 AdminPort=7791
 ClientPort=7790

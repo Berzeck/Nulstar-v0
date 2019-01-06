@@ -1,42 +1,46 @@
 #ifndef NMODULEINFO_H
 #define NMODULEINFO_H
 
-#include <QMap>
 #include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QVariant>
 
 namespace NulstarNS {
+  struct SModuleParameter {
+    QString mGroupName;
+    QString mParamName;
+    QString mParamValue;
+  };
+
   class NModuleInfo {
     public:
-      explicit NModuleInfo(const QString& lModuleAppName, const QString& lModuleLanguage = QString(), const QString& lModuleWorkingDirectory = QString(),
-                           const QStringList& lModuleEnvLibPaths = QStringList(), const QMap<QString, QString>& lModuleParameters = QMap<QString, QString>());
+      explicit NModuleInfo(const QString& lModulName, const QString &lModuleNamespace, const QString &lModuleVersion,  const QString& lModuleLanguage, const QString& lModuleWorkingDirectory,
+                           const QStringList& lModuleEnvLibPaths, const QList<SModuleParameter>& lModuleParameters);
       ~NModuleInfo() { }
 
       bool fIsValid() const;
-      QString fModuleAppName() const { return mModuleAppName; }
+      QString fModuleAppPath() const;
+      QString fModuleName() const { return mModuleName; }
+      QString fModuleVersion() const { return mModuleVersion; }
+      QString fModuleNamespace() const { return mModuleNamespace; }
       QString fModuleLanguage() const { return mModuleLanguage; }
       QString fModuleWorkingDirectory() const { return mModuleWorkingDirectory; }
       QStringList fModuleEnvLibPaths() const { return mModuleEnvLibPaths; }
-      QMap<QString, QString> fModuleParameters() const { return mModuleParameters; }
+      QList<SModuleParameter> fModuleParameters() const { return mModuleParameters; }
 
-      QString fModuleExecutablePath() const { return QString("%1/%2").arg(mModuleWorkingDirectory).arg(mModuleAppName); }
       QString fParameterValue(const QString& lParameter) const;
       QStringList fFormattedParameters() const;
       QString fLibPaths() const { return mModuleEnvLibPaths.join(";"); }
 
-      void fSetModuleLanguage(const QString& lModuleLanguage) { mModuleLanguage = lModuleLanguage; }
-      void fSetModuleWorkingDirectory(const QString& lModuleWorkingDirectory) { mModuleWorkingDirectory = lModuleWorkingDirectory; }
-      void fSetModuleEnvLibPaths(const QStringList& lModuleEnvLibPaths) { mModuleEnvLibPaths = lModuleEnvLibPaths; }
-      void fSetModuleParameters(const QMap<QString, QString>& lModuleParameters) { mModuleParameters = lModuleParameters; }
-
     private:
-      QString mModuleAppName;
+      QString mModuleName;
       QString mModuleLanguage;
+      QString mModuleNamespace;
+      QString mModuleVersion;
       QString mModuleWorkingDirectory;
       QStringList mModuleEnvLibPaths;
-      QMap<QString, QString> mModuleParameters;
+      QList<SModuleParameter> mModuleParameters;
   };
 }
 

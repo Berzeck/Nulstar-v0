@@ -13,7 +13,7 @@ VERSION = 0.1.0
 APP_DOMAIN=Nulstar
 APP_ROLE=Role_ConnectionManager
 APP_ROLE_VERSION=0.1
-APP_NAME=Nulstar Connection Manager
+APP_NAME=$$TARGET
 APP_VERSION=$$VERSION
 APP_VERSION_NAME=Baby Piglet I
 

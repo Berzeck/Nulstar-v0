@@ -13,8 +13,7 @@
 int main(int argc, char *argv[])
 {    
   QCoreApplication lApp(argc, argv);
-  QString lAppName(QString(APP_NAME).replace("_"," "));
-  lApp.setApplicationName(lAppName);
+  lApp.setApplicationName(APP_NAME);
   lApp.setApplicationVersion(APP_VERSION);
   lApp.setOrganizationDomain(APP_DOMAIN);
   lApp.setOrganizationName(APP_DOMAIN);
@@ -22,7 +21,7 @@ int main(int argc, char *argv[])
   QList<QNetworkAddressEntry> lAllowedNetworks;
   QCommandLineParser lParser;
   QString lServiceManagerUrl;
-  lParser.setApplicationDescription(lAppName);
+  lParser.setApplicationDescription(APP_NAME);
   lParser.addHelpOption();
   lParser.addVersionOption();
   lParser.addOptions({

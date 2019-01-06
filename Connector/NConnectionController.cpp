@@ -9,8 +9,8 @@ namespace NulstarNS {
   NConnectionController::NConnectionController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QUrl &lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, quint16 lAdminPort, quint16 lClientPort, QHostAddress::SpecialAddress lBindAddress, QObject* rParent)
                        : NCoreService(lSslMode, lLogLevel, lServiceManagerUrl, lAllowedNetworks, lCommPort, lBindAddress, rParent), mRequestID(0), mCompressionLevel(0) {
 
-    fAddWebSocketServer(lAdminServerName, lAdminServerLabel, lAdminPort, QHostAddress::Any, false);
-    fAddWebSocketServer(lClientServerName, lClientServerLabel, lClientPort, QHostAddress::Any, false);
+    fAddWebSocketServer(lAdminPort, QHostAddress::Any, lAdminServerName, lAdminServerLabel, false);
+    fAddWebSocketServer(lClientPort, QHostAddress::Any, lClientServerName, lClientServerLabel, false);
     fFillMethodDescriptions();
     fFillMethodMinEventAndMinPeriod();
   }
