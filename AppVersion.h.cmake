@@ -1,0 +1,9 @@
+#pragma once
+
+#define APP_NAME "@APP_NAME@"
+#define APP_VERSION "@APP_VERSION@"
+#define APP_VERSION_NAME "@APP_VERSION_NAME@"
+#define APP_ROLE "@APP_ROLE@"
+#define APP_ROLE_VERSION "@APP_ROLE_VERSION@"
+#define APP_DOMAIN "@APP_DOMAIN@"
+

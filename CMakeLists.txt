@@ -1,0 +1,21 @@
+cmake_minimum_required(VERSION 3.2)
+project(Nulstar)
+
+set(CMAKE_CXX_STANDARD 14)
+#SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
+#set(CMAKE_MACOSX_RPATH 0)
+set(LIBRARIES_PATH "${CMAKE_CURRENT_SOURCE_DIR}/Libraries")
+set(LIBRARIES_OUTPUT_DIR ${PROJECT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/Libraries)
+set(MODULES_OUTPUT_DIR ${PROJECT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/Modules)
+
+set(APP_DOMAIN "Nulstar")
+set(APP_ROLE "Role_ServiceController")
+set(APP_ROLE_VERSION "0.1")
+set(APP_NAME "Nulstar Main Controller")
+set(APP_VERSION "0.1.0")
+set(APP_VERSION_NAME "OneEye Baby Ninja Egg")
+set(ENV{LD_LIBRARY_PATH} "${LIBRARIES_OUTPUT_DIR}/Nulstar/0.1.0")
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/AppVersion.h.cmake ${PROJECT_BINARY_DIR}/AppVersion.h)
+
+add_subdirectory(Libraries)
+add_subdirectory(Modules)

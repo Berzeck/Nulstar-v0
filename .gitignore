@@ -104,3 +104,6 @@ CMakeLists.txt.user*
 # Qt Creator backups
 
 # End of https://www.gitignore.io/api/qt,macos,qtcreator
+
+# CLion
+.idea
