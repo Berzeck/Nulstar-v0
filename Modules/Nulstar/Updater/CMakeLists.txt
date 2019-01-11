@@ -1,17 +1,15 @@
 cmake_minimum_required(VERSION 3.2)
-project(NulstarMain)
+project(Updater)
+aux_source_directory(. SOURCE_SRCS)
 
 set(PROJECT_VERSION ${NULSTAR_VERSION})
 
 # Qt5 Settings
 find_package(Qt5Core REQUIRED)
 find_package(Qt5Network REQUIRED)
-find_package(Qt5WebSockets REQUIRED)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
-aux_source_directory(. SOURCE_SRCS)
 
 set(EXECUTABLE_OUTPUT_PATH "${MODULES_OUTPUT_DIR}/Nulstar/${PROJECT_NAME}/${APP_VERSION}")
 
@@ -20,11 +18,9 @@ include_directories(${LIBRARIES_PATH}/Nulstar/NNetwork)
 include_directories(${LIBRARIES_PATH}/Nulstar/NCore)
 
 add_executable(${PROJECT_NAME} ${SOURCE_SRCS})
-add_dependencies(${PROJECT_NAME} Connector)
-add_dependencies(${PROJECT_NAME} ServiceManager)
-add_dependencies(${PROJECT_NAME} Updater)
+add_dependencies(${PROJECT_NAME} NCore)
+target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Network)
 target_link_libraries(${PROJECT_NAME} NCore)
-target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Network Qt5::WebSockets)
 
 add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD        # Adds a post-build event to MyTest
         COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
