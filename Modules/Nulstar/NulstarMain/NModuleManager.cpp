@@ -68,9 +68,27 @@ namespace NulstarNS {
       return false;
     }
 
-    QList<SModuleParameter> lParameters;
-    bool lManaged = false;
-    QSettings lModuleSettings(lModuleNcfPath, QSettings::IniFormat);
+    QString lModulesDirNcfPath = QString("%1/../../../%2").arg(QCoreApplication::applicationDirPath()).arg(cModuleConfigFile);
+    QString lModulesNsNcfPath = QString("%1/../../../%2/%3").arg(QCoreApplication::applicationDirPath()).arg(lModuleNamespace).arg(cModuleConfigFile);
+    QList<SModuleParameter> lParameters = QList<SModuleParameter>();
+
+    fReadModuleNcf(lModulesDirNcfPath, lParameters)->fReadModuleNcf(lModulesNsNcfPath, lParameters)->fReadModuleNcf(lModuleNcfPath, lParameters);
+
+    bool lManaged = bool(fGetModuleParamsValue(cModuleConfigGroupCore, cModuleConfigGroupCoreManaged, lParameters) == QString("%1").arg(1));
+    if(lManaged){
+      fSetModuleInfo(lModuleNamespace, lModuleName, lModuleVersion, lParameters);
+      return true;
+    }
+    return false;
+  }
+
+  NModuleManager* NModuleManager::fReadModuleNcf(const QString& lNcfPath, QList<SModuleParameter>& lParameters){
+    QFileInfo lModuleNcfFileInfo(lNcfPath);
+    if(!lModuleNcfFileInfo.exists()){
+      return this;
+    }
+
+    QSettings lModuleSettings(lNcfPath, QSettings::IniFormat);
     QStringList lGroups(lModuleSettings.childGroups());
     for(const QString& lGroup : lGroups) {
       lModuleSettings.beginGroup(lGroup);
@@ -80,18 +98,30 @@ namespace NulstarNS {
          lParameterStructure.mGroupName = lGroup;
          lParameterStructure.mParamName = lKey;
          lParameterStructure.mParamValue = lModuleSettings.value(lKey).toString();
+
+         QString lValue = fGetModuleParamsValue(lParameterStructure.mGroupName, lParameterStructure.mParamName, lParameters);
+         if (!lValue.isEmpty()) {
+            SModuleParameter lParameterStructureRm;
+            lParameterStructureRm.mGroupName = lGroup;
+            lParameterStructureRm.mParamName = lKey;
+            lParameterStructureRm.mParamValue = lValue;
+            lParameters.removeOne(lParameterStructureRm);
+         }
          lParameters << lParameterStructure;
-      }
-      if(lGroup == cModuleConfigGroupCore) {
-        lManaged = lModuleSettings.value(cModuleConfigGroupCoreManaged, false).toBool();
       }
       lModuleSettings.endGroup();
     }
-    if(lManaged){
-      fSetModuleInfo(lModuleNamespace, lModuleName, lModuleVersion, lParameters);
-      return true;
-    }
-    return false;
+    return this;
+  }
+
+  QString NModuleManager::fGetModuleParamsValue(const QString& lModuleParamGroup, const QString& lModuleParamKey, const QList<SModuleParameter>& lModuleParameters)
+  {
+      for(const SModuleParameter& lModuleParameter : lModuleParameters ) {
+          if((lModuleParameter.mGroupName == lModuleParamGroup) && (lModuleParameter.mParamName == lModuleParamKey)) {
+              return lModuleParameter.mParamValue;
+          }
+      }
+      return QString();
   }
 
   void NModuleManager::fScanManagedModules() {

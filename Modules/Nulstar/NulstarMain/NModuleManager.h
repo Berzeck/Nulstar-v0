@@ -39,6 +39,8 @@ namespace NulstarNS {
     void fSetNamespaceModules(const QString& lModuleNamespace, const QStringList& lModuleNames);
     void fSetModuleVersions(const QString& lModuleNamespace, const QString &lModuleName, const QStringList& lModuleVersions);
     void fSetModuleInfo(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion, const QList<SModuleParameter>& lModuleParameters);
+    NModuleManager* fReadModuleNcf(const QString& lNcfPath, QList<SModuleParameter>& lParameters);
+    QString fGetModuleParamsValue(const QString& lModuleParamGroup, const QString& lModuleParamKey, const QList<SModuleParameter>& lModuleParameters);
   };
 }
 

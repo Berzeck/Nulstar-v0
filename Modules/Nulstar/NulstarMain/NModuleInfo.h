@@ -7,10 +7,21 @@
 #include <QVariant>
 
 namespace NulstarNS {
-  struct SModuleParameter {
-    QString mGroupName;
-    QString mParamName;
-    QString mParamValue;
+  class SModuleParameter {
+    public:
+        QString mGroupName;
+        QString mParamName;
+        QString mParamValue;
+        inline SModuleParameter &operator=(const SModuleParameter& lModuleParam) {
+            mGroupName = lModuleParam.mGroupName;
+            mParamName = lModuleParam.mParamName;
+            mParamValue = lModuleParam.mParamValue;
+            return *this;
+        }
+
+        inline bool operator==(const SModuleParameter& lModuleParam) {
+            return (mGroupName == lModuleParam.mGroupName) && (mParamName == lModuleParam.mParamName) && (mParamValue == lModuleParam.mParamValue);
+        }
   };
 
   class NModuleInfo {
