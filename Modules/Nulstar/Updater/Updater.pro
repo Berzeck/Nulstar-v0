@@ -11,9 +11,9 @@ CONFIG += c++11 console
 TARGET = Updater
 VERSION = 0.1.0
 APP_DOMAIN=Nulstar
-APP_ROLE=Role_ServiceManager
+APP_ROLE=Role_UpdateManager
 APP_ROLE_VERSION=0.1
-APP_NAME=Nulstar Service Manager
+APP_NAME=Nulstar Update Manager
 APP_VERSION=$$VERSION
 APP_VERSION_NAME=Baby Apple I
 
@@ -28,7 +28,7 @@ QMAKE_POST_LINK += $$QMAKE_COPY $$COPYFILE1
 
 # Source Files
 
-QMAKE_SUBSTITUTES += $$TOP_SRCDIR/AppVersion.h.in
+QMAKE_SUBSTITUTES += AppVersion.h.in
 
 HEADERS += NUpdateController.h
 
