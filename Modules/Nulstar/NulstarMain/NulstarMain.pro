@@ -26,13 +26,15 @@ QMAKE_SUBSTITUTES += $$TOP_SRCDIR/AppVersion.h.in
 HEADERS += NMainController.h \
            NPluginManger.h \
            NModuleManager.h \
-           NModuleInfo.h
+           NModuleInfo.h \
+    NModuleParameter.h
 
 SOURCES += NMainController.cpp \
            NulstarMain.cpp \
            NPluginManger.cpp \
            NModuleManager.cpp \
-           NModuleInfo.cpp
+           NModuleInfo.cpp \
+    NModuleParameter.cpp
 
 OTHER_FILES += Module.ncf
 

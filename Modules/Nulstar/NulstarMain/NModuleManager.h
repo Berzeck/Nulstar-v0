@@ -7,6 +7,7 @@
 #include <QDebug>
 
 #include "NModuleInfo.h"
+#include "NModuleParameter.h"
 
 namespace NulstarNS {  
   const QString cIndexSeparator("--");
@@ -38,9 +39,9 @@ namespace NulstarNS {
     QStringList fFoldersNameList(const QString& lDirPath) const;
     void fSetNamespaceModules(const QString& lModuleNamespace, const QStringList& lModuleNames);
     void fSetModuleVersions(const QString& lModuleNamespace, const QString &lModuleName, const QStringList& lModuleVersions);
-    void fSetModuleInfo(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion, const QList<SModuleParameter>& lModuleParameters);
-    NModuleManager* fReadModuleNcf(const QString& lNcfPath, QList<SModuleParameter>& lParameters);
-    QString fGetModuleParamsValue(const QString& lModuleParamGroup, const QString& lModuleParamKey, const QList<SModuleParameter>& lModuleParameters);
+    void fSetModuleInfo(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion, const QList<NModuleParameter>& lModuleParameters);
+    NModuleManager* fReadModuleNcf(const QString& lNcfPath, QList<NModuleParameter>& lParameters);
+    QString fGetModuleParamsValue(const QString& lModuleParamGroup, const QString& lModuleParamKey, const QList<NModuleParameter>& lModuleParameters);
   };
 }
 

@@ -5,29 +5,13 @@
 #include <QString>
 #include <QStringList>
 #include <QVariant>
+#include "NModuleParameter.h"
 
 namespace NulstarNS {
-  class SModuleParameter {
-    public:
-        QString mGroupName;
-        QString mParamName;
-        QString mParamValue;
-        inline SModuleParameter &operator=(const SModuleParameter& lModuleParam) {
-            mGroupName = lModuleParam.mGroupName;
-            mParamName = lModuleParam.mParamName;
-            mParamValue = lModuleParam.mParamValue;
-            return *this;
-        }
-
-        inline bool operator==(const SModuleParameter& lModuleParam) {
-            return (mGroupName == lModuleParam.mGroupName) && (mParamName == lModuleParam.mParamName) && (mParamValue == lModuleParam.mParamValue);
-        }
-  };
-
   class NModuleInfo {
     public:
       explicit NModuleInfo(const QString& lModulName, const QString &lModuleNamespace, const QString &lModuleVersion,  const QString& lModuleLanguage, const QString& lModuleWorkingDirectory,
-                           const QStringList& lModuleEnvLibPaths, const QList<SModuleParameter>& lModuleParameters);
+                           const QStringList& lModuleEnvLibPaths, const QList<NModuleParameter>& lModuleParameters);
       ~NModuleInfo() { }
 
       bool fIsValid() const;
@@ -38,7 +22,7 @@ namespace NulstarNS {
       QString fModuleLanguage() const { return mModuleLanguage; }
       QString fModuleWorkingDirectory() const { return mModuleWorkingDirectory; }
       QStringList fModuleEnvLibPaths() const { return mModuleEnvLibPaths; }
-      QList<SModuleParameter> fModuleParameters() const { return mModuleParameters; }
+      QList<NModuleParameter> fModuleParameters() const { return mModuleParameters; }
 
       QString fParameterValue(const QString& lParameter) const;
       QStringList fFormattedParameters() const;
@@ -51,7 +35,7 @@ namespace NulstarNS {
       QString mModuleVersion;
       QString mModuleWorkingDirectory;
       QStringList mModuleEnvLibPaths;
-      QList<SModuleParameter> mModuleParameters;
+      QList<NModuleParameter> mModuleParameters;
   };
 }
 

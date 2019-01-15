@@ -29,7 +29,7 @@ namespace NulstarNS {
       if((lModuleInfo.fModuleNamespace() == lModuleNamespace) && (lModuleInfo.fModuleName() == lModuleName) && (lModuleInfo.fModuleVersion() == lCurrentModuleVersion))
         return lModuleInfo;
     }
-    return NModuleInfo(QString(), QString(), QString(), QString(), QString(), QStringList(), QList<SModuleParameter>());
+    return NModuleInfo(QString(), QString(), QString(), QString(), QString(), QStringList(), QList<NModuleParameter>());
   }
 
   quint8 NModuleManager::fLoadModulesInfo() {
@@ -70,7 +70,7 @@ namespace NulstarNS {
 
     QString lModulesDirNcfPath = QString("%1/../../../%2").arg(QCoreApplication::applicationDirPath()).arg(cModuleConfigFile);
     QString lModulesNsNcfPath = QString("%1/../../../%2/%3").arg(QCoreApplication::applicationDirPath()).arg(lModuleNamespace).arg(cModuleConfigFile);
-    QList<SModuleParameter> lParameters = QList<SModuleParameter>();
+    QList<NModuleParameter> lParameters;
 
     fReadModuleNcf(lModulesDirNcfPath, lParameters)->fReadModuleNcf(lModulesNsNcfPath, lParameters)->fReadModuleNcf(lModuleNcfPath, lParameters);
 
@@ -82,7 +82,7 @@ namespace NulstarNS {
     return false;
   }
 
-  NModuleManager* NModuleManager::fReadModuleNcf(const QString& lNcfPath, QList<SModuleParameter>& lParameters){
+  NModuleManager* NModuleManager::fReadModuleNcf(const QString& lNcfPath, QList<NModuleParameter>& lParameters){
     QFileInfo lModuleNcfFileInfo(lNcfPath);
     if(!lModuleNcfFileInfo.exists()){
       return this;
@@ -94,14 +94,14 @@ namespace NulstarNS {
       lModuleSettings.beginGroup(lGroup);
       QStringList lKeys(lModuleSettings.childKeys());
       for (const QString& lKey : lKeys) {
-         SModuleParameter lParameterStructure;
+         NModuleParameter lParameterStructure;
          lParameterStructure.mGroupName = lGroup;
          lParameterStructure.mParamName = lKey;
          lParameterStructure.mParamValue = lModuleSettings.value(lKey).toString();
 
          QString lValue = fGetModuleParamsValue(lParameterStructure.mGroupName, lParameterStructure.mParamName, lParameters);
          if (!lValue.isEmpty()) {
-            SModuleParameter lParameterStructureRm;
+            NModuleParameter lParameterStructureRm;
             lParameterStructureRm.mGroupName = lGroup;
             lParameterStructureRm.mParamName = lKey;
             lParameterStructureRm.mParamValue = lValue;
@@ -114,9 +114,9 @@ namespace NulstarNS {
     return this;
   }
 
-  QString NModuleManager::fGetModuleParamsValue(const QString& lModuleParamGroup, const QString& lModuleParamKey, const QList<SModuleParameter>& lModuleParameters)
+  QString NModuleManager::fGetModuleParamsValue(const QString& lModuleParamGroup, const QString& lModuleParamKey, const QList<NModuleParameter>& lModuleParameters)
   {
-      for(const SModuleParameter& lModuleParameter : lModuleParameters ) {
+      for(const NModuleParameter& lModuleParameter : lModuleParameters ) {
           if((lModuleParameter.mGroupName == lModuleParamGroup) && (lModuleParameter.mParamName == lModuleParamKey)) {
               return lModuleParameter.mParamValue;
           }
@@ -174,9 +174,9 @@ namespace NulstarNS {
     mModuleVersions[lModuleIndex] = lModuleVersions;
   }
 
-  void NModuleManager::fSetModuleInfo(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion, const QList<SModuleParameter>& lModuleParameters) {
+  void NModuleManager::fSetModuleInfo(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion, const QList<NModuleParameter>& lModuleParameters) {
     QString lModuleLanguage;
-    for(const SModuleParameter& lModuleParameter : lModuleParameters ) {
+    for(const NModuleParameter& lModuleParameter : lModuleParameters ) {
       if((lModuleParameter.mGroupName == cModuleConfigGroupCore) && (lModuleParameter.mParamName == cModuleConfigGroupCoreLang)) {
         lModuleLanguage = lModuleParameter.mParamValue;
         break;
@@ -188,8 +188,8 @@ namespace NulstarNS {
 
     QString lModuleLibDirPath(QString("%1/../../../../%2/").arg(QCoreApplication::applicationDirPath()).arg(cModuleConfigGroupLibs));
     QStringList lLibDirPaths;
-    QList<SModuleParameter> lModuleStartupParameters;
-    for(const SModuleParameter& lModuleParameter : lModuleParameters ) {
+    QList<NModuleParameter> lModuleStartupParameters;
+    for(const NModuleParameter& lModuleParameter : lModuleParameters ) {
       if(lModuleParameter.mGroupName == cModuleConfigGroupLibs) {
         QDir lLibDir(QString("%1/%2/%3/%4/").arg(lModuleLibDirPath).arg(lModuleLanguage).arg(lModuleParameter.mParamName).arg(lModuleParameter.mParamValue));
         if(lLibDir.exists())
