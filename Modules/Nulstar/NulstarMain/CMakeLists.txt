@@ -11,6 +11,15 @@ find_package(Qt5WebSockets REQUIRED)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+set(APP_DOMAIN "Nulstar")
+set(APP_ROLE "Role_MainController")
+set(APP_ROLE_VERSION "0.1")
+set(APP_NAME "Nulstar Main Controller")
+set(APP_VERSION "0.1.0")
+set(APP_VERSION_NAME "OneEye Baby Ninja Egg")
+set(ENV{LD_LIBRARY_PATH} "${LIBRARIES_OUTPUT_DIR}/Nulstar/0.1.0")
+configure_file(${CMAKE_SOURCE_DIR}/AppVersion.h.cmake ${PROJECT_BINARY_DIR}/AppVersion.h)
+
 aux_source_directory(. SOURCE_SRCS)
 
 set(EXECUTABLE_OUTPUT_PATH "${MODULES_OUTPUT_DIR}/Nulstar/${PROJECT_NAME}/${APP_VERSION}")

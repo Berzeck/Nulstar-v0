@@ -28,7 +28,7 @@ QMAKE_POST_LINK += $$QMAKE_COPY $$COPYFILE1
 
 # Source Files
 
-QMAKE_SUBSTITUTES += $$TOP_SRCDIR/AppVersion.h.in
+QMAKE_SUBSTITUTES += AppVersion.h.in
 
 HEADERS += \
     NConnectionController.h
