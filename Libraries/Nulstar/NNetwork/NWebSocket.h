@@ -18,7 +18,7 @@ namespace NulstarNS {
     public:
       enum class EConnectionState { eConnectionNotNegotiated = 1, eConnectionAuthorized = 2, eConnectionActive = 3 };
 
-      NWebSocket(const QString& lModuleName, const QUrl& lConnectionUrl, quint8 lConnectionRetryInterval = 0, QObject* rParent = nullptr);
+      NWebSocket(const QString& lModuleName, const QString& lProtocolVersion, const QUrl& lConnectionUrl, quint8 lConnectionRetryInterval = 0, QObject* rParent = nullptr);
       virtual ~NWebSocket() override {}
       EConnectionState fConnectionState() { return mConnectionState; }
       QString fModuleName() { return mModuleName; }
@@ -38,6 +38,7 @@ namespace NulstarNS {
       QList<NMessage*> mMessageQueue;
       QMap<quint64, NMessage* > mMessageResponses; // MessageID, Message Pointer
       QString mModuleName;
+      QString mProtocolVersion;
       QTimer* pRetryTimer;
       QUrl mConnectionUrl;
 

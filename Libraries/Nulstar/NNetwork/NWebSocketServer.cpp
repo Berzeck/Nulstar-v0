@@ -42,8 +42,16 @@ namespace NulstarNS {
     mConnections[lMSecsSinceEpoch] = rSocket;
   }
 
-  void NWebSocketServer::fProcessTextMessage(QString lMessage) {    
-    emit fTextMessageArrived(mName, lMessage);
+  void NWebSocketServer::fProcessTextMessage(const QString& lMessage) {
+    QWebSocket* rClient = qobject_cast<QWebSocket*>(sender());
+    if(rClient) {
+      emit fTextMessageArrived(rClient->property("ID").toString(), lMessage);
+      QString lMessageType;
+      QJsonObject lMessageObject(NMessageFactory::fMessageObjectFromString(lMessage, &lMessageType));
+      if(lMessageType == cTypeNegotiateConnection) {
+
+      }
+    }
   }
 
   void NWebSocketServer::fProcessBinaryMessage(QByteArray lMessage) {
@@ -58,6 +66,15 @@ qDebug() << "socketDisconnected:" << rClient;
     if(rClient) {
       qint64 lSocketID = rClient->property("ID").toLongLong();
       mConnections.remove(lSocketID);
+      if(mMessageQueue.contains(lSocketID)) {
+        QMap<QString, NMessage* > lMessages;
+        QMapIterator<QString, NMessage*> i1(lMessages);
+        while(i1.hasNext()) {
+          i1.next();
+          delete i1.value();
+        }
+        mMessageQueue.remove(lSocketID);
+      }
       rClient->deleteLater();
     }
   }

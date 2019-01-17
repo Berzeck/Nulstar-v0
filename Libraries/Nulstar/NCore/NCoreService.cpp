@@ -12,6 +12,7 @@ namespace NulstarNS {
               : QObject(rParent), mLogLevel(lLogLevel), mServiceManagerUrl(lServiceManagerUrl), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks) {
     if(lPort)
       fAddWebSocketServer(lPort, lBindAddress, lCommServerName, lCommServerLabel, false);
+    QTimer::singleShot(0, this, [this] { mApiBuilder.fBuildApi(this); });
   }
 
   NCoreService::~NCoreService() {
@@ -53,7 +54,7 @@ namespace NulstarNS {
       rWebSocket->fConnect();
     }
     else {
-      rWebSocket = new NWebSocket(lServiceManagerName, mServiceManagerUrl, lReconnectionTryInterval);
+      rWebSocket = new NWebSocket(lServiceManagerName, fApiVersion(), mServiceManagerUrl, lReconnectionTryInterval);
       mWebSockets.insert(lServiceManagerName, rWebSocket);
       rWebSocket->fConnect();
     }

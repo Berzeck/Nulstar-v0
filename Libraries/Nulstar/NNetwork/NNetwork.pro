@@ -28,7 +28,8 @@ HEADERS += NNetwork.h \
            NMessageNotification.h \
            NMessageRegisterCompoundMethod.h \
            NWebSocketServer.h \
-    NWebSocket.h
+    NWebSocket.h \
+    NMessageFactory.h
 
 SOURCES += NMessageResponse.cpp \
            NMessageRequest.cpp \
@@ -41,7 +42,8 @@ SOURCES += NMessageResponse.cpp \
            NMessageNotification.cpp \
            NMessageRegisterCompoundMethod.cpp \
            NWebSocketServer.cpp \
-    NWebSocket.cpp
+    NWebSocket.cpp \
+    NMessageFactory.cpp
 
 # Dependencies
 

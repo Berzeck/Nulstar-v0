@@ -23,7 +23,7 @@ namespace NulstarNS {
 
     protected:
       QVariantMap fMessageData() const override;
-      QString fMessageType() const override { return QString("NegotiateConnectionResponse"); }
+      QString fMessageType() const override { return cTypeNegotiateConnectionResponse; }
 
     private:
       ENegotiationStatus mNegotiationStatus;

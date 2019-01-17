@@ -20,7 +20,7 @@ namespace NulstarNS {
 
     protected:
       QVariantMap fMessageData() const override;
-      QString fMessageType() const override { return QString("Ack"); }
+      QString fMessageType() const override { return cTypeAck; }
 
     private:
       QString mRequestID;

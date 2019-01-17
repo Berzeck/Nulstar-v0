@@ -5,9 +5,9 @@
 #include "NMessageNegotiateConnection.h"
 
 namespace NulstarNS {
-  NWebSocket::NWebSocket(const QString &lModuleName, const QUrl& lConnectionUrl, quint8 lConnectionRetryInterval, QObject* rParent)
+  NWebSocket::NWebSocket(const QString &lModuleName, const QString &lProtocolVersion, const QUrl& lConnectionUrl, quint8 lConnectionRetryInterval, QObject* rParent)
             : QWebSocket(QString(), QWebSocketProtocol::VersionLatest, rParent), mConnectionRetryInterval(lConnectionRetryInterval), mConnectionState(EConnectionState::eConnectionNotNegotiated),
-              mModuleName(lModuleName), mConnectionUrl(lConnectionUrl) {
+              mModuleName(lModuleName), mProtocolVersion(lProtocolVersion), mConnectionUrl(lConnectionUrl) {
     connect(this, &NWebSocket::connected, this, &NWebSocket::fOnConnected);
     connect(this, &NWebSocket::disconnected, this, &NWebSocket::fOnSocketDisconnection);
     connect(this, QOverload<QAbstractSocket::SocketError>::of(&NWebSocket::error), this, &NWebSocket::fOnConnectionError);
@@ -18,7 +18,7 @@ namespace NulstarNS {
   }
 
   void NWebSocket::fConnect() {
-   if(state() == QAbstractSocket::UnconnectedState && mConnectionUrl.isValid()) {
+    if(state() == QAbstractSocket::UnconnectedState && mConnectionUrl.isValid()) {
       open(mConnectionUrl);
     }
   }
@@ -61,7 +61,7 @@ namespace NulstarNS {
   }
 
   void NWebSocket::fNegotiateConnection() {
-    fQueueMessage(new  NMessageNegotiateConnection(mModuleName, QString(), 0, NMessageNegotiateConnection::ECompressionAlgorithm::eZlib, this), EConnectionState::eConnectionNotNegotiated);
+    fQueueMessage(new  NMessageNegotiateConnection(mModuleName, QString(), mProtocolVersion, 0, NMessageNegotiateConnection::ECompressionAlgorithm::eZlib, this), EConnectionState::eConnectionNotNegotiated);
   }
 
   void NWebSocket::fRegisterApi() {

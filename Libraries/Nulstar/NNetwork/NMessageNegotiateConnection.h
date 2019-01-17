@@ -14,20 +14,23 @@ namespace NulstarNS {
     public:
       enum class ECompressionAlgorithm { eZlib = 1 };
 
-      explicit NMessageNegotiateConnection(const QString& lConnectionName, const QString& lMessageID = QString(), const quint8 lCompressionRate = 0, const ECompressionAlgorithm lCompressionAlgorithm = ECompressionAlgorithm::eZlib, QObject* rParent = nullptr);
+      explicit NMessageNegotiateConnection(const QString& lConnectionName, const QString& lMessageID = QString(), const QString& lProtocolVersion = QString(), const quint8 lCompressionRate = 0,
+                                           const ECompressionAlgorithm lCompressionAlgorithm = ECompressionAlgorithm::eZlib, QObject* rParent = nullptr);
       ~NMessageNegotiateConnection() override {}
 
       ECompressionAlgorithm fCompressionAlgorithm() const { return mCompressionAlgorithm; }
       quint8 fCompressionRate() const { return mCompressionRate; }      
+      static bool fValidateMessageObject(const QJsonObject& lMessageObject);
 
     protected:
       QVariantMap fMessageData() const override;
-      QString fMessageType() const override { return QString("NegotiateConnection"); }
+      QString fMessageType() const override { return QString(cTypeNegotiateConnection); }
 
     private:
-      ECompressionAlgorithm mCompressionAlgorithm;
-      QString fCompressionAlgorithmString() const;
       quint8 mCompressionRate;
+      ECompressionAlgorithm mCompressionAlgorithm;
+      QString mProtocolVersion;
+      QString fCompressionAlgorithmString() const;            
   };
 }
 

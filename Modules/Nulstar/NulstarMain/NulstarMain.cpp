@@ -5,6 +5,8 @@
 
 #include "NMainController.h"
 
+const int lRetryInterval = 5; // Seconds
+
 int main(int argc, char* argv[])
 {
   QCoreApplication lApp(argc, argv);
@@ -23,5 +25,6 @@ int main(int argc, char* argv[])
   lController.fControlWebServer(QString(), NulstarNS::NMainController::EServiceAction::eStartService); // Start all web sockets servers
   lController.fStartModule(APP_DOMAIN, cServiceManager);
   lController.fStartAllModules();
+  lController.fConnectToServiceManager(lRetryInterval);
   return lApp.exec();
 }

@@ -20,7 +20,7 @@ namespace NulstarNS {
 
     protected:
       QVariantMap fMessageData() const override;
-      QString fMessageType() const override { return QString("UnregisterCompoundMethod"); }
+      QString fMessageType() const override { return cTypeUnregisterCompoundMethod; }
 
     private:
       QString mUnregisterCompoundMethodName;

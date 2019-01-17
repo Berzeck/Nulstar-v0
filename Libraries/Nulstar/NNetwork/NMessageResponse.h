@@ -31,7 +31,7 @@ namespace NulstarNS {
 
   protected:
     QVariantMap fMessageData() const override;
-    QString fMessageType() const override { return QString("Response"); }
+    QString fMessageType() const override { return cTypeReponse; }
 
   private:
     QString mRequestID;

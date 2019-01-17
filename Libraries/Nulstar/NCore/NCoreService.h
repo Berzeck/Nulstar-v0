@@ -68,7 +68,7 @@ namespace NulstarNS {
 
     public Q_SLOTS:
       virtual void fConnectToServiceManager(quint8 lReconnectionTryInterval);
-      virtual bool fControlWebServer(const QString& lName, EServiceAction lAction); // If lName is empty then it controls all web sockets servers      
+      virtual bool fControlWebServer(const QString& lName, EServiceAction lAction); // If lName is empty then it controls all web sockets servers            
   };
 }
 

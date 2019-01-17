@@ -1,19 +1,23 @@
 #include "NMessageNegotiateConnection.h"
 
 namespace NulstarNS {
-  const QString lCompressionRateFieldName("CompressionRate");
-  const QString lCompressionAlgorithmFieldName("CompressionAlgorithm");
+  const QString cProtocolVersionFieldName("ProtocolVersion");
+  const QString cCompressionRateFieldName("CompressionRate");
+  const QString cCompressionAlgorithmFieldName("CompressionAlgorithm");
 
-  NMessageNegotiateConnection::NMessageNegotiateConnection(const QString& lConnectionName, const QString& lMessageID, const quint8 lCompressionRate, const ECompressionAlgorithm lCompressionAlgorithm, QObject *rParent)
-                             : NMessage(lConnectionName, lMessageID, rParent), mCompressionAlgorithm(lCompressionAlgorithm) {
-    if(lCompressionRate > 9) mCompressionRate = 9;
-    else mCompressionRate = lCompressionRate;
+  NMessageNegotiateConnection::NMessageNegotiateConnection(const QString& lConnectionName, const QString& lMessageID, const QString &lProtocolVersion, const quint8 lCompressionRate, const ECompressionAlgorithm lCompressionAlgorithm, QObject *rParent)
+                             : NMessage(lConnectionName, lMessageID, rParent), mCompressionAlgorithm(lCompressionAlgorithm), mProtocolVersion(lProtocolVersion) {
+    if(lCompressionRate > 9)
+      mCompressionRate = 9;
+    else
+      mCompressionRate = lCompressionRate;
   }
 
   QVariantMap NMessageNegotiateConnection::fMessageData() const {
     QVariantMap lMessageData;
-    lMessageData.insert(lCompressionAlgorithmFieldName, fCompressionAlgorithmString());
-    lMessageData.insert(lCompressionRateFieldName, QString::number(mCompressionRate));
+    lMessageData.insert(cProtocolVersionFieldName, mProtocolVersion);
+    lMessageData.insert(cCompressionAlgorithmFieldName, fCompressionAlgorithmString());
+    lMessageData.insert(cCompressionRateFieldName, QString::number(mCompressionRate));
     return lMessageData;
   }
 
@@ -23,5 +27,21 @@ namespace NulstarNS {
       lAlgorithm = QStringLiteral("zlib");
     }
     return lAlgorithm;
+  }
+
+  bool NMessageNegotiateConnection::fValidateMessageObject(const QJsonObject& lMessageObject) {
+    if(!lMessageObject.contains(cProtocolVersionFieldName)) {
+      qDebug("Message received without 'ProtocolVersion' field!");
+      return false;
+    }
+    if(!lMessageObject.contains(cCompressionRateFieldName)) {
+      qDebug("Message received without 'CompressionRate' field!");
+      return false;
+    }
+    if(!lMessageObject.contains(cCompressionAlgorithmFieldName)) {
+      qDebug("Message received without 'CompressionAlgorithm' field!");
+      return false;
+    }
+    return NMessage::fValidateMessageObject(lMessageObject);
   }
 }

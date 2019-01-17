@@ -6,6 +6,8 @@
 #include <QObject>
 #include <QWebSocketServer>
 
+#include "NMessage.h"
+#include "NMessageFactory.h"
 #include "NNetwork.h"
 
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
@@ -30,15 +32,17 @@ namespace NulstarNS {
     private:
       int mMaxConnections;
       quint16 mPort;
+      NMessageFactory lMessageFactory;
       QString mName;      
       QHostAddress mBindAddress;
       QMap<qint64, QWebSocket* > mConnections;
+      QMap<qint64, QMap<QString, NMessage*> > mMessageQueue; // ConnectionID, <MessageID, Message>
       bool listen(const QHostAddress &address = QHostAddress::Any, quint16 port = 0) { return QWebSocketServer::listen(address, port); }
       void setServerName(const QString& serverName) { QWebSocketServer::setServerName(serverName); }
 
     private Q_SLOTS:
       void fOnNewConnection();
-      void fProcessTextMessage(QString lMessage);
+      void fProcessTextMessage(const QString& lMessage);
       void fProcessBinaryMessage(QByteArray lMessage);
       void fSocketDisconnected();
 
