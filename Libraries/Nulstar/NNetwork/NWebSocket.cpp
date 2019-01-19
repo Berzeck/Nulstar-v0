@@ -17,6 +17,11 @@ namespace NulstarNS {
     connect(pRetryTimer, &QTimer::timeout, this, &NWebSocket::fConnect);
   }
 
+  NWebSocket::NWebSocket(QObject* rParent)
+            : QWebSocket(QString(), QWebSocketProtocol::VersionLatest, rParent), pRetryTimer(nullptr) {
+
+  }
+
   void NWebSocket::fConnect() {
     if(state() == QAbstractSocket::UnconnectedState && mConnectionUrl.isValid()) {
       open(mConnectionUrl);
@@ -41,18 +46,21 @@ namespace NulstarNS {
 
   void NWebSocket::fOnConnectionError(QAbstractSocket::SocketError lErrorCode) {
     qDebug("%s", qUtf8Printable(QString::number(lErrorCode)));
-    pRetryTimer->start(mConnectionRetryInterval * 1000);
+    if(pRetryTimer && mConnectionRetryInterval)
+      pRetryTimer->start(mConnectionRetryInterval * 1000);
   }
 
   void NWebSocket::fOnConnected() {
     if(fConnectionState() == NWebSocket::EConnectionState::eConnectionNotNegotiated)
       fNegotiateConnection();
-    pRetryTimer->stop();
+    if(pRetryTimer)
+      pRetryTimer->stop();
   }
 
   void NWebSocket::fOnSocketDisconnection() {
     fSetConnectionState(NWebSocket::EConnectionState::eConnectionNotNegotiated);
-    pRetryTimer->start(mConnectionRetryInterval * 1000);
+    if(pRetryTimer && mConnectionRetryInterval)
+      pRetryTimer->start(mConnectionRetryInterval * 1000);
   }
 
   void NWebSocket::fOnTextMessageReceived(const QString& lTextMessage) {
