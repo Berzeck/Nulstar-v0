@@ -20,6 +20,7 @@ namespace NulstarNS {
 
       ENegotiationStatus fNegotiationStatus() const { return mNegotiationStatus; }
       QString fNegotiationComment() const { return mNegotiationComment; }
+      static bool fValidateMessageObject(const QJsonObject& lMessageObject);
 
     protected:
       QVariantMap fMessageData() const override;

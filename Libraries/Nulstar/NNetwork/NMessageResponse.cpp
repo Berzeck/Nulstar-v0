@@ -1,12 +1,12 @@
 #include "NMessageResponse.h"
 
 namespace NulstarNS {
-  const QString lRequestIDFieldName("RequestID");
-  const QString lResponseProcessingTimeFieldName("ResponseProcessingTime");
-  const QString lResponseStatusFieldName("ResponseStatus");
-  const QString lResponseCommentFieldName("ResponseComment");
-  const QString lResponseMaxSizeFieldName("ResponseMaxSize");
-  const QString lResponseDataFieldName("ResponseData");
+  const QString cRequestIDFieldName("RequestID");
+  const QString cResponseProcessingTimeFieldName("ResponseProcessingTime");
+  const QString cResponseStatusFieldName("ResponseStatus");
+  const QString cResponseCommentFieldName("ResponseComment");
+  const QString cResponseMaxSizeFieldName("ResponseMaxSize");
+  const QString cResponseDataFieldName("ResponseData");
 
   NMessageResponse::NMessageResponse(const QString& lConnectionName, const QString& lMessageID, const QString& lRequestID, const quint64 lResponseProcessingTime, const EResponseStatus lResponseStatus,
                                      const QString& lResponseComment, const quint64 lResponseMaxSize, const QVariantMap& lResponseData, QObject* rParent)
@@ -17,12 +17,12 @@ namespace NulstarNS {
 
   QVariantMap NMessageResponse::fMessageData() const {
     QVariantMap lMessageData;
-    lMessageData.insert(lRequestIDFieldName, mRequestID);
-    lMessageData.insert(lResponseProcessingTimeFieldName, QString::number(mResponseProcessingTime));
-    lMessageData.insert(lResponseStatusFieldName, mResponseStatus == EResponseStatus::eResponseSuccessful ? QString("1") : QString("0"));
-    lMessageData.insert(lResponseCommentFieldName, mResponseComment);
-    lMessageData.insert(lResponseMaxSizeFieldName, QString::number(mResponseMaxSize));
-    lMessageData.insert(lResponseDataFieldName, mResponseData);
+    lMessageData.insert(cRequestIDFieldName, mRequestID);
+    lMessageData.insert(cResponseProcessingTimeFieldName, QString::number(mResponseProcessingTime));
+    lMessageData.insert(cResponseStatusFieldName, mResponseStatus == EResponseStatus::eResponseSuccessful ? QString("1") : QString("0"));
+    lMessageData.insert(cResponseCommentFieldName, mResponseComment);
+    lMessageData.insert(cResponseMaxSizeFieldName, QString::number(mResponseMaxSize));
+    lMessageData.insert(cResponseDataFieldName, mResponseData);
     return lMessageData;
   }
 
@@ -38,5 +38,33 @@ namespace NulstarNS {
       return false;
     mResponseData[lMethodName].toMap()[lParameterName] = lParameterValue;
     return true;
+  }
+
+  bool NMessageResponse::fValidateMessageObject(const QJsonObject& lMessageObject) {
+    if(!lMessageObject.contains(cRequestIDFieldName)) {
+      qDebug("Message received without 'RequestID' field!");
+      return false;
+    }
+    if(!lMessageObject.contains(cResponseProcessingTimeFieldName)) {
+      qDebug("Message received without 'ResponseProcessingTime' field!");
+      return false;
+    }
+    if(!lMessageObject.contains(cResponseStatusFieldName)) {
+      qDebug("Message received without 'ResponseStatus' field!");
+      return false;
+    }
+    if(!lMessageObject.contains(cResponseCommentFieldName)) {
+      qDebug("Message received without 'ResponseComment' field!");
+      return false;
+    }
+    if(!lMessageObject.contains(cResponseMaxSizeFieldName)) {
+      qDebug("Message received without 'ResponseMaxSize' field!");
+      return false;
+    }
+    if(!lMessageObject.contains(cResponseDataFieldName)) {
+      qDebug("Message received without 'ResponseData' field!");
+      return false;
+    }
+    return NMessage::fValidateMessageObject(lMessageObject);
   }
 } // namespace NulstarNS

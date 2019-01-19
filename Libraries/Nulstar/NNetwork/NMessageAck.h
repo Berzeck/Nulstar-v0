@@ -17,6 +17,7 @@ namespace NulstarNS {
       ~NMessageAck() override {}
 
       QString fRequestID() const { return mRequestID; }
+      static bool fValidateMessageObject(const QJsonObject& lMessageObject);
 
     protected:
       QVariantMap fMessageData() const override;
