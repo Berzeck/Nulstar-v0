@@ -28,6 +28,7 @@ namespace NulstarNS {
 
     bool fAddMethod(const QString& lMethodName);
     bool fAddParameter(const QString& lMethodName, const QString& lParameterName, const QVariant& lParameterValue);
+    static bool fValidateMessageObject(const QJsonObject& lMessageObject);
 
   protected:
     QVariantMap fMessageData() const override;
