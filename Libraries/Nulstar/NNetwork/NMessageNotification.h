@@ -17,7 +17,7 @@ namespace NulstarNS {
     QString fNotificationType() const { return mNotificationType; }
     QString fNotificationComment() const { return mNotificationComment; }
     QVariantMap fNotificationData() const { return mNotificationData; }
-
+    static bool fValidateMessageObject(const QJsonObject& lMessageObject);
   protected:
     QVariantMap fMessageData() const override;
     QString fMessageType() const override { return cTypeNotification; }
