@@ -24,6 +24,7 @@ namespace NulstarNS {
       bool fListen(const QHostAddress& lAddress = QHostAddress::Null, quint16 lPort = 0);
       QString fName() { return mName; }
       int fMaxConnections() { return mMaxConnections; }
+      NWebSocket* fNextPendingConnection();
       int fTotalConnections() { return mConnections.size(); }
       void fSetName(const QString& lName);
       void fSetMaxConnections(int lMaxConnections) { mMaxConnections = lMaxConnections; }
@@ -42,7 +43,6 @@ namespace NulstarNS {
       void setServerName(const QString& serverName) { QWebSocketServer::setServerName(serverName); }
 
     private Q_SLOTS:
-      NWebSocket* fNextPendingConnection();
       void fOnNewConnection();
       void fProcessTextMessage(const QString& lMessage);
       void fProcessBinaryMessage(QByteArray lMessage);
