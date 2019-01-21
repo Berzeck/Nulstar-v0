@@ -7,6 +7,9 @@ namespace NulstarNS {
   const QString cResponseCommentFieldName("ResponseComment");
   const QString cResponseMaxSizeFieldName("ResponseMaxSize");
   const QString cResponseDataFieldName("ResponseData");
+  const int cResponseStatusSuccess = 1;
+  const int cResponseStatusFailure = 0;
+
 
   NMessageResponse::NMessageResponse(const QString& lConnectionName, const QString& lMessageID, const QString& lRequestID, const quint64 lResponseProcessingTime, const EResponseStatus lResponseStatus,
                                      const QString& lResponseComment, const quint64 lResponseMaxSize, const QVariantMap& lResponseData, QObject* rParent)
@@ -41,6 +44,14 @@ namespace NulstarNS {
   }
 
   bool NMessageResponse::fValidateMessageObject(const QJsonObject& lMessageObject) {
+    if(!lMessageObject.contains(cMessageTypeFieldName)) {
+        qDebug("Message received without 'MessageType' field!");
+        return false;
+    }
+    if (lMessageObject.value(cMessageTypeFieldName).toString() != cTypeReponse){
+        qDebug("Message type is not 'Response'!");
+        return false;
+    }
     if(!lMessageObject.contains(cRequestIDFieldName)) {
       qDebug("Message received without 'RequestID' field!");
       return false;
@@ -51,6 +62,11 @@ namespace NulstarNS {
     }
     if(!lMessageObject.contains(cResponseStatusFieldName)) {
       qDebug("Message received without 'ResponseStatus' field!");
+      return false;
+    }
+    int lResponseStatus = lMessageObject.value(cResponseStatusFieldName).toInt();
+    if((lResponseStatus !=  cResponseStatusSuccess) || (lResponseStatus !=  cResponseStatusFailure)) {
+      qDebug("ResponseStatus value out of scope!");
       return false;
     }
     if(!lMessageObject.contains(cResponseCommentFieldName)) {

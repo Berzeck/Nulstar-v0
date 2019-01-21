@@ -4,6 +4,8 @@ namespace NulstarNS {
   const QString cProtocolVersionFieldName("ProtocolVersion");
   const QString cCompressionRateFieldName("CompressionRate");
   const QString cCompressionAlgorithmFieldName("CompressionAlgorithm");
+  const int cCompressionRateMax = 9;
+  const int cCompressionRateMin = 0;
 
   NMessageNegotiateConnection::NMessageNegotiateConnection(const QString& lConnectionName, const QString& lMessageID, const QString &lProtocolVersion, const quint8 lCompressionRate, const ECompressionAlgorithm lCompressionAlgorithm, QObject *rParent)
                              : NMessage(lConnectionName, lMessageID, rParent), mCompressionAlgorithm(lCompressionAlgorithm), mProtocolVersion(lProtocolVersion) {
@@ -30,12 +32,25 @@ namespace NulstarNS {
   }
 
   bool NMessageNegotiateConnection::fValidateMessageObject(const QJsonObject& lMessageObject) {
+    if(!lMessageObject.contains(cMessageTypeFieldName)) {
+        qDebug("Message received without 'MessageType' field!");
+        return false;
+    }
+    if (lMessageObject.value(cMessageTypeFieldName).toString() != cTypeNegotiateConnection) {
+        qDebug("Message type is not 'NegotiateConnection'!");
+        return false;
+    }
     if(!lMessageObject.contains(cProtocolVersionFieldName)) {
       qDebug("Message received without 'ProtocolVersion' field!");
       return false;
     }
     if(!lMessageObject.contains(cCompressionRateFieldName)) {
       qDebug("Message received without 'CompressionRate' field!");
+      return false;
+    }
+    int lCompressionRate = lMessageObject.value(cCompressionRateFieldName).toInt();
+    if((lCompressionRate > cCompressionRateMax) || (lCompressionRate < cCompressionRateMin)) {
+      qDebug("lCompressionRate value out of scope!");
       return false;
     }
     if(!lMessageObject.contains(cCompressionAlgorithmFieldName)) {

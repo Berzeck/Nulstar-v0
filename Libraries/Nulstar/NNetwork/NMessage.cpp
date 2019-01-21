@@ -44,7 +44,7 @@ namespace NulstarNS {
       return false;
     }
     if(!lMessageObject.contains(cMessageTypeFieldName)) {
-      qDebug("Message received without '' field!");
+      qDebug("Message received without 'Type' field!");
       return false;
     }
     if(!lMessageObject.contains(cMessageDataFieldName)) {
