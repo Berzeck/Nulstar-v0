@@ -74,7 +74,7 @@ namespace NulstarNS {
     }
 
     if((lModuleName == APP_NAME) && (lModuleNamespace == APP_DOMAIN)) {
-      qDebug("Module '%s' can't be managed fron this interface!", lModuleName.toStdString().data());
+      qDebug("Module '%s' can't be managed from this interface!", lModuleName.toStdString().data());
       return false;
     }
     QProcess* lModuleProcess = new QProcess(this);
