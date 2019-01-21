@@ -10,6 +10,7 @@
 #include "NMessageFactory.h"
 #include "NNetwork.h"
 
+QT_FORWARD_DECLARE_CLASS(NWebSocket)
 QT_FORWARD_DECLARE_CLASS(QWebSocket)
 
 namespace NulstarNS {
@@ -41,6 +42,7 @@ namespace NulstarNS {
       void setServerName(const QString& serverName) { QWebSocketServer::setServerName(serverName); }
 
     private Q_SLOTS:
+      NWebSocket* fNextPendingConnection();
       void fOnNewConnection();
       void fProcessTextMessage(const QString& lMessage);
       void fProcessBinaryMessage(QByteArray lMessage);

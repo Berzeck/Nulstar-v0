@@ -2,6 +2,7 @@
 #include <NMessage.h>
 
 #include "NMessageRequest.h"
+#include "NWebSocket.h"
 #include "NWebSocketServer.h"
 
 namespace NulstarNS {
@@ -33,19 +34,19 @@ namespace NulstarNS {
   void NWebSocketServer::fOnNewConnection() {
     if(mMaxConnections && (mConnections.size() >= mMaxConnections))
       return;
-    QWebSocket* rSocket = nextPendingConnection();
-    connect(rSocket, &QWebSocket::textMessageReceived, this, &NWebSocketServer::fProcessTextMessage);
-    connect(rSocket, &QWebSocket::binaryMessageReceived, this, &NWebSocketServer::fProcessBinaryMessage);
-    connect(rSocket, &QWebSocket::disconnected, this, &NWebSocketServer::fSocketDisconnected);
+    NWebSocket* rSocket = fNextPendingConnection();
+    connect(rSocket, &NWebSocket::textMessageReceived, this, &NWebSocketServer::fProcessTextMessage);
+    connect(rSocket, &NWebSocket::binaryMessageReceived, this, &NWebSocketServer::fProcessBinaryMessage);
+    connect(rSocket, &NWebSocket::disconnected, this, &NWebSocketServer::fSocketDisconnected);
     qint64 lMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch());
-    rSocket->setProperty("ID", lMSecsSinceEpoch);
+    rSocket->fSetModuleName(QString::number(lMSecsSinceEpoch));
     mConnections[lMSecsSinceEpoch] = rSocket;
   }
 
   void NWebSocketServer::fProcessTextMessage(const QString& lMessage) {
-    QWebSocket* rClient = qobject_cast<QWebSocket*>(sender());
+    NWebSocket* rClient = qobject_cast<NWebSocket*>(sender());
     if(rClient) {
-      emit fTextMessageArrived(rClient->property("ID").toString(), lMessage);
+      emit fTextMessageArrived(rClient->fModuleName(), lMessage);
       QString lMessageType;
       QJsonObject lMessageObject(NMessageFactory::fMessageObjectFromString(lMessage, &lMessageType));
       if(lMessageType == cTypeNegotiateConnection) {
@@ -55,13 +56,13 @@ namespace NulstarNS {
   }
 
   void NWebSocketServer::fProcessBinaryMessage(QByteArray lMessage) {
-    QWebSocket* rClient = qobject_cast<QWebSocket*>(sender());
+    NWebSocket* rClient = qobject_cast<NWebSocket*>(sender());
 qDebug() << "Binary Message received:" << lMessage;
     if (rClient) rClient->sendBinaryMessage(lMessage);
   }
 
   void NWebSocketServer::fSocketDisconnected() {
-    QWebSocket* rClient = qobject_cast<QWebSocket*>(sender());
+    NWebSocket* rClient = qobject_cast<NWebSocket*>(sender());
 qDebug() << "socketDisconnected:" << rClient;
     if(rClient) {
       qint64 lSocketID = rClient->property("ID").toLongLong();
@@ -85,5 +86,10 @@ qDebug() << "socketDisconnected:" << rClient;
 
   void NWebSocketServer::fSetPort(quint16 lPort) {
     if(lPort) mPort = lPort;
+  }
+
+  NWebSocket* NWebSocketServer::fNextPendingConnection() {
+    NWebSocket* rConnection = new NWebSocket(nextPendingConnection());
+    return rConnection;
   }
 }
