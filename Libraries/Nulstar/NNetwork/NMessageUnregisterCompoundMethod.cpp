@@ -14,4 +14,17 @@ namespace NulstarNS {
     lMessageData.insert(lUnregisterCompoundMethodName, mUnregisterCompoundMethodName);
     return lMessageData;
   }
+bool NMessageUnregisterCompoundMethod::fValidateMessageObject(const QJsonObject &lMessageObject) {
+  if (!NMessage::fValidateMessageObject(lMessageObject)) {
+    return false;
+  }
+
+  if (lMessageObject.value(cMessageTypeFieldName).toString() != cTypeUnregisterCompoundMethod) {
+    qDebug("Message type is not 'UnregisterCompoundMethod'!");
+    return false;
+  }
+
+
+  return true;
+}
 }

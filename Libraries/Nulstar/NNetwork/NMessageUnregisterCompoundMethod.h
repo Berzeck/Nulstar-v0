@@ -21,6 +21,7 @@ namespace NulstarNS {
     protected:
       QVariantMap fMessageData() const override;
       QString fMessageType() const override { return cTypeUnregisterCompoundMethod; }
+      static bool fValidateMessageObject(const QJsonObject& lMessageObject);
 
     private:
       QString mUnregisterCompoundMethodName;

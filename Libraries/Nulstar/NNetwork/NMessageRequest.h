@@ -31,7 +31,7 @@ namespace NulstarNS {
     protected:
       QVariantMap fMessageData() const override;
       QString fMessageType() const override { return cTypeRequest; }
-
+      static bool fValidateMessageObject(const QJsonObject& lMessageObject);
     private:
       bool mRequestAck;
       quint64 mResponseMaxSize;

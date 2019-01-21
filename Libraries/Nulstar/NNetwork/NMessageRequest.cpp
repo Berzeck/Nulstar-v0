@@ -41,4 +41,18 @@ namespace NulstarNS {
     return true;
   }
 
+bool NMessageRequest::fValidateMessageObject(const QJsonObject &lMessageObject) {
+  if (!NMessage::fValidateMessageObject(lMessageObject)) {
+    return false;
+  }
+
+  if (lMessageObject.value(cMessageTypeFieldName).toString() != cTypeRequest) {
+    qDebug("Message type is not 'Request'!");
+    return false;
+  }
+
+
+  return true;
+}
+
 }

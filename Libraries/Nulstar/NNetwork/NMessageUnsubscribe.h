@@ -17,6 +17,7 @@ namespace NulstarNS {
   protected:
     QVariantMap fMessageData() const override;
     QString fMessageType() const override { return QString("Unsubscribe"); }
+    static bool fValidateMessageObject(const QJsonObject& lMessageObject);
 
   private:
     QStringList mUnsubscribeMethods;

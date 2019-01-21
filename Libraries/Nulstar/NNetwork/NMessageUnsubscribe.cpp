@@ -13,4 +13,17 @@ namespace NulstarNS {
     lMessageData.insert(lUnsubscribeMethodsFieldName, mUnsubscribeMethods);
     return lMessageData;
   }
+bool NMessageUnsubscribe::fValidateMessageObject(const QJsonObject &lMessageObject) {
+  if (!NMessage::fValidateMessageObject(lMessageObject)) {
+    return false;
+  }
+
+  if (lMessageObject.value(cMessageTypeFieldName).toString() != cTypeUnsubscribe) {
+    qDebug("Message type is not 'Unsubscribe'!");
+    return false;
+  }
+
+
+  return true;
+}
 } // namespace NulstarNS

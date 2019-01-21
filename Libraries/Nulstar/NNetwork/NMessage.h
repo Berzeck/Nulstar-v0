@@ -24,6 +24,7 @@ namespace NulstarNS {
   const QString cTypeRequest("Request");
   const QString cTypeReponse("Response");
   const QString cTypeUnregisterCompoundMethod("UnregisterCompoundMethod");
+  const QString cTypeUnsubscribe("Unsubscribe");
 
   class NETWORKSHARED_EXPORT NMessage : public QObject {
     Q_OBJECT

@@ -30,4 +30,18 @@ namespace NulstarNS {
     mCompoundMethods[lMethodName].toMap()[lParameterName] = lParameterValue;
     return true;
   }
+bool NMessageRegisterCompoundMethod::fValidateMessageObject(const QJsonObject &lMessageObject) {
+  if (!NMessage::fValidateMessageObject(lMessageObject)) {
+    return false;
+  }
+
+  if (lMessageObject.value(cMessageTypeFieldName).toString() != cTypeRegisterCompoundMethod) {
+    qDebug("Message type is not 'RegisterCompoundMethod'!");
+    return false;
+  }
+
+  QJsonValue dataFields = lMessageObject.value("cMessageDataFieldName");
+
+  return true;
+}
 }
