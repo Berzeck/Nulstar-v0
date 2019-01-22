@@ -3,9 +3,11 @@
 #define NCONNECTIONCONTROLLER_H
 
 #include <QHostAddress>
+#include <QList>
 #include <QObject>
 #include <QUrl>
 #include <NCoreService.h>
+#include <QVersionNumber>
 
 #include "AppVersion.h"
 //***#include <NResponse.h>
@@ -29,7 +31,7 @@ namespace NulstarNS {
       QString fVersion() const override { return QString(APP_VERSION); }
       QString fDomain() const override { return QString(APP_DOMAIN); }
       QString fApiRole() const override { return QString(APP_ROLE); }
-      QString fApiVersion() const override { return QString(APP_ROLE_VERSION); }
+      QList<QVersionNumber> fApiVersionsSupported() const override { QList<QVersionNumber> lApiVersionsSupported; QVersionNumber lMainVersion(QVersionNumber::fromString(APP_ROLE_VERSION)); lApiVersionsSupported << lMainVersion; return lApiVersionsSupported; }
 
     protected:
       void fFillMethodDescriptions();

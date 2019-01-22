@@ -37,7 +37,7 @@ namespace NulstarNS {
     if(lEffectiveLabel.isEmpty())
       lEffectiveLabel = lCommServerLabel;
 
-    NWebSocketServer* pWebServer = new NWebSocketServer(lName, lLabel, mSslMode, nullptr);
+    NWebSocketServer* pWebServer = new NWebSocketServer(lName, lLabel, mSslMode, fApiVersionsSupported(), nullptr);
     pWebServer->fSetPort(lPort);
     pWebServer->fSetBindAddress(lBindAddress);
 
@@ -54,7 +54,7 @@ namespace NulstarNS {
       rWebSocket->fConnect();
     }
     else {
-      rWebSocket = new NWebSocket(lServiceManagerName, fApiVersion(), mServiceManagerUrl, lReconnectionTryInterval);
+      rWebSocket = new NWebSocket(lServiceManagerName, fApiVersionsSupported().at(0).toString(), mServiceManagerUrl, lReconnectionTryInterval);
       mWebSockets.insert(lServiceManagerName, rWebSocket);
       rWebSocket->fConnect();
     }

@@ -1,13 +1,16 @@
 #include <QWebSocket>
-#include <NMessage.h>
+#include <QVersionNumber>
 
+#include "NMessage.h"
+#include "NMessageNegotiateConnection.h"
+#include "NMessageNegotiateConnectionResponse.h"
 #include "NMessageRequest.h"
 #include "NWebSocket.h"
 #include "NWebSocketServer.h"
 
 namespace NulstarNS {
-  NWebSocketServer::NWebSocketServer(const QString& lName, const QString& lLabel, SslMode lSslMode, QObject* rParent)
-                  : QWebSocketServer(lLabel, lSslMode, rParent), mMaxConnections(0), mPort(0), mName(lName), mBindAddress(QHostAddress::Null) {
+  NWebSocketServer::NWebSocketServer(const QString& lName, const QString& lLabel, SslMode lSslMode, const QList<QVersionNumber> &lProtocolVersionsSupported, QObject* rParent)
+                  : QWebSocketServer(lLabel, lSslMode, rParent), mMaxConnections(0), mPort(0), mProtocolVersionsSupported(lProtocolVersionsSupported), mName(lName), mBindAddress(QHostAddress::Null) {
 
   }
 
@@ -39,19 +42,18 @@ namespace NulstarNS {
     connect(rSocket, &NWebSocket::binaryMessageReceived, this, &NWebSocketServer::fProcessBinaryMessage);
     connect(rSocket, &NWebSocket::disconnected, this, &NWebSocketServer::fSocketDisconnected);
     qint64 lMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch());
-    rSocket->fSetModuleName(QString::number(lMSecsSinceEpoch));
+    rSocket->fSetName(QString::number(lMSecsSinceEpoch));
     mConnections[lMSecsSinceEpoch] = rSocket;
   }
 
   void NWebSocketServer::fProcessTextMessage(const QString& lMessage) {
     NWebSocket* rClient = qobject_cast<NWebSocket*>(sender());
     if(rClient) {
-      emit fTextMessageArrived(rClient->fModuleName(), lMessage);
+    //  emit fTextMessageArrived(rClient->fModuleName(), lMessage);
       QString lMessageType;
       QJsonObject lMessageObject(NMessageFactory::fMessageObjectFromString(lMessage, &lMessageType));
-      if(lMessageType == cTypeNegotiateConnection) {
-
-      }
+      if(lMessageType == cTypeNegotiateConnection && NMessageNegotiateConnection::fValidateMessageObject(lMessageObject))
+        fProcessNegotiateConnectionResponse(lMessageObject, rClient);
     }
   }
 
@@ -80,6 +82,24 @@ qDebug() << "socketDisconnected:" << rClient;
     }
   }
 
+  void NWebSocketServer::fProcessNegotiateConnectionResponse(const QJsonObject& lObjectMessage, NWebSocket* rConnection) {
+    if(!rConnection) {
+      qDebug() << QString("Connection '%1' no longer exists!").arg(rConnection->fName());
+      return;
+    }
+    QVersionNumber lIncommingVersion = QVersionNumber::fromString(lObjectMessage.value(cMessageDataFieldName).toObject().value(cProtocolVersionFieldName).toString());
+    for(const QVersionNumber& lVersionSupported : mProtocolVersionsSupported) {
+      if(lIncommingVersion == lVersionSupported) {
+        NMessageNegotiateConnectionResponse rNegotiationResponse(rConnection->fName(), QString(), NMessageNegotiateConnectionResponse::ENegotiationStatus::eNegotiationSuccessful, QString("Negotiation successful!"));
+        QString lJsonMessage(rNegotiationResponse.fToJsonString());
+ qDebug() << QString("Message Sent: '%1'").arg(lJsonMessage);
+        rConnection->sendTextMessage(lJsonMessage);
+        return;
+      }
+    }
+    /**send protcol version not supported message ***/
+  }
+
   void NWebSocketServer::fSetBindAddress(const QHostAddress& lBindAddress) {
     if(lBindAddress != QHostAddress::Null) mBindAddress = lBindAddress;
   }
@@ -89,7 +109,12 @@ qDebug() << "socketDisconnected:" << rClient;
   }
 
   NWebSocket* NWebSocketServer::fNextPendingConnection() {
-    NWebSocket* rConnection = new NWebSocket(nextPendingConnection());
-    return rConnection;
+    QWebSocket* rPendingConnection = nextPendingConnection();
+    if(rPendingConnection) {
+      NWebSocket* rConnection = new NWebSocket(rPendingConnection);
+      connect(rPendingConnection, &QWebSocket::textMessageReceived, rConnection, &NWebSocket::textMessageReceived, Qt::UniqueConnection);
+      return rConnection;
+    }
+    return nullptr;
   }
 }

@@ -8,6 +8,9 @@
 #include "NNetwork.h"
 
 namespace NulstarNS {
+  const QString cProtocolVersionFieldName("ProtocolVersion");
+  const QString cCompressionRateFieldName("CompressionRate");
+  const QString cCompressionAlgorithmFieldName("CompressionAlgorithm");
   class NETWORKSHARED_EXPORT NMessageNegotiateConnection : public NMessage {
     Q_OBJECT
 

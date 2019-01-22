@@ -13,6 +13,7 @@
 #include <QNetworkAddressEntry>
 #include <QObject>
 #include <QUrl>
+#include <QVersionNumber>
 #include <NWebSocket.h>
 #include <NWebSocketServer.h>
 #include "NApiBuilder.h"
@@ -36,7 +37,7 @@ namespace NulstarNS {
       virtual QString fVersion() const = 0;
       virtual QString fDomain() const = 0;
       virtual QString fApiRole() const = 0;
-      virtual QString fApiVersion() const = 0;
+      virtual QList<QVersionNumber> fApiVersionsSupported() const = 0;
 
 
       virtual bool fAddWebSocketServer(quint16 lPort, QHostAddress::SpecialAddress lBindAddress, const QString& lName = QString(), const QString& lLabel = QString(), bool lStartImmediatly = false);

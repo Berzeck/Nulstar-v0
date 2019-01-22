@@ -24,7 +24,7 @@ namespace NulstarNS {
       QString fVersion() const override { return QString(APP_VERSION); }
       QString fDomain() const override { return QString(APP_DOMAIN); }
       QString fApiRole() const override { return QString(APP_ROLE); }
-      QString fApiVersion() const override { return QString(APP_ROLE_VERSION); }
+      QList<QVersionNumber> fApiVersionsSupported() const override { QList<QVersionNumber> lApiVersionsSupported; QVersionNumber lMainVersion(QVersionNumber::fromString(APP_ROLE_VERSION)); lApiVersionsSupported << lMainVersion; return lApiVersionsSupported; }
 
     public Q_SLOTS:
       API_ADMIN_FUNCTION quint8 fScanManagedModules() { return mModuleManager.fLoadModulesInfo(); }      

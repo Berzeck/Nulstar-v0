@@ -75,7 +75,7 @@ namespace NulstarNS {
       lApiHeader[lServiceVersionFieldName] = pTargetObject->fVersion();
       lApiHeader[lServiceDomainFieldName] = pTargetObject->fDomain();
       lApiHeader[lServiceRoleFieldName] = pTargetObject->fApiRole();
-      lApiHeader[lServiceApiVersionFieldName] = pTargetObject->fApiVersion();
+      //lApiHeader[lServiceApiVersionFieldName] = pTargetObject->fApiVersion();
     }
     return lApiHeader;
   }

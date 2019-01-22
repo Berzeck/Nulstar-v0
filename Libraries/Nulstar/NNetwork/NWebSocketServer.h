@@ -2,9 +2,11 @@
 #define NWEBSOCKETSERVER_H
 
 #include <QHostAddress>
+#include <QList>
 #include <QMap>
 #include <QObject>
 #include <QWebSocketServer>
+#include <QVersionNumber>
 
 #include "NMessage.h"
 #include "NMessageFactory.h"
@@ -18,7 +20,7 @@ namespace NulstarNS {
     Q_OBJECT
 
     public:
-      explicit NWebSocketServer(const QString& lName, const QString& lLabel, SslMode lSslMode, QObject* rParent = nullptr);
+      explicit NWebSocketServer(const QString& lName, const QString& lLabel, SslMode lSslMode, const QList<QVersionNumber>& lProtocolVersionsSupported, QObject* rParent = nullptr);
       virtual ~NWebSocketServer();
 
       bool fListen(const QHostAddress& lAddress = QHostAddress::Null, quint16 lPort = 0);
@@ -31,10 +33,14 @@ namespace NulstarNS {
       void fSetPort(quint16 lPort);
       void fSetBindAddress(const QHostAddress& lBindAddress);
 
+    protected:
+      void fProcessNegotiateConnectionResponse(const QJsonObject& lObjectMessage, NWebSocket* rConnection);
+
     private:
       int mMaxConnections;
       quint16 mPort;
       NMessageFactory lMessageFactory;
+      QList<QVersionNumber> mProtocolVersionsSupported;
       QString mName;      
       QHostAddress mBindAddress;
       QMap<qint64, QWebSocket* > mConnections;
