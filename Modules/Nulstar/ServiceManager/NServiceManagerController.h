@@ -22,7 +22,7 @@ namespace NulstarNS {
       QString fVersion() const override { return QString(APP_VERSION); }
       QString fDomain() const override { return QString(APP_DOMAIN); }
       QString fApiRole() const override { return QString(APP_ROLE); }
-      QList<QVersionNumber> fApiVersionsSupported() const override { QList<QVersionNumber> lApiVersionsSupported; QVersionNumber lMainVersion(QVersionNumber::fromString(APP_ROLE_VERSION)); lApiVersionsSupported << lMainVersion; return lApiVersionsSupported; }
+      QList<QVersionNumber> fApiVersionsSupported() const override { QList<QVersionNumber> lApiVersionsSupported; QVersionNumber lMainVersion(QVersionNumber::fromString("1.7" /*APP_ROLE_VERSION*/)); lApiVersionsSupported << lMainVersion; return lApiVersionsSupported; }
   };
 }
 
