@@ -20,8 +20,6 @@
 #include "Core.h"
 
 namespace NulstarNS {    
-  const QString lConstantsFile("Constants.ncf");
-
   class CORESHARED_EXPORT NCoreService : public QObject {
     Q_OBJECT
 
@@ -30,7 +28,7 @@ namespace NulstarNS {
       enum class EServiceAction {eStartService = 0, eStopService = 1, eRestartService = 2};      
 
       NCoreService(QWebSocketServer::SslMode lSslMode = QWebSocketServer::SslMode::NonSecureMode, ELogLevel lLogLevel = ELogLevel::eLogWarning, const QUrl& lServiceManagerUrl = QUrl(),
-                   const QList<QNetworkAddressEntry>& lAllowedNetworks = QList<QNetworkAddressEntry> (), quint16 lPort = 0, QHostAddress::SpecialAddress lBindAddress = QHostAddress::LocalHost, QObject* rParent = nullptr);
+                   const QList<QNetworkAddressEntry>& lAllowedNetworks = QList<QNetworkAddressEntry> (), QObject* rParent = nullptr);
       virtual ~NCoreService();
 
       virtual QString fName() const = 0;

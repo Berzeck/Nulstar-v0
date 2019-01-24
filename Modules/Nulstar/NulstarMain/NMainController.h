@@ -3,10 +3,12 @@
 
 #include "AppVersion.h"
 
-#include <NCoreService.h>
+#include <QList>
 #include <QMap>
 #include <QObject>
+#include <QVersionNumber>
 
+#include <NCoreService.h>
 #include "NModuleManager.h"
 
 class QProcess;

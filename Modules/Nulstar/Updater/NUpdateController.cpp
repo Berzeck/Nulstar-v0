@@ -13,7 +13,9 @@ NulstarNS::NUpdateController::NUpdateController(QWebSocketServer::SslMode lSslMo
                                                 quint16 lClientPort,
                                                 QHostAddress::SpecialAddress lBindAddress,
                                                 QObject *rParent)
-    : NCoreService(lSslMode, lLogLevel, lServiceManagerUrl, lAllowedNetworks, lCommPort, lBindAddress, rParent),
+    : NCoreService(lSslMode, lLogLevel, lServiceManagerUrl, lAllowedNetworks, rParent),
       mRequestID(0), mCompressionLevel(0) {
 
+   if(lCommPort)
+     fAddWebSocketServer(lCommPort, lBindAddress);
 }

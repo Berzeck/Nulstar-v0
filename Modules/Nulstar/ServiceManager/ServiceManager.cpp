@@ -58,7 +58,6 @@ int main(int argc, char *argv[])
     lLocalHostUrl.prepend("wss");
     lSslMode = QWebSocketServer::SslMode::SecureMode;
   }
-
   NulstarNS::NServiceManagerController lController(lSslMode, static_cast<NulstarNS::NServiceManagerController::ELogLevel> (lParser.value("loglevel").toUInt()), QUrl(lLocalHostUrl), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::Any);
   lController.fControlWebServer(QString(), NulstarNS::NServiceManagerController::EServiceAction::eStartService);  // Start all web sockets servers
   return lApp.exec();

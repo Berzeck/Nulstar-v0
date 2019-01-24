@@ -26,6 +26,7 @@ namespace NulstarNS {
     bool lSuccess = false;
     if(isListening())
       return false;
+
     fSetPort(lPort);
     fSetBindAddress(lBindAddress);
     lSuccess = listen(mBindAddress, mPort);
@@ -50,6 +51,7 @@ namespace NulstarNS {
     NWebSocket* rClient = qobject_cast<NWebSocket*>(sender());
     if(rClient) {
     //  emit fTextMessageArrived(rClient->fModuleName(), lMessage);
+qDebug() << "Text Message received:" << lMessage;
       QString lMessageType;
       QJsonObject lMessageObject(NMessageFactory::fMessageObjectFromString(lMessage, &lMessageType));
       if(lMessageType == cTypeNegotiateConnection && NMessageNegotiateConnection::fValidateMessageObject(lMessageObject))

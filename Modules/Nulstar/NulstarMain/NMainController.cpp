@@ -79,6 +79,10 @@ namespace NulstarNS {
     }
     QProcess* lModuleProcess = new QProcess(this);
     NModuleInfo lModuleInfo = mModuleManager.fModuleInfo(lModuleNamespace, lModuleName, lEffectiveModuleVersion);
+/*  QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+  env.insert("LD_LIBRARY_PATH", "/home/Berzeck/Applications/Nulstar/Debug/Libraries/CPP/Nulstar/0.1.0"); // Add an environment variable
+  lModuleProcess->setProcessEnvironment(env);*/
+
     lModuleProcess->start(lModuleInfo.fModuleAppPath(), lModuleInfo.fFormattedParameters());
     if(lModuleProcess->waitForStarted(cProcessStartMaxSeconds * 1000)) {
       mModulesRunning.insert(lProcessIndex, lModuleProcess);

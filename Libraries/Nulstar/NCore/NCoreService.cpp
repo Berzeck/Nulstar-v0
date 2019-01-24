@@ -2,16 +2,15 @@
 #include "NCoreService.h"
 
 namespace NulstarNS {
-  const QString lCommServerLabel("Nulstar Internal Communication");
-  const QString lCommServerName("WebCommServer");
-  const QString lDefaultMinEventAndMinPeriod("0,0");
-  const QString lServiceManagerName("ServiceManager") ;
+  const QString cConstantsFile("Constants.ncf");
+  const QString cCommServerLabel("Nulstar Internal Communication");
+  const QString cCommServerName("WebCommServer");
+  const QString cDefaultMinEventAndMinPeriod("0,0");
+  const QString cServiceManagerName("ServiceManager") ;
 
   NCoreService::NCoreService(NWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QUrl& lServiceManagerUrl, const QList<QNetworkAddressEntry>& lAllowedNetworks,
-                             quint16 lPort, QHostAddress::SpecialAddress lBindAddress, QObject *rParent)
+                             QObject *rParent)
               : QObject(rParent), mLogLevel(lLogLevel), mServiceManagerUrl(lServiceManagerUrl), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks) {
-    if(lPort)
-      fAddWebSocketServer(lPort, lBindAddress, lCommServerName, lCommServerLabel, false);
     QTimer::singleShot(0, this, [this] { mApiBuilder.fBuildApi(this); });
   }
 
@@ -33,14 +32,13 @@ namespace NulstarNS {
     QString lEffectiveName(lName);
     QString lEffectiveLabel(lLabel);
     if(lEffectiveName.isEmpty())
-      lEffectiveName = lCommServerName;
+      lEffectiveName = cCommServerName;
     if(lEffectiveLabel.isEmpty())
-      lEffectiveLabel = lCommServerLabel;
+      lEffectiveLabel = cCommServerLabel;
 
     NWebSocketServer* pWebServer = new NWebSocketServer(lName, lLabel, mSslMode, fApiVersionsSupported(), nullptr);
     pWebServer->fSetPort(lPort);
     pWebServer->fSetBindAddress(lBindAddress);
-
     mWebServers[pWebServer->fName()] = pWebServer;
     if(lStartImmediatly)
       fControlWebServer(pWebServer->fName(), EServiceAction::eStartService);
@@ -49,13 +47,13 @@ namespace NulstarNS {
 
   void NCoreService::fConnectToServiceManager(quint8 lReconnectionTryInterval) {
     NWebSocket* rWebSocket = nullptr;
-    if(mWebSockets.contains(lServiceManagerName)) {
-      rWebSocket = mWebSockets.value(lServiceManagerName);
+    if(mWebSockets.contains(cServiceManagerName)) {
+      rWebSocket = mWebSockets.value(cServiceManagerName);
       rWebSocket->fConnect();
     }
     else {
-      rWebSocket = new NWebSocket(lServiceManagerName, fApiVersionsSupported().at(0).toString(), mServiceManagerUrl, lReconnectionTryInterval);
-      mWebSockets.insert(lServiceManagerName, rWebSocket);
+      rWebSocket = new NWebSocket(cServiceManagerName, fApiVersionsSupported().at(0).toString(), mServiceManagerUrl, lReconnectionTryInterval);
+      mWebSockets.insert(cServiceManagerName, rWebSocket);
       rWebSocket->fConnect();
     }
   }
@@ -77,14 +75,20 @@ namespace NulstarNS {
     for( const QString& lCurrentName : lWebServerNames) {
       if(!mWebServers.contains(lCurrentName)) return false;
       if(lAction == EServiceAction::eStartService) {
-        mWebServers[lCurrentName]->fListen();
+        if(!mWebServers[lCurrentName]->fListen()) {
+          qDebug() << QString("Websockets server '%1' of module '%2' could not initiated!").arg(lCurrentName).arg(fName());
+          return false;
+        }
       }
       if(lAction == EServiceAction::eStopService) {
         mWebServers[lCurrentName]->close();
       }
       if(lAction == EServiceAction::eRestartService) {
         mWebServers[lCurrentName]->close();
-        mWebServers[lCurrentName]->fListen();
+        if(!mWebServers[lCurrentName]->fListen()) {
+          qDebug() << QString("Websockets server '%1' of module '%2' could not initiated!").arg(lCurrentName).arg(fName());
+          return false;
+        }
       }
     }
     return true;
@@ -105,7 +109,7 @@ namespace NulstarNS {
 
   QString NCoreService::fMethodMinEventAndMinPeriod(const QString& lMethodName) const {
     if(mApiMethodMinEventAndMinPeriod.contains(lMethodName)) return mApiMethodMinEventAndMinPeriod.value(lMethodName);
-    else return lDefaultMinEventAndMinPeriod;
+    else return cDefaultMinEventAndMinPeriod;
   }
 
 /***  NResponse NCoreService::fTotalConnections(const QString &lName) {
