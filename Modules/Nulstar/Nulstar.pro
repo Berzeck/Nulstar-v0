@@ -2,6 +2,7 @@ TEMPLATE = subdirs
 SUBDIRS += Connector \
 			NulstarMain \
 			ServiceManager \
-			Updater
+			Updater \
+			Tester
 
-NulstarMain.depends += ServiceManager Connector Updater
+NulstarMain.depends += ServiceManager Connector Updater Tester
