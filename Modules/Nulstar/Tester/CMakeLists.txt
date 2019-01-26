@@ -30,7 +30,7 @@ include_directories(${LIBRARIES_PATH}/Nulstar/NNetwork)
 include_directories(${LIBRARIES_PATH}/Nulstar/NCore)
 
 add_executable(${PROJECT_NAME} ${SOURCE_SRCS})
-add_dependencies(${PROJECT_NAME} Tester)
+
 target_link_libraries(${PROJECT_NAME} NCore)
 target_link_libraries(${PROJECT_NAME} Qt5::Core Qt5::Network Qt5::WebSockets)
 
