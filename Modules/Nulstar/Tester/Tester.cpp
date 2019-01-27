@@ -8,6 +8,7 @@
 #include <QTextStream>
 #include <QUrl>
 #include <Core.h>
+
 #include "NTesterController.h"
 
 int main(int argc, char *argv[])
@@ -28,6 +29,7 @@ int main(int argc, char *argv[])
     {{"s", "sslmode"}, QStringLiteral("Security Type [0-1]."), QStringLiteral("sslmode")},
     {{"m", "commport"}, QStringLiteral("Communication Port."), QStringLiteral("commport")},
     {{"n", "allowednetworks"}, QStringLiteral("Allowed Networks."), QStringLiteral("allowednetworks")},
+    {{"i", "managerurl"}, QStringLiteral("Service manager URL."), QStringLiteral("managerurl")},
   });
   lParser.process(lApp);
   if(!lParser.isSet("loglevel") || lParser.value("loglevel").toUShort() < 1 || lParser.value("loglevel").toUShort() > 5) {
@@ -38,6 +40,10 @@ int main(int argc, char *argv[])
   if(!lParser.isSet("sslmode") || (lSslModeStr.toUShort() != 0 && lSslModeStr.toUShort() != 1)) {
     fputs(qPrintable(QString("Wrong security type! [0-1]\n\n%1\n").arg(lParser.helpText())), stderr);
     return 2;
+  }
+  if(!lParser.isSet("managerurl")) {
+    fputs(qPrintable(QString("Service Manager URL not set!\n\n%1\n").arg(lParser.helpText())), stderr);
+    return 3;
   }
   if(!lParser.isSet("commport")) {
     fputs(qPrintable(QString("Communication port not set!\n\n%1\n").arg(lParser.helpText())), stderr);
@@ -53,15 +59,19 @@ int main(int argc, char *argv[])
       lAllowedNetworks << lNetworkAddress;
     }
   }
+  QString lServiceManagerUrl = lParser.value("managerurl");
   QWebSocketServer::SslMode lSslMode = QWebSocketServer::SslMode::NonSecureMode;
-  QString lLocalHostUrl(QString("://%1:%2").arg(QHostAddress(QHostAddress::LocalHost).toString()).arg(lParser.value("commport")));
-  if(lSslModeStr.toUShort() == 0) lLocalHostUrl.prepend("ws");
-  if(lSslModeStr.toUShort() == 1) {
-    lLocalHostUrl.prepend("wss");
-    lSslMode = QWebSocketServer::SslMode::SecureMode;
+  if(lSslModeStr.toUInt() == 0) {
+      lServiceManagerUrl.prepend("ws://");
   }
-
-  NulstarNS::NTesterController lController(lSslMode, static_cast<NulstarNS::NTesterController::ELogLevel> (lParser.value("loglevel").toUInt()), QUrl(lLocalHostUrl), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::Any);
+  else if(lSslModeStr.toUInt() == 1) {
+      lServiceManagerUrl.prepend("wss://");
+      lSslMode = QWebSocketServer::SslMode::SecureMode;
+  }
+  const int lRetryInterval = 5; // Seconds
+  NulstarNS::NTesterController lController(lSslMode, static_cast<NulstarNS::NTesterController::ELogLevel> (lParser.value("loglevel").toUInt()),
+                                           QUrl(lServiceManagerUrl), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::Any);
   lController.fControlWebServer(QString(), NulstarNS::NTesterController::EServiceAction::eStartService);
+  lController.fConnectToServiceManager(lRetryInterval);
   return lApp.exec();
 }
