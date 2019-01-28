@@ -67,8 +67,8 @@ Otherwise a NegotiateConnectionResponse object should be received with Status se
 |CompressionAlgorithm|A String that represents the algorithm that will be used to receive and send messages.|
 |CompressionRate|The compression level in which the messages should be sent and received for this connection.|
 
-> `CompressionAlgorithm` currently just support zlib algorithm.
-> `CompressionRate` is an integer between 0 and 9. 0 means no compression while 9 maximum compression.
+> `CompressionAlgorithm` currently just support `zlib` algorithm.
+> `CompressionRate` is an integer between 0 and 9. `0` means no compression while `9` maximum compression.
 
 
 
@@ -132,21 +132,21 @@ if one of the requests fails then the whole operation is considered a failure.
 |ResponseMaxSize|An unsigned integer which specifies the maximum number of objects that the method should return, a value of 0 (the default) means no limit.|
 |RequestMethods|An array that holds all methods being requested with their respective parameters.|
 
-> `RequestType` default is 1.
+> `RequestType` default is `1`.
 > - 1: The Microserver that made the request expects only the Response.
 > - 2: The Microserver that made the request expects an Ack and the Response.
 > - 3: The Microserver that made the request expects only an Ack.
 > - 4: The Microserver that made the request does not expect any related message.
 
 > `SubscriptionEventCounter` For example, if the requested method is GetHeight and this parameter is set to 5 then the service will send back responses only after 5 blocks have been processed.
-                             0 means the method should send a Response only once; this is the default value.
+                             `0` means the method should send a Response only once; Default value is `0`.
 
-> `SubscriptionPeriod` For example, if the requested method is GetHeight and this parameter is set to 5 then the service will send back responses only after 5 seconds have passed.
-                       0 means the method should send a Response only once; this is the default value.
+> `SubscriptionPeriod` For example, if the requested method is GetHeight and this parameter is set to 5 then the service will send back responses only after 5 blocks have been processed.
+                                                    `0` means the method should send a Response only once; Default value is `0`.
                        
-> `SubscriptionRange` If the event defined in the target microservice returns a number, this is a string that represents the set of numbers that will trigger a Response. 
-> If the pair starts or ends with “(“ or “)” respectively then it means that the number is not included, if the pair pair starts or ends with “[“ or “]” respectively then it means that the number is included.
-> Example: Assume we only want to be notified only when the balance is equal or greater to 1000. Then the getbalance request should be sent with “[1000, )” string as SubscriptionRange parameter.
+> `SubscriptionRange` If the event defined in the target micro service returns a number, this is a string that represents the set of numbers that will trigger a Response. 
+> If the pair starts or ends with “(“ or “)” respectively then it means that the number is not included, if the pair pair starts or ends with "\[" or "]" respectively then it means that the number is included.
+> Example: Assume we only want to be notified only when the balance is equal or greater to 1000. Then the `getbalance` request should be sent with "[1000, )" string as SubscriptionRange parameter.
 
 ### Unsubscribe
 
