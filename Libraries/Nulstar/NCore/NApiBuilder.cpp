@@ -32,10 +32,10 @@ namespace NulstarNS {
 
   }
 
-  QVariantMap NApiBuilder::fBuildApi(NCoreService *rTargetObject) {
-    QMap<QString, QVariant> lApiMap;
-    QMap<QString, QVariant> lRegisterApiMap;
+  void NApiBuilder::fBuildApi(NCoreService *rTargetObject) {
+    mApi.clear();
     if(rTargetObject != nullptr) {
+      QMap<QString, QVariant> lApiMap;
       const QMetaObject* lMetaObject = rTargetObject->metaObject();
       lApiMap = fBuildApiHeader(rTargetObject);
       QList<QVariant> lMethods;
@@ -62,10 +62,8 @@ namespace NulstarNS {
       lApiMap[lApiMethodsField] = lMethods;
       lApiMap[lApiPeriodField] = QString("0");
       lApiMap[lApiEventField] = QString("0");
-    }
-
-    lRegisterApiMap[lRegisterApiField] = lApiMap;
-    return lRegisterApiMap;
+      mApi[lRegisterApiField] = lApiMap;
+    }    
   }
 
   QVariantMap NApiBuilder::fBuildApiHeader(NCoreService *pTargetObject) {

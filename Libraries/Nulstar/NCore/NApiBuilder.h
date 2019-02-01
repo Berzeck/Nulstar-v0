@@ -15,12 +15,17 @@ namespace NulstarNS {
 
     public:
       explicit NApiBuilder(QObject* rParent = nullptr);
+      QVariantMap fApi() { return mApi; }
+
+    public Q_SLOTS:
+      void fBuildApi(NCoreService* pTargetObject);
 
     protected:
       QVariantMap fBuildApiHeader(NCoreService* pTargetObject);
 
-    public Q_SLOTS:
-      QVariantMap fBuildApi(NCoreService* pTargetObject);
+    private:
+      QVariantMap mApi;
+
   };
 }
 #endif // NAPIBUILDER_H

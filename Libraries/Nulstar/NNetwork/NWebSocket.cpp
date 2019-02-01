@@ -2,7 +2,9 @@
 #include <QTimer>
 
 #include "NWebSocket.h"
+#include "NMessageFactory.h"
 #include "NMessageNegotiateConnection.h"
+#include "NMessageNegotiateConnectionResponse.h"
 
 namespace NulstarNS {
   NWebSocket::NWebSocket(const QString &lName, const QString &lProtocolVersion, const QUrl& lConnectionUrl, quint8 lConnectionRetryInterval, QObject* rParent)
@@ -11,7 +13,7 @@ namespace NulstarNS {
     connect(this, &NWebSocket::connected, this, &NWebSocket::fOnConnected);
     connect(this, &NWebSocket::disconnected, this, &NWebSocket::fOnSocketDisconnection);
     connect(this, QOverload<QAbstractSocket::SocketError>::of(&NWebSocket::error), this, &NWebSocket::fOnConnectionError);
-    connect(this, &NWebSocket::textMessageReceived, this, &NWebSocket::fOnTextMessageReceived);
+    connect(this, &QWebSocket::textMessageReceived, this, &NWebSocket::fOnTextMessageReceived);
 
     pRetryTimer = new QTimer(this);
     connect(pRetryTimer, &QTimer::timeout, this, &NWebSocket::fConnect);
@@ -63,13 +65,26 @@ namespace NulstarNS {
       pRetryTimer->start(mConnectionRetryInterval * 1000);
   }
 
-  void NWebSocket::fOnTextMessageReceived(const QString& lTextMessage) {
-   // mWebSocket.sendTextMessage(QString("Receieved:\n%1").arg(lTextMessage));
-    qDebug("%s", qUtf8Printable(lTextMessage));
+  void NWebSocket::fOnTextMessageReceived(const QString& lMessage) {
+ qDebug() << "Text Message received:" << lMessage;
+   QString lMessageType;
+   QJsonObject lMessageObject(NMessageFactory::fMessageObjectFromString(lMessage, &lMessageType));
+   if(lMessageType == cTypeNegotiateConnectionResponse && NMessageNegotiateConnectionResponse::fValidateMessageObject(lMessageObject))
+     fProcessNegotiateConnectionResponse(lMessageObject);
   }
 
   void NWebSocket::fNegotiateConnection() {
     fQueueMessage(new  NMessageNegotiateConnection(mName, QString(), mProtocolVersion, 0, NMessageNegotiateConnection::ECompressionAlgorithm::eZlib, this), EConnectionState::eConnectionNotNegotiated);
+  }
+
+  void NWebSocket::fProcessNegotiateConnectionResponse(const QJsonObject& lObjectMessage) {
+    if(lObjectMessage.value(cNegotiationStatusFieldName).toBool()) {
+      fSetConnectionState(NWebSocket::EConnectionState::eConnectionActive);
+  qDebug() << QString("Negosdssstiation attempt to '%1' failed!").arg(fName());
+    }
+    else {
+ qDebug() << QString("Negotiation attempt to '%1' failed!").arg(fName());
+    }
   }
 
   void NWebSocket::fRegisterApi() {

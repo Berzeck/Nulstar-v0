@@ -1,6 +1,7 @@
 #ifndef NWEBSOCKET_H
 #define NWEBSOCKET_H
 
+#include <QJsonObject>
 #include <QList>
 #include <QMap>
 #include <QUrl>
@@ -24,14 +25,14 @@ namespace NulstarNS {
       EConnectionState fConnectionState() { return mConnectionState; }
       QString fName() { return mName; }
       void fSetName(const QString& lName) { mName = lName; }
-      void fSetConnectionState(const EConnectionState lConnectionState = EConnectionState::eConnectionNotNegotiated) { mConnectionState = lConnectionState; }
+      void fSetConnectionState(const EConnectionState lConnectionState = EConnectionState::eConnectionNotNegotiated) { mConnectionState = lConnectionState; emit sStateChanged(mConnectionState); }
 
     public Q_SLOTS:
-      void fQueueMessage(NMessage* lMessage, EConnectionState lMinStateRequired = EConnectionState::eConnectionActive);      
+      void fQueueMessage(NMessage* lMessage, EConnectionState lMinStateRequired = EConnectionState::eConnectionActive);
       void fConnect();
 
-    protected:
-      using QWebSocket::open;
+    protected:     
+      void fProcessNegotiateConnectionResponse(const QJsonObject& lObjectMessage);
 
     private:
       quint8 mConnectionRetryInterval;
@@ -50,7 +51,10 @@ namespace NulstarNS {
        virtual void fOnConnectionError(QAbstractSocket::SocketError lErrorCode);
        virtual void fOnConnected();
        virtual void fOnSocketDisconnection();
-       virtual void fOnTextMessageReceived(const QString& lTextMessage);       
+       virtual void fOnTextMessageReceived(const QString& lMessage);
+
+    Q_SIGNALS:
+       void sStateChanged(EConnectionState lNewState);
   };
 }
 

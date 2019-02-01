@@ -9,6 +9,11 @@
 #include "NNetwork.h"
 
 namespace NulstarNS {
+  const QString cNegotiationStatusFieldName("NegotiationStatus");
+  const QString cNegotiationCommentFieldName("NegotiationComment");
+  const int cNegotiationStatusSuccess = 1;
+  const int cNegotiationStatusFailure = 0;
+
   class NETWORKSHARED_EXPORT NMessageNegotiateConnectionResponse : public NMessage {
     Q_OBJECT
 

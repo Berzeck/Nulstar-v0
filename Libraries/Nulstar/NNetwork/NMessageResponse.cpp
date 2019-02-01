@@ -12,7 +12,7 @@ namespace NulstarNS {
 
 
   NMessageResponse::NMessageResponse(const QString& lConnectionName, const QString& lMessageID, const QString& lRequestID, const quint64 lResponseProcessingTime, const EResponseStatus lResponseStatus,
-                                     const QString& lResponseComment, const quint64 lResponseMaxSize, const QVariantMap& lResponseData, QObject* rParent)
+                                     const QString& lResponseComment, const quint64 lResponseMaxSize, const QVariantMap& lResponseData, QObject *rParent)
                   : NMessage(lConnectionName, lMessageID, rParent), mRequestID(lRequestID), mResponseProcessingTime(lResponseProcessingTime), mResponseStatus(lResponseStatus), mResponseComment(lResponseComment),
                     mResponseMaxSize(lResponseMaxSize), mResponseData(lResponseData) {
 

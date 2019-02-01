@@ -55,7 +55,7 @@ namespace NulstarNS {
     fSetLogLevel(static_cast<NulstarNS::NMainController::ELogLevel>(lLogLevel.toUInt()));
     fSetServiceManagerUrl(QUrl(lServiceManagerUrl));
     fSetAllowedNetworks(lAllowedNetworks);
-    fAddWebSocketServer(lCommunicationPort.toUShort(), lBindAddress);
+    fAddWebSocketServer(lCommunicationPort.toUShort(), lBindAddress, fName());
   }
 
   bool NMainController::fStartModule(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion, bool fRestartIfRunning) {

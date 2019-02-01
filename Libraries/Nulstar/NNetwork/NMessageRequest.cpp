@@ -9,7 +9,7 @@ namespace NulstarNS {
   const QString lRequestMethodsFieldName("RequestMethods");
 
   NMessageRequest::NMessageRequest (const QString& lConnectionName, const QString& lMessageID, bool lRequestAck, quint64 lSubscriptionEventCounter, quint64 lSubscriptionPeriod,
-                                        const QString& lSubscriptionRange, quint64 lResponseMaxSize, const QVariantMap& lRequestMethods, QObject* rParent)
+                                        const QString& lSubscriptionRange, quint64 lResponseMaxSize, const QVariantMap& lRequestMethods, QObject *rParent)
                  : NMessage(lConnectionName, lMessageID, rParent), mRequestAck(lRequestAck), mResponseMaxSize(lResponseMaxSize), mSubscriptionEventCounter(lSubscriptionEventCounter), mSubscriptionPeriod(lSubscriptionPeriod),
                             mSubscriptionRange(lSubscriptionRange), mRequestMethods(lRequestMethods) {
 

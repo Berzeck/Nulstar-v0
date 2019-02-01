@@ -8,7 +8,7 @@ namespace NulstarNS {
   const int cNotificationAckWithNone = 0;
   const int cNotificationAckWithOneAckMsg = 1;
 
-  NMessageNotification::NMessageNotification(const QString& lConnectionName, const QString& lMessageID, bool lNotificationAck, const QString& lNotificationType, const QString& lNotificationComment, const QVariantMap& lNotificationData, QObject* rParent)
+  NMessageNotification::NMessageNotification(const QString& lConnectionName, const QString& lMessageID, bool lNotificationAck, const QString& lNotificationType, const QString& lNotificationComment, const QVariantMap& lNotificationData, QObject *rParent)
                : NMessage(lConnectionName, lMessageID, rParent), mNotificationAck(lNotificationAck), mNotificationType(lNotificationType), mNotificationComment(lNotificationComment), mNotificationData(lNotificationData) {
   }
 

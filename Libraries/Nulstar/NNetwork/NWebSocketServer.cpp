@@ -55,7 +55,9 @@ qDebug() << "Text Message received:" << lMessage;
       QString lMessageType;
       QJsonObject lMessageObject(NMessageFactory::fMessageObjectFromString(lMessage, &lMessageType));
       if(lMessageType == cTypeNegotiateConnection && NMessageNegotiateConnection::fValidateMessageObject(lMessageObject))
-        fProcessNegotiateConnectionResponse(lMessageObject, rClient);
+        fProcessNegotiateConnection(lMessageObject, rClient);
+  /*    if(lMessageType == cTypeNegotiateConnectionResponse && NMessageNegotiateConnectionResponse::fValidateMessageObject(lMessageObject))
+        fProcessNegotiateConnectionResponse(lMessageObject, rClient); // Request is always received in NWebSocket*/
     }
   }
 
@@ -72,7 +74,7 @@ qDebug() << "socketDisconnected:" << rClient;
       qint64 lSocketID = rClient->property("ID").toLongLong();
       mConnections.remove(lSocketID);
       if(mMessageQueue.contains(lSocketID)) {
-        QMap<QString, NMessage* > lMessages;
+        QMap<QString, NMessage* > lMessages = mMessageQueue.value(lSocketID);
         QMapIterator<QString, NMessage*> i1(lMessages);
         while(i1.hasNext()) {
           i1.next();
@@ -84,31 +86,39 @@ qDebug() << "socketDisconnected:" << rClient;
     }
   }
 
-  void NWebSocketServer::fProcessNegotiateConnectionResponse(const QJsonObject& lObjectMessage, NWebSocket* rConnection) {
-    if(!rConnection) {
-      qDebug() << QString("Connection '%1' no longer exists!").arg(rConnection->fName());
-      return;
-    }
+  bool NWebSocketServer::fVersionSupported(const QJsonObject& lObjectMessage) {
     QVersionNumber lIncommingVersion = QVersionNumber::fromString(lObjectMessage.value(cMessageDataFieldName).toObject().value(cProtocolVersionFieldName).toString());
 qDebug() << QString("Inc Version: '%1'").arg(lIncommingVersion.toString());
     for(const QVersionNumber& lVersionSupported : mProtocolVersionsSupported) {
       if(lIncommingVersion == lVersionSupported) {
-qDebug() << QString("Cur Version: '%1'").arg(lVersionSupported.toString());
+        return true;
+      }
+    }
+qDebug() << QString("Protocol Version '%1' not supported!").arg(lIncommingVersion.toString());
+    return false;
+  }
+
+  void NWebSocketServer::fProcessNegotiateConnection(const QJsonObject& lObjectMessage, NWebSocket* rConnection) {
+    if(!rConnection) {
+      qDebug() << QString("Connection '%1' no longer exists!").arg(rConnection->fName());
+      return;
+    }
+    if(fVersionSupported(lObjectMessage)) {
         NMessageNegotiateConnectionResponse rNegotiationResponse(rConnection->fName(), QString(), NMessageNegotiateConnectionResponse::ENegotiationStatus::eNegotiationSuccessful, QString("Negotiation successful!"));
         QString lJsonMessage(rNegotiationResponse.fToJsonString());
  qDebug() << QString("Message Sent: '%1'").arg(lJsonMessage);
+        rConnection->fSetConnectionState(NWebSocket::EConnectionState::eConnectionActive);
         rConnection->sendTextMessage(lJsonMessage);
-        return;
-      }
     }
-
-    NMessageNegotiateConnectionResponse rNegotiationResponse(rConnection->fName(), QString(), NMessageNegotiateConnectionResponse::ENegotiationStatus::eNegotiationError, QString("Negotiation unsuccessful! Protocol Version '%1' not supported!").arg(lIncommingVersion.toString()));
-    QString lJsonMessage(rNegotiationResponse.fToJsonString());
-qDebug() << QString("Message Sent: '%1'").arg(lJsonMessage);
-    rConnection->sendTextMessage(lJsonMessage);
-    mConnections.remove(rConnection->fName().toLongLong());
-    rConnection->close();
-    rConnection->deleteLater();
+    else {
+      NMessageNegotiateConnectionResponse lNegotiationResponse(rConnection->fName(), QString(), NMessageNegotiateConnectionResponse::ENegotiationStatus::eNegotiationError, QString("Negotiation unsuccessful! Protocol Version not supported!"));
+      QString lJsonMessage(lNegotiationResponse.fToJsonString());
+ qDebug() << QString("Message Sent: '%1'").arg(lJsonMessage);
+      rConnection->sendTextMessage(lJsonMessage);
+      mConnections.remove(rConnection->fName().toLongLong());
+      rConnection->close();
+      rConnection->deleteLater();
+    }
   }
 
   void NWebSocketServer::fSetBindAddress(const QHostAddress& lBindAddress) {

@@ -3,7 +3,7 @@
 
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QObject>
+
 #include <QString>
 #include <QVariantMap>
 
@@ -32,7 +32,7 @@ namespace NulstarNS {
     public:
       enum class EMessageStatus { eAwaitingDelivery = 1, eWithErrorAndAwaitingDelivery = 2, eWithErrorAndWitheld = 3, eAwaitingAck = 4, eAwaitingResponse = 5, eAwaitingAckAndResponse = 6, eSent = 7 };
 
-      explicit NMessage(const QString& lConnectionName, const QString& lMessageID = QString(), QObject* rParent = nullptr);      
+      explicit NMessage(const QString& lConnectionName, const QString& lMessageID = QString(), QObject* rParent = nullptr);
       virtual ~NMessage() {}
 
       QString fConnectionName() const { return mConnectionName; }

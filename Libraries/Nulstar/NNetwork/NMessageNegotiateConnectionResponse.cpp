@@ -1,11 +1,6 @@
 #include "NMessageNegotiateConnectionResponse.h"
 
 namespace NulstarNS {
-  const QString cNegotiationStatusFieldName("NegotiationStatus");
-  const QString cNegotiationCommentFieldName("NegotiationComment");
-  const int cNegotiationStatusSuccess = 1;
-  const int cNegotiationStatusFailure = 0;
-
   NMessageNegotiateConnectionResponse::NMessageNegotiateConnectionResponse(const QString& lConnectionName, const QString& lMessageID, ENegotiationStatus lNegotiationStatus, const QString& lNegotiationComment, QObject *rParent)
                                      : NMessage(lConnectionName, lMessageID, rParent), mNegotiationStatus(lNegotiationStatus), mNegotiationComment(lNegotiationComment) {
 

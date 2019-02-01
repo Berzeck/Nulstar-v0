@@ -34,7 +34,8 @@ namespace NulstarNS {
       void fSetBindAddress(const QHostAddress& lBindAddress);
 
     protected:
-      void fProcessNegotiateConnectionResponse(const QJsonObject& lObjectMessage, NWebSocket* rConnection);
+      bool fVersionSupported(const QJsonObject& lObjectMessage);
+      void fProcessNegotiateConnection(const QJsonObject& lObjectMessage, NWebSocket* rConnection);
 
     private:
       int mMaxConnections;

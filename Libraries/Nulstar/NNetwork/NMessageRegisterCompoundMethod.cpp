@@ -5,7 +5,7 @@ namespace NulstarNS {
   const QString lCompoundMethodDescriptionFieldName("CompoundMethodDescription");
   const QString lCompoundMethodsFieldName("CompoundMethods");
 
-  NMessageRegisterCompoundMethod::NMessageRegisterCompoundMethod(const QString& lConnectionName, const QString& lMessageID, const QString& lCompoundMethodName, const QString& lCompoundMethodDescription, const QVariantMap& lCompoundMethods, QObject* rParent)
+  NMessageRegisterCompoundMethod::NMessageRegisterCompoundMethod(const QString& lConnectionName, const QString& lMessageID, const QString& lCompoundMethodName, const QString& lCompoundMethodDescription, const QVariantMap& lCompoundMethods, QObject *rParent)
                                 : NMessage(lConnectionName, lMessageID, rParent), mCompoundMethodName(lCompoundMethodName), mCompoundMethodDescription(lCompoundMethodDescription), mCompoundMethods(lCompoundMethods) {
   }
 

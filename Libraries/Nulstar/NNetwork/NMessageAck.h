@@ -12,7 +12,6 @@ namespace NulstarNS {
     Q_OBJECT
 
     public:
-
       explicit NMessageAck(const QString& lConnectionName, const QString& lMessageID = QString(), const QString& lRequestID = QString(), QObject* rParent = nullptr);
       ~NMessageAck() override {}
 

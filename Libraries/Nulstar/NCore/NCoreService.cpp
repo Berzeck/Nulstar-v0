@@ -73,7 +73,8 @@ namespace NulstarNS {
     if(lName.isEmpty()) lWebServerNames = mWebServers.keys();
     else lWebServerNames << lName;
     for( const QString& lCurrentName : lWebServerNames) {
-      if(!mWebServers.contains(lCurrentName)) return false;
+      if(!mWebServers.contains(lCurrentName))
+        return false;
       if(lAction == EServiceAction::eStartService) {
         if(!mWebServers[lCurrentName]->fListen()) {
           qDebug() << QString("Websockets server '%1' of module '%2' could not initiated!").arg(lCurrentName).arg(fName());
