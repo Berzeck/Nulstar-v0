@@ -1,9 +1,11 @@
 #ifndef NWEBSOCKET_H
 #define NWEBSOCKET_H
 
+#include <QByteArray>
 #include <QJsonObject>
 #include <QList>
 #include <QMap>
+#include <QObject>
 #include <QUrl>
 #include <QWebSocket>
 
@@ -13,15 +15,17 @@
 QT_FORWARD_DECLARE_CLASS(QTimer)
 
 namespace NulstarNS {
-  class NETWORKSHARED_EXPORT NWebSocket : public QWebSocket {
+  class NETWORKSHARED_EXPORT NWebSocket : public QObject {
     Q_OBJECT
 
     public:
       enum class EConnectionState { eConnectionNotNegotiated = 1, eConnectionAuthorized = 2, eConnectionActive = 3 };
 
-      NWebSocket(QObject* rParent = nullptr);
-      NWebSocket(const QString& lName, const QString& lProtocolVersion, const QUrl& lConnectionUrl, quint8 lConnectionRetryInterval = 0, QObject* rParent = nullptr);
-      virtual ~NWebSocket() override {}
+      NWebSocket(const QString& lName, const QString& lProtocolVersion, const QUrl& lConnectionUrl, quint8 lConnectionRetryInterval = 0, QWebSocket* rSocket = nullptr, QObject* rParent = nullptr);
+      virtual ~NWebSocket() {}
+
+
+      qint64 fSendTextMessage(const QString& lMessage) { return mWebSocket->sendTextMessage(lMessage); }
       EConnectionState fConnectionState() { return mConnectionState; }
       QString fName() { return mName; }
       void fSetName(const QString& lName) { mName = lName; }
@@ -29,6 +33,7 @@ namespace NulstarNS {
 
     public Q_SLOTS:
       void fQueueMessage(NMessage* lMessage, EConnectionState lMinStateRequired = EConnectionState::eConnectionActive);
+      void fClose() { mWebSocket->close(); }
       void fConnect();
 
     protected:     
@@ -43,6 +48,7 @@ namespace NulstarNS {
       QString mProtocolVersion;
       QTimer* pRetryTimer;
       QUrl mConnectionUrl;
+      QWebSocket* mWebSocket;
 
     protected Q_SLOTS:
        virtual void fNegotiateConnection();
@@ -54,7 +60,11 @@ namespace NulstarNS {
        virtual void fOnTextMessageReceived(const QString& lMessage);
 
     Q_SIGNALS:
+       void sConnected();
+       void sDisconnected();
+       void sError(QAbstractSocket::SocketError lErrorCode);
        void sStateChanged(EConnectionState lNewState);
+       void sTextMessageReceived(const QString& lMessage);
   };
 }
 

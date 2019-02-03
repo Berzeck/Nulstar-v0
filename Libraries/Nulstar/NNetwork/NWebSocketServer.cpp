@@ -15,11 +15,7 @@ namespace NulstarNS {
   }
 
   NWebSocketServer::~NWebSocketServer() {      
-    QMapIterator<qint64, QWebSocket*> i1(mConnections);
-    while(i1.hasNext()) {
-      i1.next();
-      i1.value()->deleteLater();
-    }
+    fRemoveConnections();
   }
 
   bool NWebSocketServer::fListen(const QHostAddress& lBindAddress, quint16 lPort) {
@@ -37,56 +33,51 @@ namespace NulstarNS {
   void NWebSocketServer::fOnNewConnection() {
     if(mMaxConnections && (mConnections.size() >= mMaxConnections))
       return;
-    NWebSocket* rSocket = fNextPendingConnection();
-    connect(rSocket, &NWebSocket::textMessageReceived, this, &NWebSocketServer::fProcessTextMessage);
-    connect(rSocket, &NWebSocket::binaryMessageReceived, this, &NWebSocketServer::fProcessBinaryMessage);
-    connect(rSocket, &NWebSocket::disconnected, this, &NWebSocketServer::fSocketDisconnected);
-    qint64 lMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch());
-    rSocket->fSetName(QString::number(lMSecsSinceEpoch));
-    mConnections[lMSecsSinceEpoch] = rSocket;
-  }
-
-  void NWebSocketServer::fProcessTextMessage(const QString& lMessage) {
-    NWebSocket* rClient = qobject_cast<NWebSocket*>(sender());
-    if(rClient) {
-    //  emit fTextMessageArrived(rClient->fModuleName(), lMessage);
-qDebug() << "Text Message received:" << lMessage;
-      QString lMessageType;
-      QJsonObject lMessageObject(NMessageFactory::fMessageObjectFromString(lMessage, &lMessageType));
-      if(lMessageType == cTypeNegotiateConnection && NMessageNegotiateConnection::fValidateMessageObject(lMessageObject))
-        fProcessNegotiateConnection(lMessageObject, rClient);
-  /*    if(lMessageType == cTypeNegotiateConnectionResponse && NMessageNegotiateConnectionResponse::fValidateMessageObject(lMessageObject))
-        fProcessNegotiateConnectionResponse(lMessageObject, rClient); // Request is always received in NWebSocket*/
+    QWebSocket* rPendingConnection = nextPendingConnection();
+    if(rPendingConnection) {
+      qint64 lMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch());
+      NWebSocket* rSocket = new NWebSocket(QString::number(lMSecsSinceEpoch), QString(), QUrl(), 0, rPendingConnection, this);
+      connect(rSocket, &NWebSocket::sTextMessageReceived, this, &NWebSocketServer::fProcessTextMessage);
+      connect(rSocket, &NWebSocket::sDisconnected, this, &NWebSocketServer::fSocketDisconnected);
+      mConnections[lMSecsSinceEpoch] = rSocket;
     }
   }
 
-  void NWebSocketServer::fProcessBinaryMessage(QByteArray lMessage) {
-    NWebSocket* rClient = qobject_cast<NWebSocket*>(sender());
-qDebug() << "Binary Message received:" << lMessage;
-    if (rClient) rClient->sendBinaryMessage(lMessage);
+  void NWebSocketServer::fProcessTextMessage(const QString& lMessage) {
+    NWebSocket* rSocket = qobject_cast<NWebSocket*>(sender());
+    if(rSocket) {
+      QString lMessageType;
+      QJsonObject lMessageObject(NMessageFactory::fMessageObjectFromString(lMessage, &lMessageType));
+      if(lMessageType == cTypeNegotiateConnection && NMessageNegotiateConnection::fValidateMessageObject(lMessageObject))
+        fProcessNegotiateConnection(lMessageObject, rSocket);
+  /*    if(lMessageType == cTypeNegotiateConnectionResponse && NMessageNegotiateConnectionResponse::fValidateMessageObject(lMessageObject))
+        fProcessNegotiateConnectionResponse(lMessageObject, rSocket); // Request is always received in NWebSocket*/
+    }
   }
 
   void NWebSocketServer::fSocketDisconnected() {
-    NWebSocket* rClient = qobject_cast<NWebSocket*>(sender());
-qDebug() << "socketDisconnected:" << rClient;
-    if(rClient) {
-      qint64 lSocketID = rClient->property("ID").toLongLong();
-      fRemoveConnections(QList<qint64> () << lSocketID);
+    NWebSocket* rSocket = qobject_cast<NWebSocket*>(sender());
+qDebug() << "socketDisconnected:" << rSocket->fName();
+    if(rSocket) {
+      fRemoveConnections(QList<qint64> () << rSocket->fName().toLongLong());
     }
   }
 
   void NWebSocketServer::fRemoveConnections(const QList<qint64>& lConnectionIDList) {
-    for(qint64 lConnectionID : lConnectionIDList) {
+    QList<qint64> lConnectionList(lConnectionIDList);
+    if(lConnectionList.size() == 0)
+       lConnectionList = mConnections.keys();
+    for(qint64 lConnectionID : lConnectionList) {
       if(mMessageQueue.contains(lConnectionID)) {
         QMap<QString, NMessage* > lMessages = mMessageQueue.value(lConnectionID);
         QMapIterator<QString, NMessage*> i1(lMessages);
         while(i1.hasNext()) {
           i1.next();
-          delete i1.value();
+          i1.value()->deleteLater();
         }
         mMessageQueue.remove(lConnectionID);
       }
-      mConnections[lConnectionID]->close();
+      mConnections[lConnectionID]->fClose();
       mConnections[lConnectionID]->deleteLater();
       mConnections.remove(lConnectionID);
     }
@@ -113,14 +104,14 @@ qDebug() << QString("Protocol Version '%1' not supported!").arg(lIncommingVersio
       NMessageNegotiateConnectionResponse rNegotiationResponse(rConnection->fName(), QString(), NMessageNegotiateConnectionResponse::ENegotiationStatus::eNegotiationSuccessful, QString("Negotiation successful!"));
       QString lJsonMessage(rNegotiationResponse.fToJsonString());
        rConnection->fSetConnectionState(NWebSocket::EConnectionState::eConnectionActive);
-       qint64 lBytesSent = rConnection->sendTextMessage(lJsonMessage);
- qDebug() << QString("Bytes Sent: '%1'\n  - Message: '%2' Error> %3").arg(QString::number(lBytesSent)).arg(lJsonMessage).arg(rConnection->errorString());
+       qint64 lBytesSent = rConnection->fSendTextMessage(lJsonMessage);
+ qDebug() << QString("Bytes Sent: '%1'\n  - Message: '%2' Error> %3").arg(QString::number(lBytesSent)).arg(lJsonMessage) /*.arg(rConnection->errorString())  << rConnection->state()*/;
     }
     else {
       NMessageNegotiateConnectionResponse lNegotiationResponse(rConnection->fName(), QString(), NMessageNegotiateConnectionResponse::ENegotiationStatus::eNegotiationError, QString("Negotiation unsuccessful! Protocol Version not supported!"));
       QString lJsonMessage(lNegotiationResponse.fToJsonString());
- qDebug() << QString("Message Sent: '%1'").arg(lJsonMessage);
-      rConnection->sendTextMessage(lJsonMessage);
+ //qDebug() << QString("Message Sent: '%1'").arg(lJsonMessage) << rConnection->state();
+      rConnection->fSendTextMessage(lJsonMessage);
       fRemoveConnections(QList<qint64> () << rConnection->fName().toLongLong());
     }
   }
@@ -133,13 +124,4 @@ qDebug() << QString("Protocol Version '%1' not supported!").arg(lIncommingVersio
     if(lPort) mPort = lPort;
   }
 
-  NWebSocket* NWebSocketServer::fNextPendingConnection() {
-    QWebSocket* rPendingConnection = nextPendingConnection();
-    if(rPendingConnection) {
-      NWebSocket* rConnection = new NWebSocket(rPendingConnection);
-      connect(rPendingConnection, &QWebSocket::textMessageReceived, rConnection, &NWebSocket::textMessageReceived, Qt::UniqueConnection);
-      return rConnection;
-    }
-    return nullptr;
-  }
 }

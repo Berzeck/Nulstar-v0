@@ -20,8 +20,10 @@ namespace NulstarNS {
       rWebServer->deleteLater();
     }
     for(NWebSocket* rWebSocket : mWebSockets) {
-      if(rWebSocket->isValid()) rWebSocket->close(QWebSocketProtocol::CloseCodeGoingAway, tr("Shutting Down"));
-      rWebSocket->deleteLater();
+      if(rWebSocket) {
+        rWebSocket->fClose();
+        rWebSocket->deleteLater();
+      }
     }
   }
 

@@ -15,24 +15,20 @@ namespace NulstarNS {
   }
 
   bool NMessageNegotiateConnectionResponse::fValidateMessageObject(const QJsonObject& lMessageObject) {
-    if(!lMessageObject.contains(cMessageTypeFieldName)) {
-        qDebug("Message received without 'MessageType' field!");
-        return false;
+    if(!NMessage::fValidateMessageObject(lMessageObject)) {
+      return false;
     }
-    if (lMessageObject.value(cMessageTypeFieldName).toString() != cTypeNegotiateConnectionResponse){
-        qDebug("Message type is not 'NegotiateConnectionResponse'!");
-        return false;
-    }
-    if(!lMessageObject.contains(cNegotiationStatusFieldName)) {
+    QJsonObject lDataObject = lMessageObject.value(cMessageDataFieldName).toObject();
+    if(!lDataObject.contains(cNegotiationStatusFieldName)) {
       qDebug("Message received without 'NegotiationStatus' field!");
       return false;
     }
-    int lNegotiationStatus = lMessageObject.value(cNegotiationStatusFieldName).toInt();
-    if((lNegotiationStatus !=  cNegotiationStatusSuccess) || (lNegotiationStatus !=  cNegotiationStatusFailure)) {
+    int lNegotiationStatus = lDataObject.value(cNegotiationStatusFieldName).toInt();
+    if((lNegotiationStatus !=  cNegotiationStatusSuccess) && (lNegotiationStatus !=  cNegotiationStatusFailure)) {
       qDebug("NegotiationStatus value out of scope!");
       return false;
     }
-    if(!lMessageObject.contains(cNegotiationCommentFieldName)) {
+    if(!lDataObject.contains(cNegotiationCommentFieldName)) {
       qDebug("Message received without 'NegotiationComment' field!");
       return false;
     }
