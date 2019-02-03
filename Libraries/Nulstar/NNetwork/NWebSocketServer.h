@@ -26,6 +26,7 @@ namespace NulstarNS {
       bool fListen(const QHostAddress& lAddress = QHostAddress::Null, quint16 lPort = 0);
       QString fName() { return mName; }
       int fMaxConnections() { return mMaxConnections; }
+      void fRemoveConnections(const QList<qint64>& lConnectionIDList);
       NWebSocket* fNextPendingConnection();
       int fTotalConnections() { return mConnections.size(); }
       void fSetName(const QString& lName);
