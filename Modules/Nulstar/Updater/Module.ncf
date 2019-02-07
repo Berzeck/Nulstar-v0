@@ -9,6 +9,7 @@ Qt=5.12.0
 [Networks]
 AllowedNetworks=127.0.0.1/32
 CommPort=7773
+IP=127.0.0.1
 
 [Output]
 LogLevel=4

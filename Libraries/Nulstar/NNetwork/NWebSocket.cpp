@@ -86,15 +86,15 @@ namespace NulstarNS {
     QJsonObject lDataObject(lObjectMessage.value(cMessageDataFieldName).toObject());
     if(lDataObject.value(cNegotiationStatusFieldName).toVariant().toBool()) {
       fSetConnectionState(NWebSocket::EConnectionState::eConnectionActive);
- qDebug() << QString("Negotiation attempt to '%1' success!").arg(fName());
+  qDebug() << QString("Negotiation attempt to '%1' successful!").arg(fName());
     }
     else {
  qDebug() << QString("Negotiation attempt to '%1' failed!").arg(fName());
     }
   }
 
-  void NWebSocket::fRegisterApi() {
- //     QJsonDocument lApi(QJsonDocument::fromVariant(pApiBuilder->fBuildApi(this)));
+  void NWebSocket::fRegisterApi(const QVariantMap& lApiMap) {
+    QJsonDocument lApi(QJsonDocument::fromVariant(lApiMap));
         //     QString lApi(fBuildApi().toJson(QJsonDocument::Indented));
        //***   NMessageRequest lApiRegister(QDate::currentDate(), QTime::currentTime(), mApiBuilder.fBuildApi(this));
        //****   mPacketProcessor.fProcessRequest(lApiRegister);

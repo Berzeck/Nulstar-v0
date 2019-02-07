@@ -4,13 +4,12 @@
 namespace NulstarNS {
   const QString cConstantsFile("Constants.ncf");
   const QString cCommServerLabel("Nulstar Internal Communication");
-  const QString cCommServerName("WebCommServer");
   const QString cDefaultMinEventAndMinPeriod("0,0");
   const QString cServiceManagerName("ServiceManager") ;
 
-  NCoreService::NCoreService(NWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QUrl& lServiceManagerUrl, const QList<QNetworkAddressEntry>& lAllowedNetworks,
+  NCoreService::NCoreService(NWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress& lIP, const QUrl& lServiceManagerUrl, const QList<QNetworkAddressEntry>& lAllowedNetworks,
                              QObject *rParent)
-              : QObject(rParent), mLogLevel(lLogLevel), mServiceManagerUrl(lServiceManagerUrl), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks) {
+              : QObject(rParent), mLogLevel(lLogLevel), mServiceManagerUrl(lServiceManagerUrl), mIP(lIP), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks) {
     QTimer::singleShot(0, this, [this] { mApiBuilder.fBuildApi(this); });
   }
 
@@ -38,13 +37,19 @@ namespace NulstarNS {
     if(lEffectiveLabel.isEmpty())
       lEffectiveLabel = cCommServerLabel;
 
-    NWebSocketServer* pWebServer = new NWebSocketServer(lName, lLabel, mSslMode, fApiVersionsSupported(), nullptr);
+    NWebSocketServer* pWebServer = new NWebSocketServer(lEffectiveName, lEffectiveLabel, mSslMode, fProtocolVersionsSupported(), nullptr);
     pWebServer->fSetPort(lPort);
     pWebServer->fSetBindAddress(lBindAddress);
     mWebServers[pWebServer->fName()] = pWebServer;
     if(lStartImmediatly)
       fControlWebServer(pWebServer->fName(), EServiceAction::eStartService);
     return true;
+  }
+
+  quint16 NCoreService::fCommPort() const {
+    if(mWebServers.contains(cCommServerName))
+      return mWebServers.value(cCommServerName)->fPort();
+    return 0;
   }
 
   void NCoreService::fConnectToServiceManager(quint8 lReconnectionTryInterval) {
@@ -54,7 +59,8 @@ namespace NulstarNS {
       rWebSocket->fConnect();
     }
     else {
-      rWebSocket = new NWebSocket(cServiceManagerName, fApiVersionsSupported().at(0).toString(), mServiceManagerUrl, lReconnectionTryInterval);
+      rWebSocket = new NWebSocket(cServiceManagerName, fProtocolVersionsSupported().at(0).toString(), mServiceManagerUrl, lReconnectionTryInterval);
+      connect(rWebSocket, &NWebSocket::sStateChanged, this, &NCoreService::fOnConnectionStateChanged);
       mWebSockets.insert(cServiceManagerName, rWebSocket);
       rWebSocket->fConnect();
     }
@@ -69,6 +75,20 @@ namespace NulstarNS {
     NResponse lResponse(false, false, QDate::currentDate().toString("yyyy-MM-dd"), QTime::currentTime().toString("hh:mm:ss"), tr("Web server '%1' not found.").arg(lName));
     return lResponse;
   } ***/
+
+  void NCoreService::fOnConnectionStateChanged(NWebSocket::EConnectionState lNewState) {
+     NWebSocket* rWebSocket = qobject_cast<NWebSocket* > (sender());
+     if(rWebSocket) {
+         switch(lNewState) {
+           case NWebSocket::EConnectionState::eConnectionActive: {
+             rWebSocket->fRegisterApi(mApiBuilder.fApi());
+             break;
+           }
+           default:
+             break;
+         }
+     }
+  }
 
   bool NCoreService::fControlWebServer(const QString &lName, EServiceAction lAction) {
     QStringList lWebServerNames;

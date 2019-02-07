@@ -12,7 +12,9 @@
 #include <QMap>
 #include <QNetworkAddressEntry>
 #include <QObject>
+#include <QString>
 #include <QUrl>
+#include <QVariantMap>
 #include <QVersionNumber>
 #include <NWebSocket.h>
 #include <NWebSocketServer.h>
@@ -20,6 +22,10 @@
 #include "Core.h"
 
 namespace NulstarNS {    
+  const QString cRole_ServiceManager(QStringLiteral("Role_ServiceManager"));
+  const QString cCommServerName(QStringLiteral("WebCommServer"));
+  const QString cVersion_ServiceManagerRole(QStringLiteral("0.1"));
+
   class CORESHARED_EXPORT NCoreService : public QObject {
     Q_OBJECT
 
@@ -27,16 +33,21 @@ namespace NulstarNS {
       enum class ELogLevel {eLogCritical = 1, eLogImportant = 2, eLogWarning = 3, eLogInfo = 4, eLogEverything = 5};
       enum class EServiceAction {eStartService = 0, eStopService = 1, eRestartService = 2};      
 
-      NCoreService(QWebSocketServer::SslMode lSslMode = QWebSocketServer::SslMode::NonSecureMode, ELogLevel lLogLevel = ELogLevel::eLogWarning, const QUrl& lServiceManagerUrl = QUrl(),
-                   const QList<QNetworkAddressEntry>& lAllowedNetworks = QList<QNetworkAddressEntry> (), QObject* rParent = nullptr);
+      NCoreService(QWebSocketServer::SslMode lSslMode = QWebSocketServer::SslMode::NonSecureMode, ELogLevel lLogLevel = ELogLevel::eLogWarning, const QHostAddress& lIP = QHostAddress::SpecialAddress::LocalHost,
+                   const QUrl& lServiceManagerUrl = QUrl(), const QList<QNetworkAddressEntry>& lAllowedNetworks = QList<QNetworkAddressEntry> (), QObject* rParent = nullptr);
       virtual ~NCoreService();
 
+      virtual QString fAbbreviation() const = 0;
       virtual QString fName() const = 0;
       virtual QString fVersion() const = 0;
       virtual QString fDomain() const = 0;
-      virtual QString fApiRole() const = 0;
-      virtual QList<QVersionNumber> fApiVersionsSupported() const = 0;
-
+      virtual QVariantMap fDependencies() const = 0;
+      virtual QVariantMap fApiRoles() const = 0;
+      virtual QHostAddress fHostAddress() const { return mIP; }
+      virtual QList<QVersionNumber> fProtocolVersionsSupported() const = 0;
+      virtual quint16 fCommPort() const;
+      virtual int fApiMethodNameOffset() const { return 1; }
+      virtual bool fApiMethodLowercase() const { return true; }
 
       virtual bool fAddWebSocketServer(quint16 lPort, QHostAddress::SpecialAddress lBindAddress, const QString& lName = QString(), const QString& lLabel = QString(), bool lStartImmediatly = false);
       void fAddMethodFunctionDescription(const QString& lMethodName, const QString& lDescription) { mApiMethodDescription[lMethodName] = lDescription; }
@@ -50,13 +61,16 @@ namespace NulstarNS {
       void fSetLogLevel(ELogLevel lLogLevel = ELogLevel::eLogWarning) { mLogLevel = lLogLevel; }
       void fSetServiceManagerUrl(const QUrl& lServiceManagerUrl) { if(lServiceManagerUrl.isValid()) mServiceManagerUrl = lServiceManagerUrl; }
       void fSetAllowedNetworks(const QList<QNetworkAddressEntry>& lAllowedNetworks) { mAllowedNetworks = lAllowedNetworks; }
+      void fSetHost(const QHostAddress& lIP) { mIP = lIP; }
 
     protected:
+      virtual void fFillMethodMetadata() = 0;
       ELogLevel mLogLevel;
 
     private:
       quint64 mLastID;
       QUrl mServiceManagerUrl;
+      QHostAddress mIP;
       NWebSocketServer::SslMode mSslMode;
       QMap<QString, NWebSocket* > mWebSockets;  // Module Name, Connection
       QMap<QString, NWebSocketServer*> mWebServers;
@@ -67,6 +81,7 @@ namespace NulstarNS {
 
     public Q_SLOTS:
       virtual void fConnectToServiceManager(quint8 lReconnectionTryInterval);
+      virtual void fOnConnectionStateChanged(NWebSocket::EConnectionState lNewState);
       virtual bool fControlWebServer(const QString& lName, EServiceAction lAction); // If lName is empty then it controls all web sockets servers            
   };
 }

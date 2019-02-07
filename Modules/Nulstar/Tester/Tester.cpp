@@ -29,7 +29,8 @@ int main(int argc, char *argv[])
     {{"s", "sslmode"}, QStringLiteral("Security Type [0-1]."), QStringLiteral("sslmode")},
     {{"m", "commport"}, QStringLiteral("Communication Port."), QStringLiteral("commport")},
     {{"n", "allowednetworks"}, QStringLiteral("Allowed Networks."), QStringLiteral("allowednetworks")},
-    {{"i", "managerurl"}, QStringLiteral("Service manager URL."), QStringLiteral("managerurl")},
+    {{"u", "managerurl"}, QStringLiteral("Service manager URL."), QStringLiteral("managerurl")},
+    {{"i", "ip"}, QStringLiteral("Listening connections IP"), QStringLiteral("ip")},
   });
   lParser.process(lApp);
   if(!lParser.isSet("loglevel") || lParser.value("loglevel").toUShort() < 1 || lParser.value("loglevel").toUShort() > 5) {
@@ -48,6 +49,10 @@ int main(int argc, char *argv[])
   if(!lParser.isSet("commport")) {
     fputs(qPrintable(QString("Communication port not set!\n\n%1\n").arg(lParser.helpText())), stderr);
     return 5;
+  }
+  if(!lParser.isSet("ip")) {
+    fputs(qPrintable(QString("IP for listening incoming connections not set!\n\n%1\n").arg(lParser.helpText())), stderr);
+    return 6;
   }
   if(lParser.isSet("allowednetworks")) {
     QStringList lNetworks(lParser.value("allowednetworks").split(","));
@@ -68,8 +73,8 @@ int main(int argc, char *argv[])
       lServiceManagerUrl.prepend("wss://");
       lSslMode = QWebSocketServer::SslMode::SecureMode;
   }
-  const int lRetryInterval = 5; // Seconds
-  NulstarNS::NTesterController lController(lSslMode, static_cast<NulstarNS::NTesterController::ELogLevel> (lParser.value("loglevel").toUInt()),
+
+  NulstarNS::NTesterController lController(lSslMode, static_cast<NulstarNS::NTesterController::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")),
                                            QUrl(lServiceManagerUrl), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::Any);
   lController.fControlWebServer(QString(), NulstarNS::NTesterController::EServiceAction::eStartService);
  // lController.fConnectToServiceManager(lRetryInterval);

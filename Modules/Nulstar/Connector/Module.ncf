@@ -11,6 +11,7 @@ AllowedNetworks=127.0.0.1/32
 CommPort=7772
 AdminPort=7791
 ClientPort=7790
+IP=127.0.0.1
 
 [Output]
 LogLevel=4

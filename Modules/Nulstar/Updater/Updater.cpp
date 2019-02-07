@@ -3,7 +3,7 @@
 //
 #include <QtCore>
 #include <QtWebSockets>
-#include "AppVersion.h"
+#include "UpdaterVersion.h"
 #include "NUpdateController.h"
 
 int main(int argc, char *argv[]) {
@@ -25,9 +25,9 @@ int main(int argc, char *argv[]) {
                          {{"a", "adminport"}, QStringLiteral("Admin Port."), QStringLiteral("adminport")},
                          {{"c", "clientport"}, QStringLiteral("Client Port."), QStringLiteral("clientport")},
                          {{"m", "commport"}, QStringLiteral("Communication Port."), QStringLiteral("commport")},
-                         {{"n", "allowednetworks"}, QStringLiteral("Allowed Networks."),
-                          QStringLiteral("allowednetworks")},
-                         {{"i", "managerurl"}, QStringLiteral("Service manager URL."), QStringLiteral("managerurl")},
+                         {{"n", "allowednetworks"}, QStringLiteral("Allowed Networks."), QStringLiteral("allowednetworks")},
+                         {{"u", "managerurl"}, QStringLiteral("Service manager URL."), QStringLiteral("managerurl")},
+                         {{"i", "ip"}, QStringLiteral("Listening connections IP"), QStringLiteral("ip")},
                      });
   lParser.process(lApp);
   if (!lParser.isSet("loglevel") || lParser.value("loglevel").toUShort() < 1
@@ -52,6 +52,10 @@ int main(int argc, char *argv[]) {
     fputs(qPrintable(QString("Communication port not set!\n\n%1\n").arg(lParser.helpText())), stderr);
     return 5;
   }
+  if(!lParser.isSet("ip")) {
+    fputs(qPrintable(QString("IP for listening incoming connections not set!\n\n%1\n").arg(lParser.helpText())), stderr);
+    return 6;
+  }
   QWebSocketServer::SslMode lSslMode = QWebSocketServer::SslMode::NonSecureMode;
   if (lParser.isSet("managerurl")) {
     lServiceManagerUrl = lParser.value("managerurl");
@@ -73,14 +77,11 @@ int main(int argc, char *argv[]) {
       lAllowedNetworks << lNetworkAddress;
     }
   }
-  NulstarNS::NUpdateController lController(lSslMode,
-                                               static_cast<NulstarNS::NUpdateController::ELogLevel> (lParser
-                                                   .value("loglevel").toUInt()),
+
+  NulstarNS::NUpdateController lController(lSslMode, static_cast<NulstarNS::NUpdateController::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")),
                                                QUrl(lServiceManagerUrl),
                                                lAllowedNetworks,
                                                lParser.value("commport").toUShort(),
-                                               lParser.value("adminport").toUShort(),
-                                               lParser.value("clientport").toUShort(),
                                                QHostAddress::Any);
 //  lController.fControlWebServer(QString(),
 //                                NulstarNS::NConnectionController::EServiceAction::eStartService);  // Start all web sockets servers

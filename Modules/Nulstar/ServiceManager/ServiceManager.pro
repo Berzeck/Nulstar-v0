@@ -11,11 +11,12 @@ CONFIG += c++11 console
 TARGET = ServiceManager
 VERSION = 0.1.0
 APP_DOMAIN=Nulstar
-APP_ROLE=Role_ServiceManager
-APP_ROLE_VERSION=0.1
+APP_ROLES=Role_ServiceManager[0.1]
+APP_PROTOCOL_VERSIONS=0.1
 APP_NAME=$$TARGET
 APP_VERSION=$$VERSION
 APP_VERSION_NAME=Baby Apple I
+
 
 DESTDIR=$$MODULES_OUTDIR/$$APP_DOMAIN/$$TARGET/$$VERSION
 
@@ -28,7 +29,7 @@ QMAKE_POST_LINK += $$QMAKE_COPY $$COPYFILE1
 
 # Source Files
 
-QMAKE_SUBSTITUTES += AppVersion.h.in
+QMAKE_SUBSTITUTES += ServiceManagerVersion.h.in
 
 HEADERS += NServiceManagerController.h
 

@@ -6,26 +6,32 @@
 #include "NCoreService.h"
 
 namespace NulstarNS {
-  const QString lApiPeriodField("Period");
-  const QString lApiEventField("Event");
-  const QString lApiParametersField("Parameters");
-  const QString lApiParameterNameField("ParameterName");
-  const QString lApiParameterTypeField("ParameterType");
-  const QString lApiMethodsField("Methods");
-  const QString lApiMethodNameField("MethodName");
-  const QString lApiMethodScopeField("MethodScope");  
-  const QString lApiMethodDescriptionField("MethodDescription");
-  const QString lApiMethodMinEventField("MethodMinEvent");
-  const QString lApiMethodMinPeriodField("MethodMinPeriod");
-  const QString lApiAdminFunctionMacro("API_ADMIN_FUNCTION");
-  const QString lApiPublicFunctionMacro("API_PUBLIC_FUNCTION");
-  const QString lApiPrivateFunctionMacro("API_PRIVATE_FUNCTION");
-  const QString lRegisterApiField("RegisterAPI");
-  const QString lServiceNameFieldName("ServiceName");
-  const QString lServiceVersionFieldName("ServiceVersion");
-  const QString lServiceDomainFieldName("ServiceDomain");
-  const QString lServiceRoleFieldName("ServiceRole");
-  const QString lServiceApiVersionFieldName("ServiceAPIVersion");  
+  const QString cFieldName_Dependencies(QStringLiteral("Dependencies"));
+  const QString cFieldName_IP(QStringLiteral("IP"));
+  const QString cFieldName_ModuleName(QStringLiteral("ModuleName"));
+  const QString cFieldName_ModuleDomain(QStringLiteral("ModuleDomain"));
+  const QString cFieldName_ModuleRoles(QStringLiteral("ModuleRoles"));
+  const QString cFieldName_ModuleVersion(QStringLiteral("ModuleVersion"));
+  const QString cFieldName_ConnectionInformation(QStringLiteral("ConnectionInformation"));
+  const QString cFieldName_Port(QStringLiteral("Port"));
+  const QString cFieldName_Abbreviation(QStringLiteral("Abbreviation"));
+
+  const QString cFieldName_MethodName(QStringLiteral("MethodName"));
+  const QString cFieldName_MethodScope(QStringLiteral("MethodScope"));
+  const QString cFieldName_MethodDescription(QStringLiteral("MethodDescription"));
+  const QString cFieldName_MethodMinEvent(QStringLiteral("MethodMinEvent"));
+  const QString cFieldName_MethodMinPeriod(QStringLiteral("MethodMinPeriod"));
+  const QString cFieldName_ParameterName(QStringLiteral("ParameterName"));
+  const QString cFieldName_ParameterType(QStringLiteral("ParameterType"));
+  const QString cFieldName_Parameters(QStringLiteral("Parameters"));
+  const QString cFieldName_ParameterValidRange(QStringLiteral("ParameterValidRange"));
+  const QString cFieldName_ParameterValidRegExp(QStringLiteral("ParameterValidRegExp"));
+  const QString cFieldName_Methods(QStringLiteral("Methods"));
+  const QString cFieldName_RegisterAPI(QStringLiteral("RegisterAPI"));
+
+  const QString cFunctionTag_Admin(QStringLiteral("API_ADMIN_FUNCTION"));
+  const QString cFunctionTag_Public(QStringLiteral("API_PUBLIC_FUNCTION"));
+  const QString cFunctionTag_Private(QStringLiteral("API_PRIVATE_FUNCTION"));
 
   NApiBuilder::NApiBuilder(QObject* rParent)
              : QObject(rParent) {
@@ -35,45 +41,58 @@ namespace NulstarNS {
   void NApiBuilder::fBuildApi(NCoreService *rTargetObject) {
     mApi.clear();
     if(rTargetObject != nullptr) {
-      QMap<QString, QVariant> lApiMap;
+      QVariantMap lApiMap;
       const QMetaObject* lMetaObject = rTargetObject->metaObject();
       lApiMap = fBuildApiHeader(rTargetObject);
-      QList<QVariant> lMethods;
+      QVariantList lMethods;
+      QMap<QString, int> lParamCount; // Methods with default parameters are counted more than once so we choose the method with most parameters
       for(int i = lMetaObject->methodOffset(); i < lMetaObject->methodCount(); ++i) {
-        QMap<QString, QVariant> lMethodDetail;
+        QVariantMap lMethodDetail;
         QMetaMethod lApiMethod = rTargetObject->metaObject()->method(i);
-        lMethodDetail[lApiMethodNameField] = lApiMethod.name();
-        if((QString(lApiMethod.tag()) == lApiAdminFunctionMacro) || (QString(lApiMethod.tag()) == lApiPrivateFunctionMacro) || (QString(lApiMethod.tag()) == lApiPublicFunctionMacro))  {
-          lMethodDetail[lApiMethodScopeField] = QString(lApiMethod.tag()).section("_",1,1).toLower();
-          QList<QVariant> lParameters;
-          for(int j = 0; j < lApiMethod.parameterCount(); ++j) {
-            QMap<QString, QVariant> lParameterDetail;
-            lParameterDetail[lApiParameterNameField] = QString(lApiMethod.parameterNames().at(j));
-            lParameterDetail[lApiParameterTypeField] = QString(lApiMethod.parameterTypes().at(j));
-            lParameters << lParameterDetail;
+        if((QString(lApiMethod.tag()) == cFunctionTag_Admin) || (QString(lApiMethod.tag()) == cFunctionTag_Private) || (QString(lApiMethod.tag()) == cFunctionTag_Public))  {
+          QString lApiMethodName(lApiMethod.name());
+          if(rTargetObject->fApiMethodLowercase())
+            lApiMethodName = lApiMethodName.toLower();
+          if(rTargetObject->fApiMethodNameOffset())
+            lApiMethodName = lApiMethodName.right(lApiMethodName.size() - 1);
+
+          if(!lParamCount.contains(lApiMethodName) || (lParamCount.value(lApiMethodName) < lApiMethod.parameterCount())) {
+            lParamCount[lApiMethodName] = lApiMethod.parameterCount();
+            lMethodDetail[cFieldName_MethodName] = lApiMethodName;
+            lMethodDetail[cFieldName_MethodScope] = QString(lApiMethod.tag()).section("_",1,1).toLower();
+            lMethodDetail[cFieldName_MethodDescription] = rTargetObject->fMethodDescription(lApiMethod.name());
+            lMethodDetail[cFieldName_MethodMinEvent] = rTargetObject->fMethodMinEventAndMinPeriod(lApiMethod.name()).split(",").at(0).simplified();
+            lMethodDetail[cFieldName_MethodMinPeriod] = rTargetObject->fMethodMinEventAndMinPeriod(lApiMethod.name()).split(",").at(1).simplified();
+
+            QList<QVariant> lParameters;
+            for(int j = 0; j < lApiMethod.parameterCount(); ++j) {
+              QMap<QString, QVariant> lParameterDetail;
+              lParameterDetail[cFieldName_ParameterName] = QString(lApiMethod.parameterNames().at(j));
+              lParameterDetail[cFieldName_ParameterType] = QString(lApiMethod.parameterTypes().at(j));
+              lParameterDetail[cFieldName_ParameterValidRange] = QString();
+              lParameterDetail[cFieldName_ParameterValidRegExp] = QString();
+              lParameters << lParameterDetail;
+            }
+            lMethodDetail[cFieldName_Parameters] = lParameters;
+            lMethods << lMethodDetail;
           }
-          lMethodDetail[lApiParametersField] = lParameters;
-          lMethodDetail[lApiMethodDescriptionField] = rTargetObject->fMethodDescription(lApiMethod.name());
-          lMethodDetail[lApiMethodMinEventField] = rTargetObject->fMethodMinEventAndMinPeriod(lApiMethod.name()).split(",").at(0).simplified();
-          lMethodDetail[lApiMethodMinPeriodField] = rTargetObject->fMethodMinEventAndMinPeriod(lApiMethod.name()).split(",").at(1).simplified();
-          lMethods << lMethodDetail;
-        }        
+        }
       }
-      lApiMap[lApiMethodsField] = lMethods;
-      lApiMap[lApiPeriodField] = QString("0");
-      lApiMap[lApiEventField] = QString("0");
-      mApi[lRegisterApiField] = lApiMap;
+      lApiMap[cFieldName_Methods] = lMethods;
+      mApi[cFieldName_RegisterAPI] = lApiMap;
     }    
   }
 
   QVariantMap NApiBuilder::fBuildApiHeader(NCoreService *pTargetObject) {
-    QMap<QString, QVariant> lApiHeader;
+    QVariantMap lApiHeader;
     if(pTargetObject != nullptr) {
-      lApiHeader[lServiceNameFieldName] = pTargetObject->fName();
-      lApiHeader[lServiceVersionFieldName] = pTargetObject->fVersion();
-      lApiHeader[lServiceDomainFieldName] = pTargetObject->fDomain();
-      lApiHeader[lServiceRoleFieldName] = pTargetObject->fApiRole();
-      //lApiHeader[lServiceApiVersionFieldName] = pTargetObject->fApiVersion();
+      lApiHeader[cFieldName_Dependencies] = pTargetObject->fDependencies();
+      lApiHeader[cFieldName_ConnectionInformation] = QVariantMap( {{cFieldName_IP, pTargetObject->fHostAddress().toString()}, {cFieldName_Port, QString::number(pTargetObject->fCommPort()) } } ) ;
+      lApiHeader[cFieldName_ModuleDomain] = pTargetObject->fDomain();
+      lApiHeader[cFieldName_ModuleName] = pTargetObject->fName();
+      lApiHeader[cFieldName_Abbreviation] = pTargetObject->fAbbreviation();
+      lApiHeader[cFieldName_ModuleVersion] = pTargetObject->fVersion();
+      lApiHeader[cFieldName_ModuleRoles] = pTargetObject->fApiRoles();
     }
     return lApiHeader;
   }

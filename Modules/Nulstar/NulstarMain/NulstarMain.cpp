@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
 
   NulstarNS::NMainController lController;
   lController.fControlWebServer(QString(), NulstarNS::NMainController::EServiceAction::eStartService); // Start all web sockets servers
-  lController.fStartModule(APP_DOMAIN, cServiceManager);
+  lController.fStartModule(APP_DOMAIN, NulstarNS::cServiceManager);
   lController.fStartAllModules();
   lController.fConnectToServiceManager(lRetryInterval);
   return lApp.exec();

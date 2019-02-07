@@ -1,13 +1,14 @@
 #include <QHostAddress>
 #include <QSettings>
+#include <QStringList>
 #include <QWebSocket>
 #include <NWebSocketServer.h>
 #include <NApiBuilder.h>
 #include "NConnectionController.h"
 
 namespace NulstarNS {
-  NConnectionController::NConnectionController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QUrl &lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, quint16 lAdminPort, quint16 lClientPort, QHostAddress::SpecialAddress lBindAddress, QObject* rParent)
-                       : NCoreService(lSslMode, lLogLevel, lServiceManagerUrl, lAllowedNetworks, rParent), mRequestID(0), mCompressionLevel(0) {
+  NConnectionController::NConnectionController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress& lIP, const QUrl &lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, quint16 lAdminPort, quint16 lClientPort, QHostAddress::SpecialAddress lBindAddress, QObject* rParent)
+                       : NCoreService(lSslMode, lLogLevel, lIP, lServiceManagerUrl, lAllowedNetworks, rParent), mRequestID(0), mCompressionLevel(0) {
 
     if(lCommPort)
       fAddWebSocketServer(lCommPort, lBindAddress);
@@ -31,6 +32,18 @@ namespace NulstarNS {
     NResponse lResponse(true, mCompressionLevel, tr("Compression level is '%1'").arg(mCompressionLevel));
     return lResponse;
   } ***/
+
+  QVariantMap NConnectionController::fApiRoles() const {
+    QVariantMap lApiRolesMap;
+    QStringList lApiRoles(QString(APP_ROLES).split(":"));
+    for(QString& lApiRole : lApiRoles) {
+      lApiRole.remove(' ');
+      QString lRole = lApiRole.split("[").at(0);
+      QStringList lSupportedVersions = lApiRole.split("[").at(1).split("]").at(0).split(",");
+      lApiRolesMap[lApiRole] = lSupportedVersions;
+    }
+    return lApiRolesMap;
+  }
 
   void NConnectionController::fFillMethodDescriptions() {
     fAddMethodFunctionDescription("setmaxconnections", tr("Sets the maximum number of client connections that should be accepted.\nParameters:\n  maxconnections [0- ]: Maximum connections allowed. 0 means no limit."));

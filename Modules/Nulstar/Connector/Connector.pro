@@ -11,8 +11,8 @@ CONFIG += c++11 console
 TARGET = Connector
 VERSION = 0.1.0
 APP_DOMAIN=Nulstar
-APP_ROLE=Role_ConnectionManager
-APP_ROLE_VERSION=0.1
+APP_ROLES=Role_ConnectionManager[0.1]
+APP_PROTOCOL_VERSIONS=0.1
 APP_NAME=$$TARGET
 APP_VERSION=$$VERSION
 APP_VERSION_NAME=Baby Piglet I
@@ -28,7 +28,7 @@ QMAKE_POST_LINK += $$QMAKE_COPY $$COPYFILE1
 
 # Source Files
 
-QMAKE_SUBSTITUTES += AppVersion.h.in
+QMAKE_SUBSTITUTES += ConnectorVersion.h.in
 
 HEADERS += \
     NConnectionController.h

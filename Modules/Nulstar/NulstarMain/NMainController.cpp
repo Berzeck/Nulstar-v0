@@ -12,6 +12,7 @@ const QString cManageParameter("Managed");
 const QString cAllowedNetworks("AllowedNetworks");
 const QString cCommPortParameter("CommPort");
 const QString cLogLevelParameter("LogLevel");
+const QString cIPParameter("IP");
 const QString cSslModeParameter("SslMode");
 
 namespace NulstarNS {
@@ -28,6 +29,7 @@ namespace NulstarNS {
     QString lCommunicationPort(lControllerInfo.fParameterValue(cCommPortParameter));
     QString lLogLevel(lControllerInfo.fParameterValue(cLogLevelParameter));
     QString lSslModeStr(lControllerInfo.fParameterValue(cSslModeParameter));
+    QString lIP(lControllerInfo.fParameterValue(cIPParameter));
     QStringList lAllowedNetworksStrings(lControllerInfo.fParameterValue(cAllowedNetworks).split(","));
     for(const QString& lNetwork : lAllowedNetworksStrings) {
       QStringList lParams(lNetwork.split("/"));
@@ -55,7 +57,26 @@ namespace NulstarNS {
     fSetLogLevel(static_cast<NulstarNS::NMainController::ELogLevel>(lLogLevel.toUInt()));
     fSetServiceManagerUrl(QUrl(lServiceManagerUrl));
     fSetAllowedNetworks(lAllowedNetworks);
-    fAddWebSocketServer(lCommunicationPort.toUShort(), lBindAddress, fName());
+    fSetHost(QHostAddress(lIP));
+    fAddWebSocketServer(lCommunicationPort.toUShort(), lBindAddress);
+
+    fFillMethodMetadata();
+  }
+
+  QVariantMap NMainController::fApiRoles() const {
+    QVariantMap lApiRolesMap;
+    QStringList lApiRoles(QString(APP_ROLES).split(":"));
+    for(QString& lApiRole : lApiRoles) {
+      lApiRole.remove(' ');
+      QString lRole = lApiRole.split("[").at(0);
+      QStringList lSupportedVersions = lApiRole.split("[").at(1).split("]").at(0).split(",");
+      lApiRolesMap[lRole] = lSupportedVersions;
+    }
+    return lApiRolesMap;
+  }
+
+  quint8 NMainController::fScanManagedModules() {
+    return mModuleManager.fLoadModulesInfo();
   }
 
   bool NMainController::fStartModule(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion, bool fRestartIfRunning) {
@@ -157,5 +178,21 @@ namespace NulstarNS {
   void NMainController::fShutdownSystem() {
     fStopAllModules();
     qApp->quit();
+  }
+
+  void NMainController::fFillMethodMetadata() {
+    fAddMethodFunctionDescription(QStringLiteral("fScanManagedModules"), tr("Searches and reads the configuration file Module.ncf in the directory hierarchy."));
+    fAddMethodFunctionDescription(QStringLiteral("fStartAllModules"), tr("Starts modules of the desired namespace, if blank then all available modules are started."));
+    fAddMethodFunctionDescription(QStringLiteral("fStartModule"), tr("Starts the specified module."));
+    fAddMethodFunctionDescription(QStringLiteral("fStopModule"), tr("Stops the specified module."));
+    fAddMethodFunctionDescription(QStringLiteral("fStopAllModules"), tr("Stops all modules belonging to the specified namespace, if blank it stops all modules that are currently running."));
+    fAddMethodFunctionDescription(QStringLiteral("fShutdownSystem"), tr("Stops the system enterily."));
+
+    fAddMethodMinEventAndMinPeriod(QStringLiteral("fScanManagedModules"), QString("0,0"));
+    fAddMethodMinEventAndMinPeriod(QStringLiteral("fStartAllModules"), QString("0,0"));
+    fAddMethodMinEventAndMinPeriod(QStringLiteral("fStartModule"), QString("0,0"));
+    fAddMethodMinEventAndMinPeriod(QStringLiteral("fStopModule"), QString("0,0"));
+    fAddMethodMinEventAndMinPeriod(QStringLiteral("fStopAllModules"), QString("0,0"));
+    fAddMethodMinEventAndMinPeriod(QStringLiteral("fShutdownSystem"), QString("0,0"));
   }
 }
