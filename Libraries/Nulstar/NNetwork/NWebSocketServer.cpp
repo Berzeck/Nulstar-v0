@@ -52,6 +52,8 @@ namespace NulstarNS {
         fProcessNegotiateConnection(lMessageObject, rSocket);
   /*    if(lMessageType == cTypeNegotiateConnectionResponse && NMessageNegotiateConnectionResponse::fValidateMessageObject(lMessageObject))
         fProcessNegotiateConnectionResponse(lMessageObject, rSocket); // Request is always received in NWebSocket*/
+      if(lMessageType == cTypeRequest && NMessageRequest::fValidateMessageObject(lMessageObject))
+        fProcessRequest(lMessageObject, rSocket);
     }
   }
 
@@ -84,7 +86,7 @@ qDebug() << "socketDisconnected:" << rSocket->fName();
   }
 
   bool NWebSocketServer::fVersionSupported(const QJsonObject& lObjectMessage) {
-    QVersionNumber lIncommingVersion = QVersionNumber::fromString(lObjectMessage.value(cMessageDataFieldName).toObject().value(cProtocolVersionFieldName).toString());
+    QVersionNumber lIncommingVersion = QVersionNumber::fromString(lObjectMessage.value(cFieldName_MessageData).toObject().value(cProtocolVersionFieldName).toString());
 qDebug() << QString("Inc Version: '%1'").arg(lIncommingVersion.toString());
     for(const QVersionNumber& lVersionSupported : mProtocolVersionsSupported) {
       if(lIncommingVersion == lVersionSupported) {
@@ -105,7 +107,7 @@ qDebug() << QString("Protocol Version '%1' not supported!").arg(lIncommingVersio
       QString lJsonMessage(rNegotiationResponse.fToJsonString());
        rConnection->fSetConnectionState(NWebSocket::EConnectionState::eConnectionActive);
        qint64 lBytesSent = rConnection->fSendTextMessage(lJsonMessage);
- qDebug() << QString("Bytes Sent: '%1'\n  - Message: '%2' Error> %3").arg(QString::number(lBytesSent)).arg(lJsonMessage) /*.arg(rConnection->errorString())  << rConnection->state()*/;
+ qDebug() << QString("Bytes Sent: '%1'\n  - Message: '%2'").arg(QString::number(lBytesSent)).arg(lJsonMessage);
     }
     else {
       NMessageNegotiateConnectionResponse lNegotiationResponse(rConnection->fName(), QString(), NMessageNegotiateConnectionResponse::ENegotiationStatus::eNegotiationError, QString("Negotiation unsuccessful! Protocol Version not supported!"));
@@ -113,6 +115,19 @@ qDebug() << QString("Protocol Version '%1' not supported!").arg(lIncommingVersio
  //qDebug() << QString("Message Sent: '%1'").arg(lJsonMessage) << rConnection->state();
       rConnection->fSendTextMessage(lJsonMessage);
       fRemoveConnections(QList<qint64> () << rConnection->fName().toLongLong());
+    }
+  }
+
+  void NWebSocketServer::fProcessRequest(const QJsonObject& lObjectMessage, NWebSocket* rConnection) {
+    if(!rConnection) {
+      qDebug() << QString("Connection '%1' no longer exists!").arg(rConnection->fName());
+      return;
+    }
+    QVariantMap lRequestMethods(lObjectMessage.toVariantMap().value(cFieldName_MessageData).toMap().value(cFieldName_RequestMethods).toMap());
+    QString lMessageID(lObjectMessage.toVariantMap().value(cFieldName_MessageID).toString());
+    for(const QString& lRequestMethodName : lRequestMethods.keys()) {
+      QVariantMap lRequestMethodParams = lRequestMethods.value(lRequestMethodName).toMap();
+      emit sRequestMessageArrived(fName(), lMessageID, lRequestMethodName, lRequestMethodParams);
     }
   }
 

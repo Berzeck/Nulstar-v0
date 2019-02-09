@@ -10,11 +10,11 @@
 #include "NNetwork.h"
 
 namespace NulstarNS {
-  const QString cMessageIDFieldName("MessageID");
+  const QString cFieldName_MessageID("MessageID");
   const QString cTimeStampFieldName("Timestamp");
   const QString cTimeZoneFieldName("TimeZone");
   const QString cMessageTypeFieldName("MessageType");
-  const QString cMessageDataFieldName("MessageData");
+  const QString cFieldName_MessageData("MessageData");
 
   const QString cTypeAck("Ack");
   const QString cTypeNegotiateConnection("NegotiateConnection");

@@ -25,16 +25,16 @@ namespace NulstarNS {
 
   QString NMessage::fToJsonString(QJsonDocument::JsonFormat lFormat) const {
     QVariantMap lMessage;
-    lMessage.insert(cMessageIDFieldName, mMessageID);
+    lMessage.insert(cFieldName_MessageID, mMessageID);
     lMessage.insert(cTimeStampFieldName, mTimeStamp);
     lMessage.insert(cTimeZoneFieldName, mTimeZone);
     lMessage.insert(cMessageTypeFieldName, fMessageType());
-    lMessage.insert(cMessageDataFieldName, fMessageData());
+    lMessage.insert(cFieldName_MessageData, fMessageData());
     return QString(QJsonDocument::fromVariant(lMessage).toJson(lFormat));
   }
 
   bool NMessage::fValidateMessageObject(const QJsonObject& lMessageObject) {
-    if(!lMessageObject.contains(cMessageIDFieldName)) {
+    if(!lMessageObject.contains(cFieldName_MessageID)) {
       qDebug("Message received without 'ID' field!");
       return false;
     }
@@ -60,7 +60,7 @@ namespace NulstarNS {
       qDebug("Message received without 'Type' field!");
       return false;
     }
-    if(!lMessageObject.contains(cMessageDataFieldName)) {
+    if(!lMessageObject.contains(cFieldName_MessageData)) {
       qDebug("Message received without 'Data' field!");
       return false;
     }

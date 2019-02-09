@@ -40,7 +40,7 @@ bool NMessageRegisterCompoundMethod::fValidateMessageObject(const QJsonObject &l
     return false;
   }
 
-  QJsonValue dataFields = lMessageObject.value("cMessageDataFieldName");
+  QJsonValue dataFields = lMessageObject.value("cFieldName_MessageData");
 
   return true;
 }

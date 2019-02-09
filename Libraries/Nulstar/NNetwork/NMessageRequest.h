@@ -10,6 +10,12 @@
 #include "NNetwork.h"
 
 namespace NulstarNS {
+  const QString lRequestAckFieldName("RequestAck");
+  const QString lSubscriptionEventCounterFieldName("SubscriptionEventCounter");
+  const QString lSubscriptionPeriodFieldName("SubscriptionPeriod");
+  const QString lSubscriptionRangeFieldName("SubscriptionRange");
+  const QString lResponseMaxSizeFieldName("ResponseMaxSize");
+  const QString cFieldName_RequestMethods("RequestMethods");
   class NETWORKSHARED_EXPORT NMessageRequest : public NMessage {
     Q_OBJECT
 
@@ -27,11 +33,12 @@ namespace NulstarNS {
 
       bool fAddMethod(const QString& lMethodName);
       bool fAddParameter(const QString& lMethodName, const QString& lParameterName, const QVariant& lParameterValue);
+      static bool fValidateMessageObject(const QJsonObject& lMessageObject);
 
     protected:
       QVariantMap fMessageData() const override;
       QString fMessageType() const override { return cTypeRequest; }
-      static bool fValidateMessageObject(const QJsonObject& lMessageObject);
+
     private:
       bool mRequestAck;
       quint64 mResponseMaxSize;

@@ -4,6 +4,8 @@
 #include <QList>
 #include <QHostAddress>
 #include <QObject>
+#include <QString>
+#include <QVariantMap>
 #include <QVersionNumber>
 #include <NCoreService.h>
 #include <NWebSocketServer.h>
@@ -28,8 +30,12 @@ namespace NulstarNS {
       QVariantMap fApiRoles() const override;
       QList<QVersionNumber> fProtocolVersionsSupported() const override { QList<QVersionNumber> lApiVersionsSupported; QVersionNumber lMainVersion(QVersionNumber::fromString(APP_PROTOCOL_VERSIONS)); lApiVersionsSupported << lMainVersion; return lApiVersionsSupported; }
 
+    public Q_SLOTS:
+      API_PUBLIC_FUNCTION void registerapi(const QString& lWebSocketsServerName, const QString& lMessageID, const QString& lMethodName, const QVariantMap& lParameters);
+
     protected:
-      void fFillMethodMetadata() override { }
+      void fFillMethodMetadata() override { }      
+
   };
 }
 

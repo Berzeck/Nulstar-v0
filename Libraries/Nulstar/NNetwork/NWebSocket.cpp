@@ -6,6 +6,7 @@
 #include "NMessageFactory.h"
 #include "NMessageNegotiateConnection.h"
 #include "NMessageNegotiateConnectionResponse.h"
+#include "NMessageRequest.h"
 
 namespace NulstarNS {
   NWebSocket::NWebSocket(const QString &lName, const QString &lProtocolVersion, const QUrl& lConnectionUrl, quint8 lConnectionRetryInterval, QWebSocket *rSocket, QObject* rParent)
@@ -83,7 +84,7 @@ namespace NulstarNS {
   }
 
   void NWebSocket::fProcessNegotiateConnectionResponse(const QJsonObject& lObjectMessage) {
-    QJsonObject lDataObject(lObjectMessage.value(cMessageDataFieldName).toObject());
+    QJsonObject lDataObject(lObjectMessage.value(cFieldName_MessageData).toObject());
     if(lDataObject.value(cNegotiationStatusFieldName).toVariant().toBool()) {
       fSetConnectionState(NWebSocket::EConnectionState::eConnectionActive);
   qDebug() << QString("Negotiation attempt to '%1' successful!").arg(fName());
@@ -94,13 +95,6 @@ namespace NulstarNS {
   }
 
   void NWebSocket::fRegisterApi(const QVariantMap& lApiMap) {
-    QJsonDocument lApi(QJsonDocument::fromVariant(lApiMap));
-        //     QString lApi(fBuildApi().toJson(QJsonDocument::Indented));
-       //***   NMessageRequest lApiRegister(QDate::currentDate(), QTime::currentTime(), mApiBuilder.fBuildApi(this));
-       //****   mPacketProcessor.fProcessRequest(lApiRegister);
-   //      qDebug() << "ss"; // lApiRegister.fToJsonString(QJsonDocument::Indented).toLatin1();
-      //      mWebSocket.sendTextMessage(lApi);
-
-       //   return pApiBuilder->fBuildApi(this);
+    fQueueMessage(new  NMessageRequest(mName, QString(), false, 0, 0, QString(), 0, lApiMap, this), EConnectionState::eConnectionActive);
   }
 }

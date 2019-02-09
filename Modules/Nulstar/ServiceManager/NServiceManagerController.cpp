@@ -21,4 +21,8 @@ namespace NulstarNS {
     }
     return lApiRolesMap;
   }
+
+  void NServiceManagerController::registerapi(const QString& lWebSocketsServerName, const QString& lMessageID, const QString& lMethodName, const QVariantMap& lParameters) {
+     qDebug("pddpdpdpd");
+  }
 }

@@ -20,12 +20,9 @@
 #include <NWebSocketServer.h>
 #include "NApiBuilder.h"
 #include "Core.h"
+#include "NCoreConstants.h"
 
 namespace NulstarNS {    
-  const QString cRole_ServiceManager(QStringLiteral("Role_ServiceManager"));
-  const QString cCommServerName(QStringLiteral("WebCommServer"));
-  const QString cVersion_ServiceManagerRole(QStringLiteral("0.1"));
-
   class CORESHARED_EXPORT NCoreService : public QObject {
     Q_OBJECT
 
@@ -63,6 +60,14 @@ namespace NulstarNS {
       void fSetAllowedNetworks(const QList<QNetworkAddressEntry>& lAllowedNetworks) { mAllowedNetworks = lAllowedNetworks; }
       void fSetHost(const QHostAddress& lIP) { mIP = lIP; }
 
+    public Q_SLOTS:
+      virtual void fConnectToServiceManager(quint8 lReconnectionTryInterval);
+      virtual void fOnConnectionStateChanged(NWebSocket::EConnectionState lNewState);
+      virtual bool fControlWebServer(const QString& lName, EServiceAction lAction); // If lName is empty then it controls all web sockets servers
+
+    protected Q_SLOTS:
+      virtual void fOnRequestMessageArrived(const QString& lWebSocketsServerName, const QString& lMessageID, const QString& lMethodName, const QVariantMap& lParameters);
+
     protected:
       virtual void fFillMethodMetadata() = 0;
       ELogLevel mLogLevel;
@@ -78,11 +83,6 @@ namespace NulstarNS {
       QMap<QString, QString> mApiMethodMinEventAndMinPeriod;
       QList<QNetworkAddressEntry> mAllowedNetworks;
       NApiBuilder mApiBuilder;
-
-    public Q_SLOTS:
-      virtual void fConnectToServiceManager(quint8 lReconnectionTryInterval);
-      virtual void fOnConnectionStateChanged(NWebSocket::EConnectionState lNewState);
-      virtual bool fControlWebServer(const QString& lName, EServiceAction lAction); // If lName is empty then it controls all web sockets servers            
   };
 }
 

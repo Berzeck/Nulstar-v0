@@ -32,7 +32,7 @@ namespace NulstarNS {
     if(!NMessage::fValidateMessageObject(lMessageObject)) {
       return false;
     }
-    QJsonObject lDataObject = lMessageObject.value(cMessageDataFieldName).toObject();
+    QJsonObject lDataObject = lMessageObject.value(cFieldName_MessageData).toObject();
     if(!lDataObject.contains(cProtocolVersionFieldName)) {
       qDebug("Message received without 'ProtocolVersion' field!");
       return false;

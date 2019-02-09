@@ -2,11 +2,6 @@
 #include "NCoreService.h"
 
 namespace NulstarNS {
-  const QString cConstantsFile("Constants.ncf");
-  const QString cCommServerLabel("Nulstar Internal Communication");
-  const QString cDefaultMinEventAndMinPeriod("0,0");
-  const QString cServiceManagerName("ServiceManager") ;
-
   NCoreService::NCoreService(NWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress& lIP, const QUrl& lServiceManagerUrl, const QList<QNetworkAddressEntry>& lAllowedNetworks,
                              QObject *rParent)
               : QObject(rParent), mLogLevel(lLogLevel), mServiceManagerUrl(lServiceManagerUrl), mIP(lIP), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks) {
@@ -40,6 +35,7 @@ namespace NulstarNS {
     NWebSocketServer* pWebServer = new NWebSocketServer(lEffectiveName, lEffectiveLabel, mSslMode, fProtocolVersionsSupported(), nullptr);
     pWebServer->fSetPort(lPort);
     pWebServer->fSetBindAddress(lBindAddress);
+    connect(pWebServer, &NWebSocketServer::sRequestMessageArrived, this, &NCoreService::fOnRequestMessageArrived);
     mWebServers[pWebServer->fName()] = pWebServer;
     if(lStartImmediatly)
       fControlWebServer(pWebServer->fName(), EServiceAction::eStartService);
@@ -135,12 +131,12 @@ namespace NulstarNS {
     else return cDefaultMinEventAndMinPeriod;
   }
 
-/***  NResponse NCoreService::fTotalConnections(const QString &lName) {
-    if(mWebServers.contains(lName)) {
-      NResponse lResponse(true, mWebServers[lName]->fTotalConnections());
-      return lResponse;
-    }
-    NResponse lResponse(false, 0, tr("Web server '%1' not found.").arg(lName));
-    return lResponse;
-  } ***/
+  void NCoreService::fOnRequestMessageArrived(const QString& lWebSocketsServerName, const QString& lMessageID, const QString& lMethodName, const QVariantMap& lParameters) {
+    QString lEffectiveMethodName(lMethodName);
+    if(fApiMethodLowercase())
+      lEffectiveMethodName = lMethodName.toLower();
+    bool lSuccess = metaObject()->invokeMethod(this, lEffectiveMethodName.toLatin1().data(), Qt::DirectConnection, Q_ARG(QString, lWebSocketsServerName), Q_ARG(QString, lMethodName), Q_ARG(QVariantMap, lParameters));
+    if(!lSuccess)
+      qDebug("%s", qUtf8Printable(QString("Method '%1' couldn't be executed successfully!").arg(lMethodName)));
+  }
 }

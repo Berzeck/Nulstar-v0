@@ -18,10 +18,13 @@ DESTDIR=$$LIBRARIES_OUTDIR
 
 HEADERS += Core.h \
            NCoreService.h \
-    NApiBuilder.h
+    NApiBuilder.h \
+    NModuleAPI.h \
+    NCoreConstants.h
 
 SOURCES += NCoreService.cpp \
-    NApiBuilder.cpp
+    NApiBuilder.cpp \
+    NModuleAPI.cpp
 
 # Dependencies
 
