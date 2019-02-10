@@ -62,6 +62,7 @@ namespace NulstarNS {
 qDebug() << "socketDisconnected:" << rSocket->fName();
     if(rSocket) {
       fRemoveConnections(QList<qint64> () << rSocket->fName().toLongLong());
+      emit sWebSocketDisconnected(rSocket->fName());
     }
   }
 
@@ -127,7 +128,7 @@ qDebug() << QString("Protocol Version '%1' not supported!").arg(lIncommingVersio
     QString lMessageID(lObjectMessage.toVariantMap().value(cFieldName_MessageID).toString());
     for(const QString& lRequestMethodName : lRequestMethods.keys()) {
       QVariantMap lRequestMethodParams = lRequestMethods.value(lRequestMethodName).toMap();
-      emit sRequestMessageArrived(fName(), lMessageID, lRequestMethodName, lRequestMethodParams);
+      emit sRequestMessageArrived(fName(), rConnection->fName(),lMessageID, lRequestMethodName, lRequestMethodParams);
     }
   }
 

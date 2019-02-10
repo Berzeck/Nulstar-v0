@@ -36,6 +36,7 @@ namespace NulstarNS {
     pWebServer->fSetPort(lPort);
     pWebServer->fSetBindAddress(lBindAddress);
     connect(pWebServer, &NWebSocketServer::sRequestMessageArrived, this, &NCoreService::fOnRequestMessageArrived);
+    connect(pWebServer, &NWebSocketServer::sWebSocketDisconnected, this, &NCoreService::fOnWebSocketDisconnected);
     mWebServers[pWebServer->fName()] = pWebServer;
     if(lStartImmediatly)
       fControlWebServer(pWebServer->fName(), EServiceAction::eStartService);
@@ -131,11 +132,11 @@ namespace NulstarNS {
     else return cDefaultMinEventAndMinPeriod;
   }
 
-  void NCoreService::fOnRequestMessageArrived(const QString& lWebSocketsServerName, const QString& lMessageID, const QString& lMethodName, const QVariantMap& lParameters) {
+  void NCoreService::fOnRequestMessageArrived(const QString& lWebSocketsServerName, const QString& lWebSocketID, const QString& lMessageID, const QString& lMethodName, const QVariantMap& lParameters) {
     QString lEffectiveMethodName(lMethodName);
     if(fApiMethodLowercase())
       lEffectiveMethodName = lMethodName.toLower();
-    bool lSuccess = metaObject()->invokeMethod(this, lEffectiveMethodName.toLatin1().data(), Qt::DirectConnection, Q_ARG(QString, lWebSocketsServerName), Q_ARG(QString, lMethodName), Q_ARG(QVariantMap, lParameters));
+    bool lSuccess = metaObject()->invokeMethod(this, lEffectiveMethodName.toLatin1().data(), Qt::DirectConnection, Q_ARG(QString, lWebSocketsServerName), Q_ARG(QString, lWebSocketID), Q_ARG(QString, lMessageID), Q_ARG(QVariantMap, lParameters));
     if(!lSuccess)
       qDebug("%s", qUtf8Printable(QString("Method '%1' couldn't be executed successfully!").arg(lMethodName)));
   }

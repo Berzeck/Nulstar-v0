@@ -66,7 +66,8 @@ namespace NulstarNS {
       virtual bool fControlWebServer(const QString& lName, EServiceAction lAction); // If lName is empty then it controls all web sockets servers
 
     protected Q_SLOTS:
-      virtual void fOnRequestMessageArrived(const QString& lWebSocketsServerName, const QString& lMessageID, const QString& lMethodName, const QVariantMap& lParameters);
+      virtual void fOnRequestMessageArrived(const QString& lWebSocketsServerName, const QString& lWebSocketID, const QString& lMessageID, const QString& lMethodName, const QVariantMap& lParameters);
+      virtual void fOnWebSocketDisconnected(const QString& lWebSocketID) { Q_UNUSED(lWebSocketID); }
 
     protected:
       virtual void fFillMethodMetadata() = 0;
