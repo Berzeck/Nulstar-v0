@@ -27,7 +27,7 @@ namespace NulstarNS {
     }
     mDependencies = lModuleApiMap.value(cFieldName_Dependencies).toMap();
 
-    if(!lModuleApiMap.contains(cFieldName_IP))  {
+    if(!lModuleApiMap.value(cFieldName_ConnectionInformation).toMap().contains(cFieldName_IP))  {
       qDebug("%s", qUtf8Printable(QString("API from module '%1', field '%2' does not contain valid information!)").arg(cFieldName_ModuleName).arg(cFieldName_IP)));
       return;
     }
