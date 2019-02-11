@@ -8,6 +8,7 @@
 #include <QVariantMap>
 #include <QVersionNumber>
 #include <NCoreService.h>
+#include <NModuleAPI.h>
 #include <NWebSocketServer.h>
 
 #include "ServiceManagerVersion.h"
@@ -34,13 +35,13 @@ namespace NulstarNS {
       API_PUBLIC_FUNCTION void registerapi(const QString& lWebSocketsServerName, const QString &lWebSocketID, const QString& lMessageID, const QVariantMap& lParameters);
 
     protected Q_SLOTS:
-      void fOnWebSocketDisconnected(const QString& lWebSocketID);
+      void fOnWebSocketDisconnected(const QString& lWebSocketID) override;
 
     protected:
       void fFillMethodMetadata() override { }      
 
     private:
-      QVariantMap mModuleAPISet;
+      QMap<QString, NModuleAPI> mModuleAPISet;
   };
 }
 

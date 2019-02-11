@@ -1,5 +1,5 @@
 #include <NMessage.h>
-#include "Core.h"
+#include <QVersionNumber>
 #include "NCoreConstants.h"
 #include "NModuleAPI.h"
 
@@ -10,7 +10,7 @@ namespace NulstarNS {
   }
 
   NModuleAPI::NModuleAPI(const QVariantMap& lModuleApiMap)
-            : QVariantMap(lModuleApiMap), mIsValid(false) {
+            : mIsValid(false) {
     fFillFields(lModuleApiMap);
   }
 
@@ -59,7 +59,16 @@ namespace NulstarNS {
       qDebug("%s", qUtf8Printable(QString("API from module '%1', field '%2' does not contain valid information!)").arg(cFieldName_ModuleName).arg(cFieldName_ModuleRoles)));
       return;
     }
-    mModuleRoles = lModuleApiMap.value(cFieldName_ModuleRoles).toMap();
+    QVariantMap lRoleMap = lModuleApiMap.value(cFieldName_ModuleRoles).toMap();
+    QMapIterator<QString, QVariant> i1(lRoleMap);
+    while(i1.hasNext()) {
+      i1.next();
+      NModuleAPIRole lAPIRole;
+      lAPIRole.fSetRoleName(i1.key());
+      lAPIRole.fSetVersionNumber(QVersionNumber::fromString(i1.value().toString()));
+      mModuleRoles << lAPIRole;
+  //    mModuleRoles << NModuleAPIRole(i1.key(), QVersionNumber::fromString(i1.value().toString()));
+    }
 
     if(!lModuleApiMap.contains(cFieldName_ModuleVersion))  {
       qDebug("%s", qUtf8Printable(QString("API from unknown module received! (Field '%1' does not contain valid information)").arg(cFieldName_ModuleVersion)));
@@ -76,7 +85,7 @@ namespace NulstarNS {
     mIsValid = true;
   }
 
-  bool NModuleAPI::fIsRoleSupported(const QString& lRoleName, const QString& lVersion) {
+ /* bool NModuleAPI::fIsRoleSupported(const QString& lRoleName, const QString& lVersion) const {
     if(mModuleRoles.contains(lRoleName)) {
       if(mModuleRoles[lRoleName].toList().contains(lVersion))
         return true;
@@ -86,5 +95,5 @@ namespace NulstarNS {
       }
     }
     return false;
-  }
+  }*/
 }

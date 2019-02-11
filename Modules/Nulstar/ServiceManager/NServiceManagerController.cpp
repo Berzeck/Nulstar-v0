@@ -1,6 +1,5 @@
 #include <QHostAddress>
 #include <QWebSocket>
-#include <NModuleAPI.h>
 #include "NServiceManagerController.h"
 
 namespace NulstarNS {
@@ -9,7 +8,6 @@ namespace NulstarNS {
 
      if(lCommPort)
        fAddWebSocketServer(lCommPort, lBindAddress);
-     qRegisterMetaType<NModuleAPI>();
   }
 
   QVariantMap NServiceManagerController::fApiRoles() const {
@@ -25,7 +23,14 @@ namespace NulstarNS {
   }
 
   void NServiceManagerController::fOnWebSocketDisconnected(const QString& lWebSocketID) {
-      qDebug("djifdjjf");
+    QMapIterator<QString, NModuleAPI> i1(mModuleAPISet);
+    while(i1.hasNext()) {
+      i1.next();
+      if(lWebSocketID == i1.value().fWebSocketID()) {
+        mModuleAPISet.remove(i1.key());
+        qDebug("%s", qUtf8Printable(QString("API from module '%1' usng WebSocket connection '%2' has been removed!").arg(i1.value().fModuleName()).arg(i1.value().fWebSocketID())));
+      }
+    }
   }
 
   void NServiceManagerController::registerapi(const QString& lWebSocketsServerName, const QString& lWebSocketID, const QString& lMessageID, const QVariantMap& lParameters) {

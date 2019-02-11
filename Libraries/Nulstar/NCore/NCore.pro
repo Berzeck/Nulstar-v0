@@ -20,11 +20,13 @@ HEADERS += Core.h \
            NCoreService.h \
     NApiBuilder.h \
     NModuleAPI.h \
-    NCoreConstants.h
+    NCoreConstants.h \
+    NModuleAPIRole.h
 
 SOURCES += NCoreService.cpp \
     NApiBuilder.cpp \
-    NModuleAPI.cpp
+    NModuleAPI.cpp \
+    NModuleAPIRole.cpp
 
 # Dependencies
 

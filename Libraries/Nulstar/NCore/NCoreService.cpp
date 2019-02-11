@@ -1,4 +1,5 @@
 #include <QTimer>
+#include "NModuleAPI.h"
 #include "NCoreService.h"
 
 namespace NulstarNS {
