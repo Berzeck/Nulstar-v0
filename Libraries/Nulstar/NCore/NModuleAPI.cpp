@@ -22,23 +22,23 @@ namespace NulstarNS {
     mModuleName = lModuleApiMap.value(cFieldName_ModuleName).toString();
 
     if(!lModuleApiMap.contains(cFieldName_Dependencies))  {
-      qDebug("%s", qUtf8Printable(QString("API from module '%1', field '%2' does not contain valid information!)").arg(cFieldName_ModuleName).arg(cFieldName_Dependencies)));
+      qDebug("%s", qUtf8Printable(QString("API from module '%1', field '%2' does not contain valid information!)").arg(mModuleName).arg(cFieldName_Dependencies)));
       return;
     }
     mDependencies = lModuleApiMap.value(cFieldName_Dependencies).toMap();
 
     if(!lModuleApiMap.value(cFieldName_ConnectionInformation).toMap().contains(cFieldName_IP))  {
-      qDebug("%s", qUtf8Printable(QString("API from module '%1', field '%2' does not contain valid information!)").arg(cFieldName_ModuleName).arg(cFieldName_IP)));
+      qDebug("%s", qUtf8Printable(QString("API from module '%1', field '%2' does not contain valid information!)").arg(mModuleName).arg(cFieldName_IP)));
       return;
     }
     mIP = QHostAddress(lModuleApiMap.value(cFieldName_ConnectionInformation).toMap().value(cFieldName_IP).toString());
     if(mIP.isNull()) {
-      qDebug("%s", qUtf8Printable(QString("API from module '%1', field '%2' does not contain valid information!)").arg(cFieldName_ModuleName).arg(cFieldName_IP)));
+      qDebug("%s", qUtf8Printable(QString("API from module '%1', field '%2' does not contain valid information!)").arg(mModuleName).arg(cFieldName_IP)));
       return;
     }
 
     if(!lModuleApiMap.contains(cFieldName_Methods))  {
-      qDebug("%s", qUtf8Printable(QString("API from module '%1', field '%2' does not contain valid information!)").arg(cFieldName_ModuleName).arg(cFieldName_Methods)));
+      qDebug("%s", qUtf8Printable(QString("API from module '%1', field '%2' does not contain valid information!)").arg(mModuleName).arg(cFieldName_Methods)));
       return;
     }
     mMethods = lModuleApiMap.value(cFieldName_Methods).toMap();
@@ -56,7 +56,7 @@ namespace NulstarNS {
     mModuleDomain = lModuleApiMap.value(cFieldName_ModuleDomain).toString();
 
     if(!lModuleApiMap.contains(cFieldName_ModuleRoles))  {
-      qDebug("%s", qUtf8Printable(QString("API from module '%1', field '%2' does not contain valid information!)").arg(cFieldName_ModuleName).arg(cFieldName_ModuleRoles)));
+      qDebug("%s", qUtf8Printable(QString("API from module '%1', field '%2' does not contain valid information!)").arg(mModuleName).arg(cFieldName_ModuleRoles)));
       return;
     }
     QVariantMap lRoleMap = lModuleApiMap.value(cFieldName_ModuleRoles).toMap();
@@ -71,16 +71,16 @@ namespace NulstarNS {
     }
 
     if(!lModuleApiMap.contains(cFieldName_ModuleVersion))  {
-      qDebug("%s", qUtf8Printable(QString("API from unknown module received! (Field '%1' does not contain valid information)").arg(cFieldName_ModuleVersion)));
+      qDebug("%s", qUtf8Printable(QString("API from '%1' module received! (Field '%2' does not contain valid information)").arg(mModuleName).arg(cFieldName_ModuleVersion)));
       return;
     }
     mModuleVersion = lModuleApiMap.value(cFieldName_ModuleVersion).toString();
 
-    if(!lModuleApiMap.contains(cFieldName_Port))  {
-      qDebug("%s", qUtf8Printable(QString("API from unknown module received! (Field '%1' does not contain valid information)").arg(cFieldName_Port)));
+    if(!lModuleApiMap.value(cFieldName_ConnectionInformation).toMap().contains(cFieldName_Port)) {
+      qDebug("%s", qUtf8Printable(QString("API from '%1' module received! (Field '%2' does not contain valid information)").arg(mModuleName).arg(cFieldName_Port)));
       return;
     }
-    mPort = lModuleApiMap.value(cFieldName_Port).toString().toUShort();
+    mPort = lModuleApiMap.value(cFieldName_ConnectionInformation).toMap().value(cFieldName_Port).toString().toUShort();
 
     mIsValid = true;
   }
