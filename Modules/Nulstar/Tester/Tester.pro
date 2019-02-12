@@ -30,10 +30,12 @@ QMAKE_POST_LINK += $$QMAKE_COPY $$COPYFILE1
 
 QMAKE_SUBSTITUTES += TesterVersion.h.in
 
-HEADERS += NTesterController.h
+HEADERS += NTesterController.h \
+            NTesterMessage.h
 
 
 SOURCES += NTesterController.cpp \
+           NTesterMessage.cpp \
            Tester.cpp
 
 # Dependencies

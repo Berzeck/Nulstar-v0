@@ -1,6 +1,6 @@
 [Core]
 Language=CPP
-Managed=1
+Managed=0
 
 [Libraries]
 Nulstar=0.1.0
