@@ -1,3 +1,4 @@
+#include <QDateTime>
 #include <QWebSocket>
 #include <QVersionNumber>
 
@@ -40,6 +41,14 @@ namespace NulstarNS {
       connect(rSocket, &NWebSocket::sTextMessageReceived, this, &NWebSocketServer::fProcessTextMessage);
       connect(rSocket, &NWebSocket::sDisconnected, this, &NWebSocketServer::fSocketDisconnected);
       mConnections[lMSecsSinceEpoch] = rSocket;
+    }
+  }
+  void NWebSocketServer::fSendMessage(const qint64 lWebSocketID, NMessage& lMessage) {
+    if(mConnections.contains(lWebSocketID)) {
+      mConnections.value(lWebSocketID)->fSendMessage(lMessage);
+    }
+    else {
+      qDebug("%s", qUtf8Printable(QString("Message '%1' couldn't be sent because WebSocket '%2' wasn't found!").arg(lMessage.fMessageID()).arg(lWebSocketID)));
     }
   }
 
@@ -124,11 +133,12 @@ qDebug() << QString("Protocol Version '%1' not supported!").arg(lIncommingVersio
       qDebug() << QString("Connection '%1' no longer exists!").arg(rConnection->fName());
       return;
     }
+    qint64 lMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch());
     QVariantMap lRequestMethods(lObjectMessage.toVariantMap().value(cFieldName_MessageData).toMap().value(cFieldName_RequestMethods).toMap());
     QString lMessageID(lObjectMessage.toVariantMap().value(cFieldName_MessageID).toString());
     for(const QString& lRequestMethodName : lRequestMethods.keys()) {
       QVariantMap lRequestMethodParams = lRequestMethods.value(lRequestMethodName).toMap();
-      emit sRequestMessageArrived(fName(), rConnection->fName(),lMessageID, lRequestMethodName, lRequestMethodParams);
+      emit sRequestMessageArrived(fName(), rConnection->fName(),lMessageID, lRequestMethodName, lRequestMethodParams, lMSecsSinceEpoch);
     }
   }
 

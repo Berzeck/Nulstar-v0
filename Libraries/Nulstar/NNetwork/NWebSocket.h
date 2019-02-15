@@ -34,6 +34,7 @@ namespace NulstarNS {
     public Q_SLOTS:
       void fRegisterApi(const QVariantMap& lApiMap);
       void fQueueMessage(NMessage* lMessage, EConnectionState lMinStateRequired = EConnectionState::eConnectionActive);
+      void fSendMessage(NMessage& rMessage);
       void fClose() { mWebSocket->close(); }
       void fConnect();
 
@@ -52,8 +53,7 @@ namespace NulstarNS {
       QWebSocket* mWebSocket;
 
     protected Q_SLOTS:
-       virtual void fNegotiateConnection();       
-       virtual void fSendMessage(NMessage* rMessage);
+       virtual void fNegotiateConnection();              
        virtual void fOnConnectionError(QAbstractSocket::SocketError lErrorCode);
        virtual void fOnConnected();
        virtual void fOnSocketDisconnection();

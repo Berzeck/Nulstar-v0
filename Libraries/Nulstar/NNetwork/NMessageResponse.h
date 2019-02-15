@@ -15,12 +15,12 @@ namespace NulstarNS {
     public:
       enum class EResponseStatus { eResponseError = 0, eResponseSuccessful = 1 };
 
-      explicit NMessageResponse(const QString& lConnectionName, const QString& lMessageID = QString(), const QString& lRequestID = QString(), const quint64 lResponseProcessingTime = 0, const EResponseStatus lResponseStatus = EResponseStatus::eResponseSuccessful,
+      explicit NMessageResponse(const QString& lConnectionName, const QString& lMessageID = QString(), const QString& lRequestID = QString(), const qint64 lResponseProcessingTime = 0, const EResponseStatus lResponseStatus = EResponseStatus::eResponseSuccessful,
                                 const QString& lResponseComment = QString(), const quint64 lResponseMaxSize = 0, const QVariantMap& lResponseData = QVariantMap(), QObject* rParent = nullptr);
       ~NMessageResponse() override {}
 
       QString fRequestID() const { return mRequestID; }
-      quint64 fResponseProcessingTime() const { return mResponseProcessingTime; }
+      qint64 fResponseProcessingTime() const { return mResponseProcessingTime; }
       EResponseStatus fResponseStatus() const { return mResponseStatus; }
       QString fResponseComment() const { return mResponseComment; }
       quint64 fResponseMaxSize() const { return mResponseMaxSize; }
@@ -29,6 +29,7 @@ namespace NulstarNS {
       bool fAddMethod(const QString& lMethodName);
       bool fAddParameter(const QString& lMethodName, const QString& lParameterName, const QVariant& lParameterValue);
       static bool fValidateMessageObject(const QJsonObject& lMessageObject);
+      static qint64 fCalculateResponseProccessingTime(qint64 lStartingTimestamp);
 
     protected:
       QVariantMap fMessageData() const override;
@@ -36,7 +37,7 @@ namespace NulstarNS {
 
     private:
       QString mRequestID;
-      quint64 mResponseProcessingTime;
+      qint64 mResponseProcessingTime;
       EResponseStatus mResponseStatus;
       QString mResponseComment;
       quint64 mResponseMaxSize;

@@ -17,6 +17,7 @@ namespace NulstarNS {
   const QString cFieldName_ModuleName(QStringLiteral("ModuleName"));
   const QString cFieldName_ModuleDomain(QStringLiteral("ModuleDomain"));
   const QString cFieldName_ModuleRoles(QStringLiteral("ModuleRoles"));
+  const QString cFieldName_ModuleRoleVersion(QStringLiteral("APIVersion"));
   const QString cFieldName_ModuleVersion(QStringLiteral("ModuleVersion"));
   const QString cFieldName_ConnectionInformation(QStringLiteral("ConnectionInformation"));
   const QString cFieldName_Port(QStringLiteral("Port"));

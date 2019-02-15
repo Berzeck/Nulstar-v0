@@ -1,3 +1,4 @@
+#include <QDateTime>
 #include "NMessageResponse.h"
 
 namespace NulstarNS {
@@ -11,7 +12,7 @@ namespace NulstarNS {
   const int cResponseStatusFailure = 0;
 
 
-  NMessageResponse::NMessageResponse(const QString& lConnectionName, const QString& lMessageID, const QString& lRequestID, const quint64 lResponseProcessingTime, const EResponseStatus lResponseStatus,
+  NMessageResponse::NMessageResponse(const QString& lConnectionName, const QString& lMessageID, const QString& lRequestID, const qint64 lResponseProcessingTime, const EResponseStatus lResponseStatus,
                                      const QString& lResponseComment, const quint64 lResponseMaxSize, const QVariantMap& lResponseData, QObject *rParent)
                   : NMessage(lConnectionName, lMessageID, rParent), mRequestID(lRequestID), mResponseProcessingTime(lResponseProcessingTime), mResponseStatus(lResponseStatus), mResponseComment(lResponseComment),
                     mResponseMaxSize(lResponseMaxSize), mResponseData(lResponseData) {
@@ -27,6 +28,11 @@ namespace NulstarNS {
     lMessageData.insert(cResponseMaxSizeFieldName, QString::number(mResponseMaxSize));
     lMessageData.insert(cResponseDataFieldName, mResponseData);
     return lMessageData;
+  }
+
+  qint64 NMessageResponse::fCalculateResponseProccessingTime(qint64 lStartingTimestamp) {
+    qint64 lCurrentMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch() - lStartingTimestamp);
+    return lCurrentMSecsSinceEpoch;
   }
 
   bool NMessageResponse::fAddMethod(const QString& lMethodName) {

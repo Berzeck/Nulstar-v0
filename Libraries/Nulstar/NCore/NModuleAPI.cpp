@@ -10,7 +10,7 @@ namespace NulstarNS {
   }
 
   NModuleAPI::NModuleAPI(const QVariantMap& lModuleApiMap)
-            : mIsValid(false) {
+            : mIsValid(false), mFindDependenciesRetryCounter(0) {
     fFillFields(lModuleApiMap);
   }
 
@@ -67,7 +67,6 @@ namespace NulstarNS {
       lAPIRole.fSetRoleName(i1.key());
       lAPIRole.fSetVersionNumber(QVersionNumber::fromString(i1.value().toString()));
       mModuleRoles << lAPIRole;
-  //    mModuleRoles << NModuleAPIRole(i1.key(), QVersionNumber::fromString(i1.value().toString()));
     }
 
     if(!lModuleApiMap.contains(cFieldName_ModuleVersion))  {
@@ -85,15 +84,9 @@ namespace NulstarNS {
     mIsValid = true;
   }
 
- /* bool NModuleAPI::fIsRoleSupported(const QString& lRoleName, const QString& lVersion) const {
-    if(mModuleRoles.contains(lRoleName)) {
-      if(mModuleRoles[lRoleName].toList().contains(lVersion))
-        return true;
-      else {
-        qDebug("%s", qUtf8Printable(QString("Version '%1' of role '%2' requiered by module '%3' not supported!").arg(lVersion).arg(lRoleName).arg(fModuleName())));
-        return false;
-      }
-    }
+  bool NModuleAPI::fIsRoleSupported(const NModuleAPIRole& lModuleRole) const {
+    if(mModuleRoles.contains(lModuleRole))
+      return true;
     return false;
-  }*/
+  }
 }

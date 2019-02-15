@@ -133,11 +133,20 @@ namespace NulstarNS {
     else return cDefaultMinEventAndMinPeriod;
   }
 
-  void NCoreService::fOnRequestMessageArrived(const QString& lWebSocketsServerName, const QString& lWebSocketID, const QString& lMessageID, const QString& lMethodName, const QVariantMap& lParameters) {
+  void NCoreService::fSendMessage(const QString& lWebSocketsServerName, NMessage& lMessage) {
+    if(mWebServers.contains(lWebSocketsServerName)) {
+      mWebServers.value(lWebSocketsServerName)->fSendMessage(lMessage.fConnectionName().toLongLong(), lMessage);
+    }
+    else {
+      qDebug("%s", qUtf8Printable(QString("Message '%1' couldn't be sent because WebSocket server '%2' wasn't found!").arg(lMessage.fMessageID()).arg(lWebSocketsServerName)));
+    }
+  }
+
+  void NCoreService::fOnRequestMessageArrived(const QString& lWebSocketsServerName, const QString& lWebSocketID, const QString& lMessageID, const QString& lMethodName, const QVariantMap& lParameters, qint64 lMSecsSinceEpoch) {
     QString lEffectiveMethodName(lMethodName);
     if(fApiMethodLowercase())
       lEffectiveMethodName = lMethodName.toLower();
-    bool lSuccess = metaObject()->invokeMethod(this, lEffectiveMethodName.toLatin1().data(), Qt::DirectConnection, Q_ARG(QString, lWebSocketsServerName), Q_ARG(QString, lWebSocketID), Q_ARG(QString, lMessageID), Q_ARG(QVariantMap, lParameters));
+    bool lSuccess = metaObject()->invokeMethod(this, lEffectiveMethodName.toLatin1().data(), Qt::DirectConnection, Q_ARG(QString, lWebSocketsServerName), Q_ARG(QString, lWebSocketID), Q_ARG(QString, lMessageID), Q_ARG(QVariantMap, lParameters), Q_ARG(qint64, lMSecsSinceEpoch));
     if(!lSuccess)
       qDebug("%s", qUtf8Printable(QString("Method '%1' couldn't be executed successfully!").arg(lMethodName)));
   }

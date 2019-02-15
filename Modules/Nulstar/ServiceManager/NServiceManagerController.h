@@ -5,6 +5,7 @@
 #include <QHostAddress>
 #include <QObject>
 #include <QString>
+#include <QTimer>
 #include <QVariantMap>
 #include <QVersionNumber>
 #include <NCoreService.h>
@@ -32,16 +33,19 @@ namespace NulstarNS {
       QList<QVersionNumber> fProtocolVersionsSupported() const override { QList<QVersionNumber> lApiVersionsSupported; QVersionNumber lMainVersion(QVersionNumber::fromString(APP_PROTOCOL_VERSIONS)); lApiVersionsSupported << lMainVersion; return lApiVersionsSupported; }
 
     public Q_SLOTS:
-      API_PUBLIC_FUNCTION void registerapi(const QString& lWebSocketsServerName, const QString &lWebSocketID, const QString& lMessageID, const QVariantMap& lParameters);
+      API_PUBLIC_FUNCTION void registerapi(const QString& lWebSocketsServerName, const QString &lWebSocketID, const QString& lMessageID, const QVariantMap& lParameters, qint64 lMSecsSinceEpoch);
 
     protected Q_SLOTS:
       void fOnWebSocketDisconnected(const QString& lWebSocketID) override;
+      void fFindDependencies();
 
     protected:
+      QTimer mFindDependenciesRetryTimer;
+      QList<NModuleAPI> mModuleAPIPendingDependencies;
       void fFillMethodMetadata() override { }      
 
     private:
-      QMap<QString, NModuleAPI> mModuleAPISet;
+      QMap<QString, NModuleAPI> mModuleAPIActive;
   };
 }
 

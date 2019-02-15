@@ -16,21 +16,27 @@ namespace NulstarNS {
       NModuleAPI(const QVariantMap& lModuleApiMap);
 
       bool fIsValid() { return mIsValid; }
+      QVariantMap fDependencies() const { return mDependencies; }
+      quint8 fFindDependenciesRetryCounter() const { return mFindDependenciesRetryCounter; }
       QString fModuleName() const { return mModuleName; }
       QString fMessageID() const { return mMessageID; }
+      qint64 fMSecsSinceEpoch() const { return mMSecsSinceEpoch; }
       QString fWebSocketID() const { return mWebSocketID; }
       QString fWebSocketServerName() const { return mWebSocketServerName; }
       void fSetMessageID(const QString& lMessageID) { mMessageID = lMessageID ; }
       void fSetWebSocketServerName(const QString& lWebSocketServerName) { mWebSocketServerName = lWebSocketServerName; }
       void fSetWebSocketID(const QString& lWebSocketID) { mWebSocketID = lWebSocketID; }
-    //  bool fDoesAPISatisfyDependence(const NModuleAPIlVersion) const;
-   //   bool fIsRoleSupported(const QString& lRoleName, const QVersionNumber& lVersion) const;
+      void fSetMSecsSinceEpoch(qint64 lMSecsSinceEpoch) { mMSecsSinceEpoch = lMSecsSinceEpoch; }
+      void fSetFindDependenciesRetryCounter(quint8 lFindDependenciesRetryCounter) { mFindDependenciesRetryCounter = lFindDependenciesRetryCounter; }
+      bool fIsRoleSupported(const NModuleAPIRole& lModuleRoleName) const;
+      bool operator==(NModuleAPI const& lTargetAPI) { if((mModuleName == lTargetAPI.fModuleName()) && (mWebSocketID == lTargetAPI.fWebSocketID())) return true; else return false; }
 
     protected:
       void fFillFields(const QVariantMap& lModuleApiMap);
 
     private:
       bool mIsValid;
+      quint8 mFindDependenciesRetryCounter;
       QVariantMap mDependencies;
       QHostAddress mIP;
       QVariantMap mMethods;
@@ -41,6 +47,7 @@ namespace NulstarNS {
       QString mModuleVersion;
       quint16 mPort;
 
+      qint64 mMSecsSinceEpoch;
       QString mMessageID;
       QString mWebSocketID;
       QString mWebSocketServerName;

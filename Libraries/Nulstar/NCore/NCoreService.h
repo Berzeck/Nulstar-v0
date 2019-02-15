@@ -16,6 +16,8 @@
 #include <QUrl>
 #include <QVariantMap>
 #include <QVersionNumber>
+#include <NMessage.h>
+#include <NMessageResponse.h>
 #include <NWebSocket.h>
 #include <NWebSocketServer.h>
 #include "NApiBuilder.h"
@@ -59,6 +61,7 @@ namespace NulstarNS {
       void fSetServiceManagerUrl(const QUrl& lServiceManagerUrl) { if(lServiceManagerUrl.isValid()) mServiceManagerUrl = lServiceManagerUrl; }
       void fSetAllowedNetworks(const QList<QNetworkAddressEntry>& lAllowedNetworks) { mAllowedNetworks = lAllowedNetworks; }
       void fSetHost(const QHostAddress& lIP) { mIP = lIP; }
+      void fSendMessage(const QString& lWebSocketsServerName, NMessage& lMessage);
 
     public Q_SLOTS:
       virtual void fConnectToServiceManager(quint8 lReconnectionTryInterval);
@@ -66,7 +69,7 @@ namespace NulstarNS {
       virtual bool fControlWebServer(const QString& lName, EServiceAction lAction); // If lName is empty then it controls all web sockets servers
 
     protected Q_SLOTS:
-      virtual void fOnRequestMessageArrived(const QString& lWebSocketsServerName, const QString& lWebSocketID, const QString& lMessageID, const QString& lMethodName, const QVariantMap& lParameters);
+      virtual void fOnRequestMessageArrived(const QString& lWebSocketsServerName, const QString& lWebSocketID, const QString& lMessageID, const QString& lMethodName, const QVariantMap& lParameters, qint64 lMSecsSinceEpoch);
       virtual void fOnWebSocketDisconnected(const QString& lWebSocketID) { Q_UNUSED(lWebSocketID); }
 
     protected:

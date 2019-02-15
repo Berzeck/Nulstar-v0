@@ -36,16 +36,16 @@ namespace NulstarNS {
     mMessageResponses.insert(lMessage->fMessageID().toULongLong(), lMessage);
     lMessage->fSetStatus(NMessage::EMessageStatus::eAwaitingDelivery);
     if((lMinStateRequired <= fConnectionState()) && (mWebSocket->state() == QAbstractSocket::ConnectedState))
-      fSendMessage(lMessage);
+      fSendMessage(*lMessage);
   }
 
-  void NWebSocket::fSendMessage(NMessage* rMessage) {
-    qint64 lBytesSent = mWebSocket->sendTextMessage(rMessage->fToJsonString());
+  void NWebSocket::fSendMessage(NMessage& rMessage) {
+    qint64 lBytesSent = mWebSocket->sendTextMessage(rMessage.fToJsonString());
     if(lBytesSent)
-      rMessage->fSetStatus(NMessage::EMessageStatus::eSent);
+      rMessage.fSetStatus(NMessage::EMessageStatus::eSent);
     else
-      rMessage->fSetStatus(NMessage::EMessageStatus::eWithErrorAndWitheld);
- qDebug("%s", qUtf8Printable(QString::number(mWebSocket->state())));
+      rMessage.fSetStatus(NMessage::EMessageStatus::eWithErrorAndWitheld);
+// qDebug("%s", qUtf8Printable(QString::number(mWebSocket->state())));
   }
 
   void NWebSocket::fOnConnectionError(QAbstractSocket::SocketError lErrorCode) {
