@@ -1,10 +1,11 @@
 [Core]
-Language=CPP
-Managed=0
+Language=JAVA
+Managed=1
 
 [Libraries]
 Nulstar=0.1.0
 Qt=5.12.0
+JRE=11.0.2
 
 [Networks]
 AllowedNetworks=127.0.0.1/32
@@ -17,4 +18,9 @@ LogLevel=4
 
 [Security]
 SslMode=0 
+
+[Script]
+Scripted=1
+StartScript=start
+StopScript=stop
 

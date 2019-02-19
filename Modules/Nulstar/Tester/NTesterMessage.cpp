@@ -13,7 +13,7 @@ namespace NulstarNS {
   }
   void NTesterMessage::fConnectServiceManager() {
       fConnect();
-      connect(this, &NWebSocket::sStateChanged, this, &NTesterMessage::fOnConnectionStateChanged);
+      //connect(this, &NWebSocket::sStateChanged, this, &NTesterMessage::fOnConnectionStateChanged);
   }
 
   void NTesterMessage::fSendBulkRequestMessage() {

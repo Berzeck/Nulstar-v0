@@ -11,6 +11,8 @@ namespace NulstarNS {
   const QString cModuleConfigGroupCoreLang("Language");
   const QString cModuleConfigGroupCoreManaged("Managed");
   const QString cModuleConfigGroupLibs("Libraries");
+  const QString cModuleConfigGroupLibsJre("JRE");
+  const QString cModuleConfigGroupScript("Script");
 
   NModuleManager::NModuleManager(QObject *rParent)
                  : QObject(rParent), mModulesConfigLoaded(false) {
@@ -29,7 +31,7 @@ namespace NulstarNS {
       if((lModuleInfo.fModuleNamespace() == lModuleNamespace) && (lModuleInfo.fModuleName() == lModuleName) && (lModuleInfo.fModuleVersion() == lCurrentModuleVersion))
         return lModuleInfo;
     }
-    return NModuleInfo(QString(), QString(), QString(), QString(), QString(), QStringList(), QList<NModuleParameter>());
+    return NModuleInfo(QString(), QString(), QString(), QString(), QString(), QStringList(), QList<NModuleParameter>(), QList<NModuleParameter>());
   }
 
   quint8 NModuleManager::fLoadModulesInfo() {
@@ -111,6 +113,7 @@ namespace NulstarNS {
       }
       lModuleSettings.endGroup();
     }
+
     return this;
   }
 
@@ -175,32 +178,37 @@ namespace NulstarNS {
   }
 
   void NModuleManager::fSetModuleInfo(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion, const QList<NModuleParameter>& lModuleParameters) {
-    QString lModuleLanguage;
-    for(const NModuleParameter& lModuleParameter : lModuleParameters ) {
-      if((lModuleParameter.mGroupName == cModuleConfigGroupCore) && (lModuleParameter.mParamName == cModuleConfigGroupCoreLang)) {
-        lModuleLanguage = lModuleParameter.mParamValue;
-        break;
-      }
-    }
-
+    QString lModuleLanguage = fGetModuleParamsValue(cModuleConfigGroupCore, cModuleConfigGroupCoreLang, lModuleParameters);
     QString lModuleWorkingDirectory(QString("%1/../../../%2/%3/%4/").arg(QCoreApplication::applicationDirPath()).arg(lModuleNamespace).arg(lModuleName).arg(lModuleVersion));
     lModuleWorkingDirectory = QDir(lModuleWorkingDirectory).canonicalPath();
 
     QString lModuleLibDirPath(QString("%1/../../../../%2/").arg(QCoreApplication::applicationDirPath()).arg(cModuleConfigGroupLibs));
     QStringList lLibDirPaths;
     QList<NModuleParameter> lModuleStartupParameters;
+    QList<NModuleParameter> lModuleScriptParams;
     for(const NModuleParameter& lModuleParameter : lModuleParameters ) {
       if(lModuleParameter.mGroupName == cModuleConfigGroupLibs) {
         QDir lLibDir(QString("%1/%2/%3/%4/").arg(lModuleLibDirPath).arg(lModuleLanguage).arg(lModuleParameter.mParamName).arg(lModuleParameter.mParamValue));
-        if(lLibDir.exists())
+        if(lLibDir.exists()){
           lLibDirPaths.append(lLibDir.canonicalPath());
+          if (lModuleParameter.mParamName == cModuleConfigGroupLibsJre){
+              NModuleParameter lModuleParam;
+              lModuleParam.mGroupName = lModuleParameter.mGroupName;
+              lModuleParam.mParamName = lModuleParameter.mParamName;
+              lModuleParam.mParamValue = lLibDir.path();
+              lModuleStartupParameters << lModuleParam;
+          }
+        }
       }
-      else if(lModuleParameter.mGroupName != cModuleConfigGroupCore) {
+      else if(lModuleParameter.mGroupName == cModuleConfigGroupScript) {
+         lModuleScriptParams << lModuleParameter;
+      }
+      else if(lModuleParameter.mGroupName != cModuleConfigGroupCore){
          lModuleStartupParameters << lModuleParameter;
       }
     }
 
-    NModuleInfo lModuleInfo(lModuleName, lModuleNamespace, lModuleVersion, lModuleLanguage, lModuleWorkingDirectory, lLibDirPaths, lModuleStartupParameters);
+    NModuleInfo lModuleInfo(lModuleName, lModuleNamespace, lModuleVersion, lModuleLanguage, lModuleWorkingDirectory, lLibDirPaths, lModuleStartupParameters, lModuleScriptParams);
     mModuleInfoList << lModuleInfo;
   }
 

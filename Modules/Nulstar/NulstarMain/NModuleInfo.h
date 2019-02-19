@@ -11,7 +11,7 @@ namespace NulstarNS {
   class NModuleInfo {
     public:
       explicit NModuleInfo(const QString& lModulName, const QString &lModuleNamespace, const QString &lModuleVersion,  const QString& lModuleLanguage, const QString& lModuleWorkingDirectory,
-                           const QStringList& lModuleEnvLibPaths, const QList<NModuleParameter>& lModuleParameters);
+                           const QStringList& lModuleEnvLibPaths, const QList<NModuleParameter>& lModuleParameters, const QList<NModuleParameter>& lModuleScriptParameters);
       ~NModuleInfo() { }
 
       bool fIsValid() const;
@@ -27,7 +27,7 @@ namespace NulstarNS {
       QString fParameterValue(const QString& lParameter) const;
       QStringList fFormattedParameters() const;
       QString fLibPaths() const { return mModuleEnvLibPaths.join(";"); }
-
+      QString fScriptParameterValue(const QString& lParameter) const;
     private:
       QString mModuleName;
       QString mModuleLanguage;
@@ -36,6 +36,7 @@ namespace NulstarNS {
       QString mModuleWorkingDirectory;
       QStringList mModuleEnvLibPaths;
       QList<NModuleParameter> mModuleParameters;
+      QList<NModuleParameter> mModuleScriptParameters;
   };
 }
 

@@ -1,11 +1,15 @@
-
+#include <QDebug>
 #include "NModuleInfo.h"
 
 namespace NulstarNS {
+  const QString cModuleConfigGroupScript("Script");
+  const QString cModuleConfigGroupScripted("Scripted");
+  const QString cModuleConfigGroupScriptStart("StartScript");
+
   NModuleInfo::NModuleInfo(const QString& lModuleName, const QString& lModuleNamespace, const QString& lModuleVersion, const QString& lModuleLanguage,
-                           const QString& lModuleWorkingDirectory,  const QStringList& lModuleEnvLibPaths, const QList<NModuleParameter> &lModuleParameters)
+                           const QString& lModuleWorkingDirectory,  const QStringList& lModuleEnvLibPaths, const QList<NModuleParameter> &lModuleParameters, const QList<NModuleParameter> &lModuleScriptParameters)
               : mModuleName(lModuleName), mModuleLanguage(lModuleLanguage), mModuleNamespace(lModuleNamespace), mModuleVersion(lModuleVersion),
-                mModuleWorkingDirectory(lModuleWorkingDirectory), mModuleEnvLibPaths(lModuleEnvLibPaths), mModuleParameters(lModuleParameters)  {
+                mModuleWorkingDirectory(lModuleWorkingDirectory), mModuleEnvLibPaths(lModuleEnvLibPaths), mModuleParameters(lModuleParameters), mModuleScriptParameters(lModuleScriptParameters)   {
 
   }
 
@@ -19,7 +23,17 @@ namespace NulstarNS {
   }
 
   QString NModuleInfo::fModuleAppPath() const {
-     QString lAppName(mModuleName);
+    if(bool(fScriptParameterValue(cModuleConfigGroupScripted) == QString("%1").arg(1))){
+      QString lStartScriptName(fScriptParameterValue(cModuleConfigGroupScriptStart));
+#ifdef Q_OS_WIN
+      lStartScriptName.append(".bat");
+#else
+      lStartScriptName.append(".sh");
+#endif
+      return QString("%1/%2").arg(mModuleWorkingDirectory).arg(lStartScriptName);
+    }
+
+    QString lAppName(mModuleName);
 #ifdef Q_OS_WIN
     lAppName.append(".exe");
 #endif
@@ -37,6 +51,14 @@ namespace NulstarNS {
        QString lCurrentParameter = lModuleParameter.mParamName.toLower();
        if(lParameter.toLower() == lCurrentParameter)
          return lModuleParameter.mParamValue;
+    }
+    return QString();
+  }
+  QString NModuleInfo::fScriptParameterValue(const QString& lParameter) const {
+    for(const NModuleParameter& lScriptModuleParameter : mModuleScriptParameters ) {
+       QString lCurrentParameter = lScriptModuleParameter.mParamName.toLower();
+       if(lParameter.toLower() == lCurrentParameter)
+         return lScriptModuleParameter.mParamValue;
     }
     return QString();
   }
