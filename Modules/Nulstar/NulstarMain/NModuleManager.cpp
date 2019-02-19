@@ -182,7 +182,7 @@ namespace NulstarNS {
     QString lModuleWorkingDirectory(QString("%1/../../../%2/%3/%4/").arg(QCoreApplication::applicationDirPath()).arg(lModuleNamespace).arg(lModuleName).arg(lModuleVersion));
     lModuleWorkingDirectory = QDir(lModuleWorkingDirectory).canonicalPath();
 
-    QString lModuleLibDirPath(QString("%1/../../../../%2/").arg(QCoreApplication::applicationDirPath()).arg(cModuleConfigGroupLibs));
+    QString lModuleLibDirPath(QString("%1/../../../../%2").arg(QCoreApplication::applicationDirPath()).arg(cModuleConfigGroupLibs));
     QStringList lLibDirPaths;
     QList<NModuleParameter> lModuleStartupParameters;
     QList<NModuleParameter> lModuleScriptParams;
@@ -195,7 +195,7 @@ namespace NulstarNS {
               NModuleParameter lModuleParam;
               lModuleParam.mGroupName = lModuleParameter.mGroupName;
               lModuleParam.mParamName = lModuleParameter.mParamName;
-              lModuleParam.mParamValue = lLibDir.path();
+              lModuleParam.mParamValue = lLibDir.canonicalPath();
               lModuleStartupParameters << lModuleParam;
           }
         }
