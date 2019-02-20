@@ -27,7 +27,7 @@ namespace NulstarNS {
     fSetBindAddress(lBindAddress);
     lSuccess = listen(mBindAddress, mPort);
     if(lSuccess)
-      connect(this, &NWebSocketServer::QWebSocketServer::newConnection, this, &NWebSocketServer::fOnNewConnection, static_cast<Qt::ConnectionType>(Qt::UniqueConnection | Qt::AutoConnection));
+      connect(this, &NWebSocketServer::newConnection, this, &NWebSocketServer::fOnNewConnection, static_cast<Qt::ConnectionType>(Qt::UniqueConnection | Qt::AutoConnection));
     return lSuccess;
   }
 
@@ -35,20 +35,20 @@ namespace NulstarNS {
     if(mMaxConnections && (mConnections.size() >= mMaxConnections))
       return;
     QWebSocket* rPendingConnection = nextPendingConnection();
-    if(rPendingConnection) {
+    if(rPendingConnection != nullptr) {
       qint64 lMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch());
       NWebSocket* rSocket = new NWebSocket(QString::number(lMSecsSinceEpoch), QString(), QUrl(), 0, rPendingConnection, this);
-      connect(rSocket, &NWebSocket::sTextMessageReceived, this, &NWebSocketServer::fProcessTextMessage);
-      connect(rSocket, &NWebSocket::sDisconnected, this, &NWebSocketServer::fSocketDisconnected);
+      connect(rSocket, &NWebSocket::sTextMessageReceived, this, &NWebSocketServer::fProcessTextMessage, Qt::UniqueConnection);
+      connect(rSocket, &NWebSocket::sDisconnected, this, &NWebSocketServer::fSocketDisconnected, Qt::UniqueConnection);
       mConnections[lMSecsSinceEpoch] = rSocket;
     }
   }
-  void NWebSocketServer::fSendMessage(const qint64 lWebSocketID, NMessage& lMessage) {
+  void NWebSocketServer::fSendMessage(const qint64 lWebSocketID, NMessage* rMessage) {
     if(mConnections.contains(lWebSocketID)) {
-      mConnections.value(lWebSocketID)->fSendMessage(lMessage);
+      mConnections.value(lWebSocketID)->fSendMessage(rMessage);
     }
     else {
-      qDebug("%s", qUtf8Printable(QString("Message '%1' couldn't be sent because WebSocket '%2' wasn't found!").arg(lMessage.fMessageID()).arg(lWebSocketID)));
+      qDebug("%s", qUtf8Printable(QString("Message '%1' couldn't be sent because WebSocket '%2' wasn't found!").arg(rMessage->fMessageID()).arg(lWebSocketID)));
     }
   }
 

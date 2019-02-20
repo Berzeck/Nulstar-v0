@@ -31,12 +31,12 @@ namespace NulstarNS {
       QList<QVersionNumber> fProtocolVersionsSupported() const override { QList<QVersionNumber> lApiVersionsSupported; QVersionNumber lMainVersion(QVersionNumber::fromString(APP_PROTOCOL_VERSIONS)); lApiVersionsSupported << lMainVersion; return lApiVersionsSupported; }
 
     public Q_SLOTS:
-      API_ADMIN_FUNCTION quint8 fScanManagedModules();
-      API_ADMIN_FUNCTION bool fStartModule(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion = QString(), bool fRestartIfRunning = false);
-      API_ADMIN_FUNCTION bool fStartAllModules(const QString& lModuleNamespace = QString(), bool fRestartIfRunning = false);
-      API_ADMIN_FUNCTION bool fStopModule(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion = QString());
-      API_ADMIN_FUNCTION bool fStopAllModules(const QString& lModuleNamespace = QString());
-      API_ADMIN_FUNCTION void fShutdownSystem();
+      API_ADMIN_FUNCTION quint8 scanmanagedmodules();
+      API_ADMIN_FUNCTION bool startmodule(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion = QString(), bool fRestartIfRunning = false);
+      API_ADMIN_FUNCTION bool startallmodules(const QString& lModuleNamespace = QString(), bool fRestartIfRunning = false);
+      API_ADMIN_FUNCTION bool stopmodule(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion = QString());
+      API_ADMIN_FUNCTION bool stopallmodules(const QString& lModuleNamespace = QString());
+      API_ADMIN_FUNCTION void shutdownsystem();
 
     protected:
       void fFillMethodMetadata() override;

@@ -33,7 +33,7 @@ namespace NulstarNS {
       void fSetMaxConnections(int lMaxConnections) { mMaxConnections = lMaxConnections; }
       void fSetPort(quint16 lPort);
       void fSetBindAddress(const QHostAddress& lBindAddress);
-      void fSendMessage(const qint64 lWebSocketID, NMessage& lMessage);
+      void fSendMessage(const qint64 lWebSocketID, NMessage* lMessage);
 
     protected:
       bool fVersionSupported(const QJsonObject& lObjectMessage);

@@ -33,8 +33,8 @@ namespace NulstarNS {
 
     public Q_SLOTS:
       void fRegisterApi(const QVariantMap& lApiMap);
-      void fQueueMessage(NMessage* lMessage, EConnectionState lMinStateRequired = EConnectionState::eConnectionActive);
-      void fSendMessage(NMessage& rMessage);
+      void fQueueMessage(NMessage* rMessage, EConnectionState lMinStateRequired = EConnectionState::eConnectionActive);
+      void fSendMessage(NMessage* rMessage);
       void fClose() { mWebSocket->close(); }
       void fConnect();
 

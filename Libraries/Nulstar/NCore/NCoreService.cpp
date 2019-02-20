@@ -133,12 +133,12 @@ namespace NulstarNS {
     else return cDefaultMinEventAndMinPeriod;
   }
 
-  void NCoreService::fSendMessage(const QString& lWebSocketsServerName, NMessage& lMessage) {
+  void NCoreService::fSendMessage(const QString& lWebSocketsServerName, NMessage* rMessage) {
     if(mWebServers.contains(lWebSocketsServerName)) {
-      mWebServers.value(lWebSocketsServerName)->fSendMessage(lMessage.fConnectionName().toLongLong(), lMessage);
+      mWebServers.value(lWebSocketsServerName)->fSendMessage(rMessage->fConnectionName().toLongLong(), rMessage);
     }
     else {
-      qDebug("%s", qUtf8Printable(QString("Message '%1' couldn't be sent because WebSocket server '%2' wasn't found!").arg(lMessage.fMessageID()).arg(lWebSocketsServerName)));
+      qDebug("%s", qUtf8Printable(QString("Message '%1' couldn't be sent because WebSocket server '%2' wasn't found!").arg(rMessage->fMessageID()).arg(lWebSocketsServerName)));
     }
   }
 

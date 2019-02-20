@@ -12,7 +12,7 @@ namespace NulstarNS {
   NWebSocket::NWebSocket(const QString &lName, const QString &lProtocolVersion, const QUrl& lConnectionUrl, quint8 lConnectionRetryInterval, QWebSocket *rSocket, QObject* rParent)
             : QObject(rParent), mConnectionRetryInterval(lConnectionRetryInterval), mConnectionState(EConnectionState::eConnectionNotNegotiated),
               mName(lName), mProtocolVersion(lProtocolVersion), mConnectionUrl(lConnectionUrl) {
-    if(rSocket)
+    if(rSocket != nullptr)
       mWebSocket = rSocket;
     else
       mWebSocket = new QWebSocket(QString(), QWebSocketProtocol::VersionLatest, this);
@@ -31,20 +31,23 @@ namespace NulstarNS {
     }
   }
 
-  void NWebSocket::fQueueMessage(NMessage* lMessage, EConnectionState lMinStateRequired) {
-    mMessageQueue.append(lMessage);
-    mMessageResponses.insert(lMessage->fMessageID().toULongLong(), lMessage);
-    lMessage->fSetStatus(NMessage::EMessageStatus::eAwaitingDelivery);
+  void NWebSocket::fQueueMessage(NMessage* rMessage, EConnectionState lMinStateRequired) {
+    mMessageQueue.append(rMessage);
+    mMessageResponses.insert(rMessage->fMessageID().toULongLong(), rMessage);
+    rMessage->fSetStatus(NMessage::EMessageStatus::eAwaitingDelivery);
     if((lMinStateRequired <= fConnectionState()) && (mWebSocket->state() == QAbstractSocket::ConnectedState))
-      fSendMessage(*lMessage);
+      fSendMessage(rMessage);
   }
 
-  void NWebSocket::fSendMessage(NMessage& rMessage) {
-    qint64 lBytesSent = mWebSocket->sendTextMessage(rMessage.fToJsonString());
-    if(lBytesSent)
-      rMessage.fSetStatus(NMessage::EMessageStatus::eSent);
+  void NWebSocket::fSendMessage(NMessage* rMessage) {
+    QString ddd = rMessage->fMessageID();
+    qint64 lBytesSent = mWebSocket->sendTextMessage(rMessage->fToJsonString());
+    if(lBytesSent) {
+      rMessage->fSetStatus(NMessage::EMessageStatus::eSent);
+      rMessage->deleteLater();
+    }
     else
-      rMessage.fSetStatus(NMessage::EMessageStatus::eWithErrorAndWitheld);
+      rMessage->fSetStatus(NMessage::EMessageStatus::eWithErrorAndWitheld);
 // qDebug("%s", qUtf8Printable(QString::number(mWebSocket->state())));
   }
 

@@ -1,5 +1,4 @@
 #include <NMessage.h>
-#include <QVersionNumber>
 #include "NCoreConstants.h"
 #include "NModuleAPI.h"
 
@@ -12,6 +11,10 @@ namespace NulstarNS {
   NModuleAPI::NModuleAPI(const QVariantMap& lModuleApiMap)
             : mIsValid(false), mFindDependenciesRetryCounter(0) {
     fFillFields(lModuleApiMap);
+  }
+
+  NModuleAPI::~NModuleAPI() {
+    //qDeleteAll(mModuleRoles);
   }
 
   void NModuleAPI::fFillFields(const QVariantMap& lModuleApiMap) {
@@ -63,9 +66,12 @@ namespace NulstarNS {
     QMapIterator<QString, QVariant> i1(lRoleMap);
     while(i1.hasNext()) {
       i1.next();
-      NModuleAPIRole lAPIRole;
+      NModuleAPIRole lAPIRole;// = new NModuleAPIRole(i1.key(), QVersionNumber::fromString(i1.value().toString()));
+      QStringList lVersionsSupported;
+      for(const QVariant& lVersionSupported : i1.value().toList())
+        lVersionsSupported << lVersionSupported.toString();
       lAPIRole.fSetRoleName(i1.key());
-      lAPIRole.fSetVersionNumber(QVersionNumber::fromString(i1.value().toString()));
+      lAPIRole.fSetVersionsSupported(lVersionsSupported);
       mModuleRoles << lAPIRole;
     }
 
@@ -85,8 +91,10 @@ namespace NulstarNS {
   }
 
   bool NModuleAPI::fIsRoleSupported(const NModuleAPIRole& lModuleRole) const {
-    if(mModuleRoles.contains(lModuleRole))
-      return true;
+    for(const NModuleAPIRole& lModuleAPIRole : mModuleRoles) {
+      if((lModuleRole.fVersionsSupported().size()) && (lModuleRole.fRoleName() == lModuleAPIRole.fRoleName()) && (lModuleAPIRole.fVersionsSupported().contains(lModuleRole.fVersionsSupported().at(0))))
+        return true;
+    }
     return false;
   }
 }

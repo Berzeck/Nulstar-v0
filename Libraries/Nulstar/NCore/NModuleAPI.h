@@ -5,7 +5,6 @@
 #include <QList>
 #include <QString>
 #include <QVariantMap>
-#include <QVersionNumber>
 #include "Core.h"
 #include "NModuleAPIRole.h"
 
@@ -14,6 +13,7 @@ namespace NulstarNS {
     public:
       NModuleAPI();
       NModuleAPI(const QVariantMap& lModuleApiMap);
+      ~NModuleAPI();
 
       bool fIsValid() { return mIsValid; }
       QVariantMap fDependencies() const { return mDependencies; }
@@ -23,13 +23,16 @@ namespace NulstarNS {
       qint64 fMSecsSinceEpoch() const { return mMSecsSinceEpoch; }
       QString fWebSocketID() const { return mWebSocketID; }
       QString fWebSocketServerName() const { return mWebSocketServerName; }
+      QHostAddress fIP() const { return mIP; }
+      quint16 fPort() const { return mPort; }
       void fSetMessageID(const QString& lMessageID) { mMessageID = lMessageID ; }
       void fSetWebSocketServerName(const QString& lWebSocketServerName) { mWebSocketServerName = lWebSocketServerName; }
       void fSetWebSocketID(const QString& lWebSocketID) { mWebSocketID = lWebSocketID; }
       void fSetMSecsSinceEpoch(qint64 lMSecsSinceEpoch) { mMSecsSinceEpoch = lMSecsSinceEpoch; }
       void fSetFindDependenciesRetryCounter(quint8 lFindDependenciesRetryCounter) { mFindDependenciesRetryCounter = lFindDependenciesRetryCounter; }
       bool fIsRoleSupported(const NModuleAPIRole& lModuleRoleName) const;
-      bool operator==(NModuleAPI const& lTargetAPI) { if((mModuleName == lTargetAPI.fModuleName()) && (mWebSocketID == lTargetAPI.fWebSocketID())) return true; else return false; }
+      bool operator==(NModuleAPI const& lTargetAPI) { if((mModuleName == lTargetAPI.fModuleName()) && (mWebSocketID == lTargetAPI.fWebSocketID())) return true; return false; }
+      bool operator<(NModuleAPI const& lTargetAPI) { if((mModuleName < lTargetAPI.fModuleName())) return true; return false; }
 
     protected:
       void fFillFields(const QVariantMap& lModuleApiMap);

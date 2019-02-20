@@ -40,7 +40,7 @@ namespace NulstarNS {
       lApiRole.remove(' ');
       QString lRole = lApiRole.split("[").at(0);
       QStringList lSupportedVersions = lApiRole.split("[").at(1).split("]").at(0).split(",");
-      lApiRolesMap[lApiRole] = lSupportedVersions;
+      lApiRolesMap[lRole] = lSupportedVersions;
     }
     return lApiRolesMap;
   }

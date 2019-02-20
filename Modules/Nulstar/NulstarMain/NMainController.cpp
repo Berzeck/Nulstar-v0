@@ -75,11 +75,11 @@ namespace NulstarNS {
     return lApiRolesMap;
   }
 
-  quint8 NMainController::fScanManagedModules() {
+  quint8 NMainController::scanmanagedmodules() {
     return mModuleManager.fLoadModulesInfo();
   }
 
-  bool NMainController::fStartModule(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion, bool fRestartIfRunning) {
+  bool NMainController::startmodule(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion, bool fRestartIfRunning) {
     QString lEffectiveModuleVersion = lModuleVersion.isEmpty() ? mModuleManager.fGetModuleLastVersion(lModuleNamespace, lModuleName) : lModuleVersion;
     if(lEffectiveModuleVersion.isEmpty()) {
       qDebug("Module '%s' does not exist!", lModuleName.toStdString().data());
@@ -88,7 +88,7 @@ namespace NulstarNS {
     QString lProcessIndex(QString("%1%2%3%4%5").arg(lModuleNamespace).arg(cIndexSeparator).arg(lModuleName).arg(cIndexSeparator).arg(lEffectiveModuleVersion));
     if(mModulesRunning.contains(lProcessIndex)) {
       if(fRestartIfRunning) {
-        fStopModule(lModuleNamespace, lModuleName, lEffectiveModuleVersion);
+        stopmodule(lModuleNamespace, lModuleName, lEffectiveModuleVersion);
       }
       else
         return true;
@@ -115,7 +115,7 @@ namespace NulstarNS {
     return false;
   }
 
-  bool NMainController::fStartAllModules(const QString& lModuleNamespace, bool fRestartIfRunning) {
+  bool NMainController::startallmodules(const QString& lModuleNamespace, bool fRestartIfRunning) {
     bool lAllModulesSuccessfullyStarted = true;
     QList<NModuleInfo> lModuleInfoList(mModuleManager.fModuleInfoList());
     for(const NModuleInfo& lModuleInfo : lModuleInfoList) {
@@ -125,13 +125,13 @@ namespace NulstarNS {
         QString lModuleVersion(lModuleInfo.fModuleVersion());
         if((lModuleName == APP_NAME) && (lCurrentModuleNamespace == APP_DOMAIN))
           continue;
-        lAllModulesSuccessfullyStarted = lAllModulesSuccessfullyStarted && fStartModule(lCurrentModuleNamespace, lModuleName, lModuleVersion, fRestartIfRunning);
+        lAllModulesSuccessfullyStarted = lAllModulesSuccessfullyStarted && startmodule(lCurrentModuleNamespace, lModuleName, lModuleVersion, fRestartIfRunning);
       }
     }
     return lAllModulesSuccessfullyStarted;
   }
 
-  bool NMainController::fStopModule(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion) {
+  bool NMainController::stopmodule(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion) {
     QString lEffectiveModuleVersion = lModuleVersion.isEmpty() ? mModuleManager.fGetModuleLastVersion(lModuleNamespace, lModuleName) : lModuleVersion;
     if(lEffectiveModuleVersion.isEmpty()) {
       qDebug("Module '%s' does not exist!", lModuleName.toStdString().data());
@@ -158,7 +158,7 @@ namespace NulstarNS {
     return false;
   }
 
-  bool NMainController::fStopAllModules(const QString &lModuleNamespace) {
+  bool NMainController::stopallmodules(const QString &lModuleNamespace) {
     bool lAllModulesSuccessfullyStoped = true;
     QMapIterator<QString, QProcess*> i1(mModulesRunning);
     while(i1.hasNext()) {
@@ -169,30 +169,30 @@ namespace NulstarNS {
         QString lModuleVersion(i1.key().split("--").at(2));
         if((lModuleName == APP_NAME) && (lCurrentModuleNamespace == APP_DOMAIN))
           continue;
-        lAllModulesSuccessfullyStoped = lAllModulesSuccessfullyStoped && fStopModule(lCurrentModuleNamespace, lModuleName, lModuleVersion);
+        lAllModulesSuccessfullyStoped = lAllModulesSuccessfullyStoped && stopmodule(lCurrentModuleNamespace, lModuleName, lModuleVersion);
       }
     }
     return lAllModulesSuccessfullyStoped;
   }
 
-  void NMainController::fShutdownSystem() {
-    fStopAllModules();
+  void NMainController::shutdownsystem() {
+    stopallmodules();
     qApp->quit();
   }
 
   void NMainController::fFillMethodMetadata() {
-    fAddMethodFunctionDescription(QStringLiteral("fScanManagedModules"), tr("Searches and reads the configuration file Module.ncf in the directory hierarchy."));
-    fAddMethodFunctionDescription(QStringLiteral("fStartAllModules"), tr("Starts modules of the desired namespace, if blank then all available modules are started."));
-    fAddMethodFunctionDescription(QStringLiteral("fStartModule"), tr("Starts the specified module."));
-    fAddMethodFunctionDescription(QStringLiteral("fStopModule"), tr("Stops the specified module."));
-    fAddMethodFunctionDescription(QStringLiteral("fStopAllModules"), tr("Stops all modules belonging to the specified namespace, if blank it stops all modules that are currently running."));
-    fAddMethodFunctionDescription(QStringLiteral("fShutdownSystem"), tr("Stops the system enterily."));
+    fAddMethodFunctionDescription(QStringLiteral("scanmanagedmodules"), tr("Searches and reads the configuration file Module.ncf in the directory hierarchy."));
+    fAddMethodFunctionDescription(QStringLiteral("startallmodules"), tr("Starts modules of the desired namespace, if blank then all available modules are started."));
+    fAddMethodFunctionDescription(QStringLiteral("startmodule"), tr("Starts the specified module."));
+    fAddMethodFunctionDescription(QStringLiteral("stopmodule"), tr("Stops the specified module."));
+    fAddMethodFunctionDescription(QStringLiteral("stopallmodules"), tr("Stops all modules belonging to the specified namespace, if blank it stops all modules that are currently running."));
+    fAddMethodFunctionDescription(QStringLiteral("shutdownsystem"), tr("Stops the system enterily."));
 
-    fAddMethodMinEventAndMinPeriod(QStringLiteral("fScanManagedModules"), QString("0,0"));
-    fAddMethodMinEventAndMinPeriod(QStringLiteral("fStartAllModules"), QString("0,0"));
-    fAddMethodMinEventAndMinPeriod(QStringLiteral("fStartModule"), QString("0,0"));
-    fAddMethodMinEventAndMinPeriod(QStringLiteral("fStopModule"), QString("0,0"));
-    fAddMethodMinEventAndMinPeriod(QStringLiteral("fStopAllModules"), QString("0,0"));
-    fAddMethodMinEventAndMinPeriod(QStringLiteral("fShutdownSystem"), QString("0,0"));
+    fAddMethodMinEventAndMinPeriod(QStringLiteral("scanmanagedmodules"), QString("0,0"));
+    fAddMethodMinEventAndMinPeriod(QStringLiteral("startallmodules"), QString("0,0"));
+    fAddMethodMinEventAndMinPeriod(QStringLiteral("startmodule"), QString("0,0"));
+    fAddMethodMinEventAndMinPeriod(QStringLiteral("stopmodule"), QString("0,0"));
+    fAddMethodMinEventAndMinPeriod(QStringLiteral("stopallmodules"), QString("0,0"));
+    fAddMethodMinEventAndMinPeriod(QStringLiteral("shutdownsystem"), QString("0,0"));
   }
 }

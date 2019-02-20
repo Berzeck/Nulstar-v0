@@ -2,10 +2,9 @@
 #include <QCoreApplication>
 #include <QString>
 #include <QStringList>
+#include <NCoreConstants.h>
 
 #include "NMainController.h"
-
-const int lRetryInterval = 5; // Seconds
 
 int main(int argc, char* argv[])
 {
@@ -23,8 +22,8 @@ int main(int argc, char* argv[])
 
   NulstarNS::NMainController lController;
   lController.fControlWebServer(QString(), NulstarNS::NMainController::EServiceAction::eStartService); // Start all web sockets servers
-  lController.fStartModule(APP_DOMAIN, NulstarNS::cServiceManager);
-  lController.fStartAllModules();
-  lController.fConnectToServiceManager(lRetryInterval);
+  lController.startmodule(APP_DOMAIN, NulstarNS::cServiceManager);
+ // lController.startallmodules();
+  lController.fConnectToServiceManager(NulstarNS::cRetryInterval);
   return lApp.exec();
 }

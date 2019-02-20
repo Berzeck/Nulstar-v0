@@ -45,7 +45,7 @@ namespace NulstarNS {
       virtual QHostAddress fHostAddress() const { return mIP; }
       virtual QList<QVersionNumber> fProtocolVersionsSupported() const = 0;
       virtual quint16 fCommPort() const;
-      virtual int fApiMethodNameOffset() const { return 1; }
+    //  virtual int fApiMethodNameOffset() const { return 1; }
       virtual bool fApiMethodLowercase() const { return true; }
 
       virtual bool fAddWebSocketServer(quint16 lPort, QHostAddress::SpecialAddress lBindAddress, const QString& lName = QString(), const QString& lLabel = QString(), bool lStartImmediatly = false);
@@ -61,7 +61,7 @@ namespace NulstarNS {
       void fSetServiceManagerUrl(const QUrl& lServiceManagerUrl) { if(lServiceManagerUrl.isValid()) mServiceManagerUrl = lServiceManagerUrl; }
       void fSetAllowedNetworks(const QList<QNetworkAddressEntry>& lAllowedNetworks) { mAllowedNetworks = lAllowedNetworks; }
       void fSetHost(const QHostAddress& lIP) { mIP = lIP; }
-      void fSendMessage(const QString& lWebSocketsServerName, NMessage& lMessage);
+      void fSendMessage(const QString& lWebSocketsServerName, NMessage* rMessage);
 
     public Q_SLOTS:
       virtual void fConnectToServiceManager(quint8 lReconnectionTryInterval);

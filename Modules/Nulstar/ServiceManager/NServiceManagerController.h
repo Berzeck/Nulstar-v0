@@ -42,10 +42,8 @@ namespace NulstarNS {
     protected:
       QTimer mFindDependenciesRetryTimer;
       QList<NModuleAPI> mModuleAPIPendingDependencies;
-      void fFillMethodMetadata() override { }      
-
-    private:
       QMap<QString, NModuleAPI> mModuleAPIActive;
+      void fFillMethodMetadata() override { }           
   };
 }
 

@@ -22,7 +22,7 @@ namespace NulstarNS {
       lApiRole.remove(' ');
       QString lRole = lApiRole.split("[").at(0);
       QStringList lSupportedVersions = lApiRole.split("[").at(1).split("]").at(0).split(",");
-      lApiRolesMap[lApiRole] = lSupportedVersions;
+      lApiRolesMap[lRole] = lSupportedVersions;
     }
     return lApiRolesMap;
   }
@@ -31,9 +31,9 @@ namespace NulstarNS {
     QMapIterator<QString, NModuleAPI> i1(mModuleAPIActive);
     while(i1.hasNext()) {
       i1.next();
-      if(lWebSocketID == i1.value().fWebSocketID()) {
+      if(lWebSocketID == i1.value().fWebSocketID()) {        
+        qDebug("%s", qUtf8Printable(QString("API from module '%1' using WebSocket connection '%2' has been removed!").arg(i1.value().fModuleName()).arg(i1.value().fWebSocketID())));
         mModuleAPIActive.remove(i1.key());
-        qDebug("%s", qUtf8Printable(QString("API from module '%1' usng WebSocket connection '%2' has been removed!").arg(i1.value().fModuleName()).arg(i1.value().fWebSocketID())));
       }
     }
     for(const NModuleAPI& lModuleAPI : mModuleAPIPendingDependencies) {
@@ -60,8 +60,7 @@ namespace NulstarNS {
          qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lModuleAPIPending.fMSecsSinceEpoch());
          NMessageResponse* lRegisterAPIResponse = new NMessageResponse(lModuleAPIPending.fWebSocketID(), QString(), lModuleAPIPending.fMessageID(), lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseError,
                                                tr("Dependencies of module '%1' not found!").arg(lModuleAPIPending.fModuleName()), 0,lDependencies);
-         fSendMessage(lModuleAPIPending.fWebSocketServerName(), *lRegisterAPIResponse);
-         lRegisterAPIResponse->deleteLater();
+         fSendMessage(lModuleAPIPending.fWebSocketServerName(), lRegisterAPIResponse);
          mModuleAPIPendingDependencies.removeOne(lModuleAPIPending);
       }
       else {
@@ -70,23 +69,40 @@ namespace NulstarNS {
         bool lAllDependenciesSatisfied = true;
         while(i1.hasNext() && lAllDependenciesSatisfied) {
           i1.next();
-          NModuleAPIRole lDependency(i1.key(), QVersionNumber::fromString(i1.value().toString()));
+          QString lRoleName = i1.key();
+          QStringList lVersionsSupported(i1.value().toString());
+          NModuleAPIRole lDependency(lRoleName, lVersionsSupported);
           bool lDependencySatisfied = false;
           QMapIterator<QString, NModuleAPI> i2(mModuleAPIActive);
           while(i2.hasNext()) {
             i2.next();
             if(i2.value().fIsRoleSupported(lDependency)) {
               lDependencySatisfied = true;
+              QVariantMap lConnectionData( {{i1.key(), QVariantMap( {{cFieldName_IP, i2.value().fIP().toString() }, {cFieldName_Port, QString::number(i2.value().fPort()) },
+                                                                     {cFieldName_ModuleRoleVersion, i1.value().toString() } } ) }});
+              if(lDependencies.size())
+                lDependencies[cFieldName_RegisterAPI] = QVariantMap( {{cFieldName_Dependencies, lDependencies[cFieldName_RegisterAPI].toMap()[cFieldName_Dependencies].toMap().unite(lConnectionData) }} );
+              else
+                lDependencies[cFieldName_RegisterAPI] = QVariantMap( {{cFieldName_Dependencies, lConnectionData }} );
               break;
             }
           }
           if(!lDependencySatisfied) {
             lAllDependenciesSatisfied = false;
+            lModuleAPIPending.fSetFindDependenciesRetryCounter(lModuleAPIPending.fFindDependenciesRetryCounter() + 1);
             break;
           }
         }
+        if(lAllDependenciesSatisfied) {
+          QString lModuleAPIIndexName(QString("%1|%2").arg(lModuleAPIPending.fModuleName()).arg(lModuleAPIPending.fWebSocketID()));
+          qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lModuleAPIPending.fMSecsSinceEpoch());
+          NMessageResponse* lRegisterAPIResponse = new NMessageResponse(lModuleAPIPending.fWebSocketID(), QString(), lModuleAPIPending.fMessageID(), lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseSuccessful,
+                                                  tr("Module '%1' is active!").arg(lModuleAPIPending.fModuleName()), 0,lDependencies);
+          fSendMessage(lModuleAPIPending.fWebSocketServerName(), lRegisterAPIResponse);
+          mModuleAPIActive[lModuleAPIIndexName] = lModuleAPIPending;
+          mModuleAPIPendingDependencies.removeOne(lModuleAPIPending);
+        }
       }
-      lModuleAPIPending.fSetFindDependenciesRetryCounter(lModuleAPIPending.fFindDependenciesRetryCounter() + 1);
     }
   }
 

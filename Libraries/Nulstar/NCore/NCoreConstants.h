@@ -4,6 +4,8 @@
 #include <QString>
 
 namespace NulstarNS {
+  const int cRetryInterval = 5; // Seconds
+
   const QString cRole_ServiceManager(QStringLiteral("Role_ServiceManager"));
   const QString cCommServerName(QStringLiteral("WebCommServer"));
   const QString cConstantsFile("Constants.ncf");

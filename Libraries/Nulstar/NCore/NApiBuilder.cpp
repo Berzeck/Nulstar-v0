@@ -25,10 +25,10 @@ namespace NulstarNS {
         QMetaMethod lApiMethod = rTargetObject->metaObject()->method(i);
         if((QString(lApiMethod.tag()) == cFunctionTag_Admin) || (QString(lApiMethod.tag()) == cFunctionTag_Private) || (QString(lApiMethod.tag()) == cFunctionTag_Public))  {
           QString lApiMethodName(lApiMethod.name());
-          if(rTargetObject->fApiMethodLowercase())
+          /*if(rTargetObject->fApiMethodLowercase())
             lApiMethodName = lApiMethodName.toLower();
           if(rTargetObject->fApiMethodNameOffset())
-            lApiMethodName = lApiMethodName.right(lApiMethodName.size() - rTargetObject->fApiMethodNameOffset());
+            lApiMethodName = lApiMethodName.right(lApiMethodName.size() - rTargetObject->fApiMethodNameOffset());*/
 
           if(!lParamCount.contains(lApiMethodName) || (lParamCount.value(lApiMethodName) < lApiMethod.parameterCount())) {
             lParamCount[lApiMethodName] = lApiMethod.parameterCount();

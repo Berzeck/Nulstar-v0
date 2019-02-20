@@ -2,24 +2,26 @@
 #define NMODULEAPIROLE_H
 
 #include <QString>
-#include <QVersionNumber>
+#include <QStringList>
 #include "Core.h"
 
 namespace NulstarNS {
   class CORESHARED_EXPORT NModuleAPIRole {
     public:
-      NModuleAPIRole(const QString& lRoleName, const QVersionNumber& lVersionNumber);
+      NModuleAPIRole(const QString& lRoleName, const QStringList& lVersionsSupported);
       NModuleAPIRole() { }
+      NModuleAPIRole(const NModuleAPIRole& lApiRole) { mRoleName = lApiRole.mRoleName; mVersionsSupported = lApiRole.mVersionsSupported; }
 
       QString fRoleName() const { return mRoleName; }
-      QVersionNumber fVersionNumber() const { return mVersionNumber; }
+      QStringList fVersionsSupported() const { return mVersionsSupported; }
       void fSetRoleName(const QString& lRoleName) { mRoleName = lRoleName; }
-      void fSetVersionNumber(const QVersionNumber& lVersionNumber) { mVersionNumber = lVersionNumber; }
-      bool operator==(const NModuleAPIRole& lTargetModuleAPIRole) { if((mRoleName == lTargetModuleAPIRole.fRoleName()) && (mVersionNumber == lTargetModuleAPIRole.fVersionNumber())) return true; else return false; }
+      void fSetVersionsSupported(const QStringList& lVersionsSupported) { mVersionsSupported = lVersionsSupported; }
+      bool operator==(const NModuleAPIRole& lTargetModuleAPIRole);
+      void operator=(const NModuleAPIRole& lTargetModuleAPIRole) { mRoleName = lTargetModuleAPIRole.mRoleName; mVersionsSupported = lTargetModuleAPIRole.mVersionsSupported; }
 
     private:
       QString mRoleName;
-      QVersionNumber mVersionNumber;
+      QStringList mVersionsSupported;
   };
 }
 
