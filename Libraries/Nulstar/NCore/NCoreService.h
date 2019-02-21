@@ -56,6 +56,7 @@ namespace NulstarNS {
       NResponse fSetMaxConnections(const QString& lName, int lMaxconnections); ***/
       QString fMethodDescription(const QString& lMethodName) const;
       QString fMethodMinEventAndMinPeriod(const QString& lMethodName) const;
+      QUrl fServiceManagerUrl() const { return mServiceManagerUrl; }
       void fSetSslMode(QWebSocketServer::SslMode lSslMode = QWebSocketServer::SslMode::NonSecureMode) { mSslMode = lSslMode; }
       void fSetLogLevel(ELogLevel lLogLevel = ELogLevel::eLogWarning) { mLogLevel = lLogLevel; }
       void fSetServiceManagerUrl(const QUrl& lServiceManagerUrl) { if(lServiceManagerUrl.isValid()) mServiceManagerUrl = lServiceManagerUrl; }
@@ -67,6 +68,7 @@ namespace NulstarNS {
       virtual void fConnectToServiceManager(quint8 lReconnectionTryInterval);
       virtual void fOnConnectionStateChanged(NWebSocket::EConnectionState lNewState);
       virtual bool fControlWebServer(const QString& lName, EServiceAction lAction); // If lName is empty then it controls all web sockets servers
+      virtual void fCloseConnection(const QString& lWebServerName, const QString& lWebSocketID);
 
     protected Q_SLOTS:
       virtual void fOnRequestMessageArrived(const QString& lWebSocketsServerName, const QString& lWebSocketID, const QString& lMessageID, const QString& lMethodName, const QVariantMap& lParameters, qint64 lMSecsSinceEpoch);

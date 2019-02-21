@@ -97,4 +97,12 @@ namespace NulstarNS {
     }
     return false;
   }
+
+  bool NModuleAPI::fAreRolesNeeded(const QList<NModuleAPIRole>& lModuleRoles) const {
+    for(const NModuleAPIRole& lModuleRole : lModuleRoles) {
+      if(mDependencies.contains(lModuleRole.fRoleName()) && (lModuleRole.fVersionsSupported().contains(mDependencies.value(lModuleRole.fRoleName()).toString())))
+        return true;
+    }
+    return false;
+  }
 }

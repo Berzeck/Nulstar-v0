@@ -25,12 +25,14 @@ namespace NulstarNS {
       QString fWebSocketServerName() const { return mWebSocketServerName; }
       QHostAddress fIP() const { return mIP; }
       quint16 fPort() const { return mPort; }
+      QList<NModuleAPIRole> fModuleRoles() const { return mModuleRoles; }
       void fSetMessageID(const QString& lMessageID) { mMessageID = lMessageID ; }
       void fSetWebSocketServerName(const QString& lWebSocketServerName) { mWebSocketServerName = lWebSocketServerName; }
       void fSetWebSocketID(const QString& lWebSocketID) { mWebSocketID = lWebSocketID; }
       void fSetMSecsSinceEpoch(qint64 lMSecsSinceEpoch) { mMSecsSinceEpoch = lMSecsSinceEpoch; }
       void fSetFindDependenciesRetryCounter(quint8 lFindDependenciesRetryCounter) { mFindDependenciesRetryCounter = lFindDependenciesRetryCounter; }
       bool fIsRoleSupported(const NModuleAPIRole& lModuleRoleName) const;
+      bool fAreRolesNeeded(const QList<NModuleAPIRole>& lModuleRoles) const;
       bool operator==(NModuleAPI const& lTargetAPI) { if((mModuleName == lTargetAPI.fModuleName()) && (mWebSocketID == lTargetAPI.fWebSocketID())) return true; return false; }
       bool operator<(NModuleAPI const& lTargetAPI) { if((mModuleName < lTargetAPI.fModuleName())) return true; return false; }
 

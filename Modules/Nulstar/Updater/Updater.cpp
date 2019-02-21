@@ -1,6 +1,4 @@
-//
-// Created by daviyang35 on 2019-01-10.
-//
+#include <QSettings>
 #include <QtCore>
 #include <QtWebSockets>
 #include "UpdaterVersion.h"
@@ -22,8 +20,6 @@ int main(int argc, char *argv[]) {
   lParser.addOptions({
                          {{"d", "loglevel"}, QStringLiteral("Log Level [1-5]."), QStringLiteral("loglevel")},
                          {{"s", "sslmode"}, QStringLiteral("Security Type [0-1]."), QStringLiteral("sslmode")},
-                         {{"a", "adminport"}, QStringLiteral("Admin Port."), QStringLiteral("adminport")},
-                         {{"c", "clientport"}, QStringLiteral("Client Port."), QStringLiteral("clientport")},
                          {{"m", "commport"}, QStringLiteral("Communication Port."), QStringLiteral("commport")},
                          {{"n", "allowednetworks"}, QStringLiteral("Allowed Networks."), QStringLiteral("allowednetworks")},
                          {{"u", "managerurl"}, QStringLiteral("Service manager URL."), QStringLiteral("managerurl")},
@@ -40,14 +36,6 @@ int main(int argc, char *argv[]) {
     fputs(qPrintable(QString("Wrong security type! [0-1]\n\n%1\n").arg(lParser.helpText())), stderr);
     return 2;
   }
-  if (!lParser.isSet("adminport")) {
-    fputs(qPrintable(QString("Admin port not set!\n\n%1\n").arg(lParser.helpText())), stderr);
-    return 3;
-  }
-  if (!lParser.isSet("clientport")) {
-    fputs(qPrintable(QString("Client port not set!\n\n%1\n").arg(lParser.helpText())), stderr);
-    return 4;
-  }
   if (!lParser.isSet("commport")) {
     fputs(qPrintable(QString("Communication port not set!\n\n%1\n").arg(lParser.helpText())), stderr);
     return 5;
@@ -57,15 +45,18 @@ int main(int argc, char *argv[]) {
     return 6;
   }
   QWebSocketServer::SslMode lSslMode = QWebSocketServer::SslMode::NonSecureMode;
-  if (lParser.isSet("managerurl")) {
-    lServiceManagerUrl = lParser.value("managerurl");
-    if (lSslModeStr.toUInt() == 0)
-      lServiceManagerUrl.prepend("ws://");
-    if (lSslModeStr.toUInt() == 1) {
-      lServiceManagerUrl.prepend("wss://");
-      lSslMode = QWebSocketServer::SslMode::SecureMode;
-    }
+  if(lSslModeStr.toUInt() == 1) {
+    lSslMode = QWebSocketServer::SslMode::SecureMode;
   }
+
+  if(lParser.isSet("managerurl")) {
+    lServiceManagerUrl = lParser.value("managerurl");
+  }
+  else {
+    fputs(qPrintable(QString("Service Manager URL not set!\n\n%1\n").arg(lParser.helpText())), stderr);
+    return 7;
+  }
+
   if (lParser.isSet("allowednetworks")) {
     QStringList lNetworks(lParser.value("allowednetworks").split(","));
     for (const QString &lNetwork : lNetworks) {
@@ -83,7 +74,8 @@ int main(int argc, char *argv[]) {
                                                lAllowedNetworks,
                                                lParser.value("commport").toUShort(),
                                                QHostAddress::Any);
-//  lController.fControlWebServer(QString(),
-//                                NulstarNS::NConnectionController::EServiceAction::eStartService);  // Start all web sockets servers
+  lController.fControlWebServer(QString(), NulstarNS::NUpdateController::EServiceAction::eStartService);  // Start all web sockets servers
+  lController.fConnectToServiceManager(NulstarNS::cRetryInterval);
+
   return lApp.exec();
 }

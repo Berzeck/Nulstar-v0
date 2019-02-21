@@ -1,4 +1,5 @@
 #include <QHostAddress>
+#include <QSettings>
 #include <QWebSocket>
 #include "NServiceManagerController.h"
 
@@ -31,9 +32,18 @@ namespace NulstarNS {
     QMapIterator<QString, NModuleAPI> i1(mModuleAPIActive);
     while(i1.hasNext()) {
       i1.next();
-      if(lWebSocketID == i1.value().fWebSocketID()) {        
+      if(lWebSocketID == i1.value().fWebSocketID()) {
+        QMapIterator<QString, NModuleAPI> i2(mModuleAPIActive);
+        while(i2.hasNext()) {
+          i2.next();
+          if((lWebSocketID != i2.value().fWebSocketID()) && i2.value().fAreRolesNeeded(i1.value().fModuleRoles())) {
+            fCloseConnection(i2.value().fWebSocketServerName(), i2.value().fWebSocketID());
+          }
+        }
+
         qDebug("%s", qUtf8Printable(QString("API from module '%1' using WebSocket connection '%2' has been removed!").arg(i1.value().fModuleName()).arg(i1.value().fWebSocketID())));
         mModuleAPIActive.remove(i1.key());
+        break;
       }
     }
     for(const NModuleAPI& lModuleAPI : mModuleAPIPendingDependencies) {
@@ -45,7 +55,7 @@ namespace NulstarNS {
 
   void NServiceManagerController::fFindDependencies() {
     for(NModuleAPI& lModuleAPIPending : mModuleAPIPendingDependencies) {
-      if(lModuleAPIPending.fFindDependenciesRetryCounter() >= cTotal_DependencesSearchRetryTimes) {
+      if(lModuleAPIPending.fFindDependenciesRetryCounter() >= 255 /*cTotal_DependencesSearchRetryTimes*/) {
          QVariantMap lDependencies;
          QMapIterator<QString, QVariant> i1(lModuleAPIPending.fDependencies());
          while(i1.hasNext()) {
@@ -66,6 +76,10 @@ namespace NulstarNS {
       else {
         QVariantMap lDependencies;
         QMapIterator<QString, QVariant> i1(lModuleAPIPending.fDependencies());
+  if(lModuleAPIPending.fModuleName() == "Updater") {
+   QSettings aaa("aaa.log", QSettings::IniFormat);
+   aaa.setValue("ll",lModuleAPIPending.fModuleName());
+ }
         bool lAllDependenciesSatisfied = true;
         while(i1.hasNext() && lAllDependenciesSatisfied) {
           i1.next();
@@ -90,6 +104,11 @@ namespace NulstarNS {
           if(!lDependencySatisfied) {
             lAllDependenciesSatisfied = false;
             lModuleAPIPending.fSetFindDependenciesRetryCounter(lModuleAPIPending.fFindDependenciesRetryCounter() + 1);
+       if(lModuleAPIPending.fModuleName() == "Updater") {
+            QSettings aaa("aaa.log", QSettings::IniFormat);
+          aaa.setValue("l2",lModuleAPIPending.fModuleName());
+       }
+
             break;
           }
         }

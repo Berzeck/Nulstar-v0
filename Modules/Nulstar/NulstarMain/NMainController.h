@@ -13,8 +13,6 @@
 class QProcess;
 
 namespace NulstarNS {
-  const QString cServiceManager("ServiceManager");
-
   class NMainController : public NCoreService {
     Q_OBJECT
 

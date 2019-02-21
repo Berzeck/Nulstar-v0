@@ -62,13 +62,16 @@ int main(int argc, char *argv[])
     return 6;
   }
   QWebSocketServer::SslMode lSslMode = QWebSocketServer::SslMode::NonSecureMode;
+  if(lSslModeStr.toUInt() == 1) {
+    lSslMode = QWebSocketServer::SslMode::SecureMode;
+  }
+
   if(lParser.isSet("managerurl")) {
     lServiceManagerUrl = lParser.value("managerurl");
-    if(lSslModeStr.toUInt() == 0) lServiceManagerUrl.prepend("ws://");
-    if(lSslModeStr.toUInt() == 1) {
-      lServiceManagerUrl.prepend("wss://");
-      lSslMode = QWebSocketServer::SslMode::SecureMode;
-    }
+  }
+  else {
+    fputs(qPrintable(QString("Service Manager URL not set!\n\n%1\n").arg(lParser.helpText())), stderr);
+    return 7;
   }
   if(lParser.isSet("allowednetworks")) {
     QStringList lNetworks(lParser.value("allowednetworks").split(","));

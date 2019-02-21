@@ -1,21 +1,26 @@
 #include <QCoreApplication>
+#include <QEventLoop>
 #include <QHostAddress>
 #include <QProcess>
+#include <QSettings>
+#include <QTimer>
 #include <QWebSocketServer>
 
 #include "NMainController.h"
 
-const int cProcessStartMaxSeconds = 5;
-const QString cComponentsDirectory("MainModules");
-const QString cMainControllerIPParameter("MainControllerIP");
-const QString cManageParameter("Managed");
-const QString cAllowedNetworks("AllowedNetworks");
-const QString cCommPortParameter("CommPort");
-const QString cLogLevelParameter("LogLevel");
-const QString cIPParameter("IP");
-const QString cSslModeParameter("SslMode");
-
 namespace NulstarNS {
+  const int cProcessStartMaxSeconds = 5;
+  const int cTimePeriod_ExtraDelayMSecs = 500;
+  const QString cComponentsDirectory("MainModules");
+  const QString cMainControllerIPParameter("MainControllerIP");
+  const QString cManageParameter("Managed");
+  const QString cAllowedNetworks("AllowedNetworks");
+  const QString cCommPortParameter("CommPort");
+  const QString cLogLevelParameter("LogLevel");
+  const QString cIPParameter("IP");
+  const QString cSslModeParameter("SslMode");
+  const QString cParameter_ManagerURL("managerurl");
+
   NMainController::NMainController()
                  : NCoreService() {
 
@@ -40,7 +45,7 @@ namespace NulstarNS {
       lAllowedNetworks << lNetworkAddress;
     }
 
-    NModuleInfo lServiceManagerInfo = mModuleManager.fModuleInfo(APP_DOMAIN, cServiceManager);
+    NModuleInfo lServiceManagerInfo = mModuleManager.fModuleInfo(APP_DOMAIN, cServiceManagerName);
     QString lServiceManagerPort = lServiceManagerInfo.fParameterValue("CommPort");
     QString lServiceManagerUrl = QHostAddress(QHostAddress::LocalHost).toString();
     lServiceManagerUrl.append(QString(":%1").arg(lServiceManagerPort));
@@ -103,15 +108,21 @@ namespace NulstarNS {
 /*  QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
   env.insert("LD_LIBRARY_PATH", "/home/Berzeck/Applications/Nulstar/Debug/Libraries/CPP/Nulstar/0.1.0"); // Add an environment variable
   lModuleProcess->setProcessEnvironment(env);*/
-
-    lModuleProcess->start(lModuleInfo.fModuleAppPath(), lModuleInfo.fFormattedParameters());
+    QStringList lFormattedParameters(lModuleInfo.fFormattedParameters());
+    if(lModuleInfo.fModuleName() != cServiceManagerName)
+      lFormattedParameters << QString("--%1").arg(cParameter_ManagerURL) << fServiceManagerUrl().toString();
+    lModuleProcess->start(lModuleInfo.fModuleAppPath(), lFormattedParameters);
     if(lModuleProcess->waitForStarted(cProcessStartMaxSeconds * 1000)) {
       mModulesRunning.insert(lProcessIndex, lModuleProcess);
+      QEventLoop lExtraDelay;  // So components have enough time to open the websocket servers
+      QTimer lDelayTimer;
+      connect(&lDelayTimer, &QTimer::timeout, &lExtraDelay, &QEventLoop::quit);
+      lDelayTimer.start(cTimePeriod_ExtraDelayMSecs);
+      lExtraDelay.exec();
       return true;
     }
     qDebug("Module '%s' and version '%s' could not start successfully!", lModuleName.toStdString().data(), lEffectiveModuleVersion.toStdString().data());
     lModuleProcess->deleteLater();
-
     return false;
   }
 
@@ -125,7 +136,8 @@ namespace NulstarNS {
         QString lModuleVersion(lModuleInfo.fModuleVersion());
         if((lModuleName == APP_NAME) && (lCurrentModuleNamespace == APP_DOMAIN))
           continue;
-        lAllModulesSuccessfullyStarted = lAllModulesSuccessfullyStarted && startmodule(lCurrentModuleNamespace, lModuleName, lModuleVersion, fRestartIfRunning);
+        bool lStartModule = startmodule(lCurrentModuleNamespace, lModuleName, lModuleVersion, fRestartIfRunning);
+        lAllModulesSuccessfullyStarted = lAllModulesSuccessfullyStarted && lStartModule;
       }
     }
     return lAllModulesSuccessfullyStarted;

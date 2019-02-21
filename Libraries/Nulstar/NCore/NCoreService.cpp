@@ -44,6 +44,15 @@ namespace NulstarNS {
     return true;
   }
 
+  void NCoreService::fCloseConnection(const QString& lWebServerName, const QString& lWebSocketID) {
+    if(mWebServers.contains(lWebServerName)) {
+      mWebServers.value(lWebServerName)->fRemoveConnections(QList<qint64>() << lWebSocketID.toLongLong());
+    }
+    else {
+      qDebug("%s", qUtf8Printable(QString("WebServer '%1' has not been found when trying to remove Connection ID '%2'").arg(lWebServerName).arg(lWebSocketID)));
+    }
+  }
+
   quint16 NCoreService::fCommPort() const {
     if(mWebServers.contains(cCommServerName))
       return mWebServers.value(cCommServerName)->fPort();

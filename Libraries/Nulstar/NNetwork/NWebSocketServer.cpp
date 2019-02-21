@@ -35,6 +35,7 @@ namespace NulstarNS {
     if(mMaxConnections && (mConnections.size() >= mMaxConnections))
       return;
     QWebSocket* rPendingConnection = nextPendingConnection();
+
     if(rPendingConnection != nullptr) {
       qint64 lMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch());
       NWebSocket* rSocket = new NWebSocket(QString::number(lMSecsSinceEpoch), QString(), QUrl(), 0, rPendingConnection, this);
@@ -117,6 +118,7 @@ qDebug() << QString("Protocol Version '%1' not supported!").arg(lIncommingVersio
       QString lJsonMessage(rNegotiationResponse.fToJsonString());
        rConnection->fSetConnectionState(NWebSocket::EConnectionState::eConnectionActive);
        qint64 lBytesSent = rConnection->fSendTextMessage(lJsonMessage);
+
  qDebug() << QString("Bytes Sent: '%1'\n  - Message: '%2'").arg(QString::number(lBytesSent)).arg(lJsonMessage);
     }
     else {
