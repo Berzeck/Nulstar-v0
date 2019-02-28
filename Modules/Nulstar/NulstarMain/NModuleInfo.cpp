@@ -5,6 +5,7 @@ namespace NulstarNS {
   const QString cModuleConfigGroupScript("Script");
   const QString cModuleConfigGroupScripted("Scripted");
   const QString cModuleConfigGroupScriptStart("StartScript");
+  const QString cModuleConfigGroupLibJre("JRE");
 
   NModuleInfo::NModuleInfo(const QString& lModuleName, const QString& lModuleNamespace, const QString& lModuleVersion, const QString& lModuleLanguage,
                            const QString& lModuleWorkingDirectory,  const QStringList& lModuleEnvLibPaths, const QList<NModuleParameter> &lModuleParameters, const QList<NModuleParameter> &lModuleScriptParameters)
@@ -15,9 +16,16 @@ namespace NulstarNS {
 
   QStringList NModuleInfo::fFormattedParameters() const {
     QStringList lFormattedParameters;
+    QString lParamValue;
     for(const NModuleParameter& lModuleParameter : mModuleParameters ) {
       QString lParameter(QString("--%1").arg(lModuleParameter.mParamName.toLower()));
-      lFormattedParameters << lParameter << lModuleParameter.mParamValue;
+      lParamValue = lModuleParameter.mParamValue;
+ #ifdef Q_OS_WIN
+      if (lModuleParameter.mParamName.toLower() == cModuleConfigGroupLibJre.toLower()){
+        lParamValue.replace("/", "\\", Qt::CaseInsensitive);
+      }
+ #endif
+      lFormattedParameters << lParameter << lParamValue;
     }
     return lFormattedParameters;
   }
