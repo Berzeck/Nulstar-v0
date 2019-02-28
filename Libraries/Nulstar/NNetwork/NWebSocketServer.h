@@ -10,6 +10,7 @@
 
 #include "NMessage.h"
 #include "NMessageFactory.h"
+#include "NMessageRequest.h"
 #include "NNetwork.h"
 
 QT_FORWARD_DECLARE_CLASS(NWebSocket)
@@ -59,7 +60,7 @@ namespace NulstarNS {
 
     Q_SIGNALS:
       void fTextMessageArrived(QString lWebServerName, QString lMessage);
-      void sRequestMessageArrived(const QString& lWebSocketsServerName, const QString& lWebSocketID, const QString& lMessageID, const QString& lMethodName, const QVariantMap& lParameters, qint64 lMSecsSinceEpoch);
+      void sRequestMessageArrived(TMessageRequestToProcess& lMessageRequest);
       void sWebSocketDisconnected(const QString& lWebSocketID);
   };
 }

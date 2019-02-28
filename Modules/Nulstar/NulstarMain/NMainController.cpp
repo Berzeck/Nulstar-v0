@@ -25,7 +25,6 @@ namespace NulstarNS {
                  : NCoreService() {
 
     NModuleInfo lControllerInfo = mModuleManager.fModuleInfo(APP_DOMAIN, APP_NAME);
-
     QList<QNetworkAddressEntry> lAllowedNetworks;
     QHostAddress::SpecialAddress lBindAddress = QHostAddress::Any;
     QHostAddress lHostAddress;

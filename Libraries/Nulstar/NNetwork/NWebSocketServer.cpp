@@ -2,10 +2,8 @@
 #include <QWebSocket>
 #include <QVersionNumber>
 
-#include "NMessage.h"
 #include "NMessageNegotiateConnection.h"
 #include "NMessageNegotiateConnectionResponse.h"
-#include "NMessageRequest.h"
 #include "NWebSocket.h"
 #include "NWebSocketServer.h"
 
@@ -135,12 +133,15 @@ qDebug() << QString("Protocol Version '%1' not supported!").arg(lIncommingVersio
       qDebug() << QString("Connection '%1' no longer exists!").arg(rConnection->fName());
       return;
     }
-    qint64 lMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch());
+
     QVariantMap lRequestMethods(lObjectMessage.toVariantMap().value(cFieldName_MessageData).toMap().value(cFieldName_RequestMethods).toMap());
     QString lMessageID(lObjectMessage.toVariantMap().value(cFieldName_MessageID).toString());
+    quint64 lSubscriptionEventCounter(lObjectMessage.toVariantMap().value(cFieldName_MessageData).toMap().value(cFieldName_SubscriptionEventCounter).toULongLong());
+    quint64 lSubscriptionPeriod(lObjectMessage.toVariantMap().value(cFieldName_MessageData).toMap().value(cFieldName_SubscriptionPeriod).toULongLong());
     for(const QString& lRequestMethodName : lRequestMethods.keys()) {
       QVariantMap lRequestMethodParams = lRequestMethods.value(lRequestMethodName).toMap();
-      emit sRequestMessageArrived(fName(), rConnection->fName(),lMessageID, lRequestMethodName, lRequestMethodParams, lMSecsSinceEpoch);
+      TMessageRequestToProcess tMessageRequest({fName(), rConnection->fName(),lMessageID, lRequestMethodName, lRequestMethodParams, lSubscriptionEventCounter, lSubscriptionPeriod, 0, 0} );
+      emit sRequestMessageArrived(tMessageRequest);
     }
   }
 

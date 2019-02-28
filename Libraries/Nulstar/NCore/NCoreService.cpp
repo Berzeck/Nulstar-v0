@@ -7,6 +7,16 @@ namespace NulstarNS {
                              QObject *rParent)
               : QObject(rParent), mLogLevel(lLogLevel), mServiceManagerUrl(lServiceManagerUrl), mIP(lIP), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks) {
     QTimer::singleShot(0, this, [this] { mApiBuilder.fBuildApi(this); });
+    connect(this, &NCoreService::sEventTriggered, [this](const QString& lMethodName) {
+              QMutableMapIterator<QString, TMessageRequestToProcess> i1(mMessageRequestEventQueue);
+              while(i1.hasNext()) {
+                i1.next();
+                if((lMethodName == i1.value().mMethodName) && ((i1.value().mEventCounter % i1.value().mSubscriptionEventCounter) == 0  )) {
+                  fOnRequestMessageArrived(i1.value());
+                  qDebug("%s", qUtf8Printable(QString("Message '%1' using method '%2' has been executed '%3' times.").arg(i1.key()).arg(i1.value().mMethodName).arg(i1.value().mEventCounter)));
+                }
+              }
+            } );
   }
 
   NCoreService::~NCoreService() {
@@ -151,12 +161,19 @@ namespace NulstarNS {
     }
   }
 
-  void NCoreService::fOnRequestMessageArrived(const QString& lWebSocketsServerName, const QString& lWebSocketID, const QString& lMessageID, const QString& lMethodName, const QVariantMap& lParameters, qint64 lMSecsSinceEpoch) {
-    QString lEffectiveMethodName(lMethodName);
+  void NCoreService::fOnRequestMessageArrived(TMessageRequestToProcess& lMessageRequestToProcess) {
+    lMessageRequestToProcess.mMSecsSinceEpoch = QDateTime::currentMSecsSinceEpoch();
     if(fApiMethodLowercase())
-      lEffectiveMethodName = lMethodName.toLower();
-    bool lSuccess = metaObject()->invokeMethod(this, lEffectiveMethodName.toLatin1().data(), Qt::DirectConnection, Q_ARG(QString, lWebSocketsServerName), Q_ARG(QString, lWebSocketID), Q_ARG(QString, lMessageID), Q_ARG(QVariantMap, lParameters), Q_ARG(qint64, lMSecsSinceEpoch));
-    if(!lSuccess)
-      qDebug("%s", qUtf8Printable(QString("Method '%1' couldn't be executed successfully!").arg(lMethodName)));
-  }
+      lMessageRequestToProcess.mMethodName = lMessageRequestToProcess.mMethodName.toLower();
+    bool lSuccess = metaObject()->invokeMethod(this, lMessageRequestToProcess.mMethodName.toLatin1().data(), Qt::DirectConnection, Q_ARG(TMessageRequestToProcess, lMessageRequestToProcess));
+      if(lSuccess) {
+        if(lMessageRequestToProcess.mSubscriptionEventCounter) {
+          lMessageRequestToProcess.mEventCounter += 1;
+          if(!mMessageRequestEventQueue.contains(lMessageRequestToProcess.mMessageID))
+            mMessageRequestEventQueue.insert(lMessageRequestToProcess.mMessageID, lMessageRequestToProcess);
+        }
+      }
+      else
+        qDebug("%s", qUtf8Printable(QString("Method '%1' couldn't be executed successfully!").arg(lMessageRequestToProcess.mMethodName)));
+  }  
 }

@@ -43,6 +43,7 @@ namespace NulstarNS {
 
         qDebug("%s", qUtf8Printable(QString("API from module '%1' using WebSocket connection '%2' has been removed!").arg(i1.value().fModuleName()).arg(i1.value().fWebSocketID())));
         mModuleAPIActive.remove(i1.key());
+        emit sEventTriggered("getconsolidatedapi");
         break;
       }
     }
@@ -54,6 +55,10 @@ namespace NulstarNS {
   }
 
   void NServiceManagerController::fFindDependencies() {
+    for(NModuleAPI& lModuleAPIPending : mModuleAPIActive) {
+      QSettings lTempLog("ActiveModules.log", QSettings::IniFormat);
+      lTempLog.setValue(lModuleAPIPending.fModuleName(), QTime::currentTime().toString("hh:mm:ss"));
+    }
     for(NModuleAPI& lModuleAPIPending : mModuleAPIPendingDependencies) {
       if(lModuleAPIPending.fFindDependenciesRetryCounter() >= 255 /*cTotal_DependencesSearchRetryTimes*/) {
          QVariantMap lDependencies;
@@ -76,10 +81,7 @@ namespace NulstarNS {
       else {
         QVariantMap lDependencies;
         QMapIterator<QString, QVariant> i1(lModuleAPIPending.fDependencies());
-  if(lModuleAPIPending.fModuleName() == "Updater") {
-   QSettings aaa("aaa.log", QSettings::IniFormat);
-   aaa.setValue("ll",lModuleAPIPending.fModuleName());
- }
+
         bool lAllDependenciesSatisfied = true;
         while(i1.hasNext() && lAllDependenciesSatisfied) {
           i1.next();
@@ -104,11 +106,6 @@ namespace NulstarNS {
           if(!lDependencySatisfied) {
             lAllDependenciesSatisfied = false;
             lModuleAPIPending.fSetFindDependenciesRetryCounter(lModuleAPIPending.fFindDependenciesRetryCounter() + 1);
-       if(lModuleAPIPending.fModuleName() == "Updater") {
-            QSettings aaa("aaa.log", QSettings::IniFormat);
-          aaa.setValue("l2",lModuleAPIPending.fModuleName());
-       }
-
             break;
           }
         }
@@ -120,17 +117,22 @@ namespace NulstarNS {
           fSendMessage(lModuleAPIPending.fWebSocketServerName(), lRegisterAPIResponse);
           mModuleAPIActive[lModuleAPIIndexName] = lModuleAPIPending;
           mModuleAPIPendingDependencies.removeOne(lModuleAPIPending);
+          emit sEventTriggered("getconsolidatedapi");
         }
       }
     }
   }
 
-  void NServiceManagerController::registerapi(const QString& lWebSocketsServerName, const QString& lWebSocketID, const QString& lMessageID, const QVariantMap& lParameters, qint64 lMSecsSinceEpoch) {
-     NModuleAPI lModuleAPI(lParameters);
-     lModuleAPI.fSetMessageID(lMessageID);
-     lModuleAPI.fSetMSecsSinceEpoch(lMSecsSinceEpoch);
-     lModuleAPI.fSetWebSocketID(lWebSocketID);
-     lModuleAPI.fSetWebSocketServerName(lWebSocketsServerName);
+  void NServiceManagerController::getconsolidatedapi() {
+
+  }
+
+  void NServiceManagerController::registerapi(const TMessageRequestToProcess& lMessageRequest) {
+     NModuleAPI lModuleAPI(lMessageRequest.mParameters);
+     lModuleAPI.fSetMessageID(lMessageRequest.mMessageID);
+     lModuleAPI.fSetMSecsSinceEpoch(lMessageRequest.mMSecsSinceEpoch);
+     lModuleAPI.fSetWebSocketID(lMessageRequest.mWebSocketID);
+     lModuleAPI.fSetWebSocketServerName(lMessageRequest.mWebSocketsServerName);
      if(lModuleAPI.fIsValid())
        mModuleAPIPendingDependencies << lModuleAPI;
   }

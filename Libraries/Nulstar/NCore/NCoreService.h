@@ -17,6 +17,7 @@
 #include <QVariantMap>
 #include <QVersionNumber>
 #include <NMessage.h>
+#include <NMessageRequest.h>
 #include <NMessageResponse.h>
 #include <NWebSocket.h>
 #include <NWebSocketServer.h>
@@ -70,9 +71,12 @@ namespace NulstarNS {
       virtual bool fControlWebServer(const QString& lName, EServiceAction lAction); // If lName is empty then it controls all web sockets servers
       virtual void fCloseConnection(const QString& lWebServerName, const QString& lWebSocketID);
 
+    Q_SIGNALS:
+      void sEventTriggered(const QString& lMethodName);
+
     protected Q_SLOTS:
-      virtual void fOnRequestMessageArrived(const QString& lWebSocketsServerName, const QString& lWebSocketID, const QString& lMessageID, const QString& lMethodName, const QVariantMap& lParameters, qint64 lMSecsSinceEpoch);
-      virtual void fOnWebSocketDisconnected(const QString& lWebSocketID) { Q_UNUSED(lWebSocketID); }
+      virtual void fOnRequestMessageArrived(TMessageRequestToProcess& lMessageRequestToProcess);
+      virtual void fOnWebSocketDisconnected(const QString& lWebSocketID) { Q_UNUSED(lWebSocketID); }  
 
     protected:
       virtual void fFillMethodMetadata() = 0;
@@ -83,6 +87,7 @@ namespace NulstarNS {
       QUrl mServiceManagerUrl;
       QHostAddress mIP;
       NWebSocketServer::SslMode mSslMode;
+      QMap<QString, TMessageRequestToProcess > mMessageRequestEventQueue; // MessageID, Struct RequestToProcess
       QMap<QString, NWebSocket* > mWebSockets;  // Module Name, Connection
       QMap<QString, NWebSocketServer*> mWebServers;
       QMap<QString, QString> mApiMethodDescription;

@@ -33,7 +33,8 @@ namespace NulstarNS {
       QList<QVersionNumber> fProtocolVersionsSupported() const override { QList<QVersionNumber> lApiVersionsSupported; QVersionNumber lMainVersion(QVersionNumber::fromString(APP_PROTOCOL_VERSIONS)); lApiVersionsSupported << lMainVersion; return lApiVersionsSupported; }
 
     public Q_SLOTS:
-      API_PUBLIC_FUNCTION void registerapi(const QString& lWebSocketsServerName, const QString &lWebSocketID, const QString& lMessageID, const QVariantMap& lParameters, qint64 lMSecsSinceEpoch);
+      API_PRIVATE_FUNCTION void registerapi(const TMessageRequestToProcess& lMessageRequest);
+      API_PRIVATE_FUNCTION void getconsolidatedapi();
 
     protected Q_SLOTS:
       void fOnWebSocketDisconnected(const QString& lWebSocketID) override;

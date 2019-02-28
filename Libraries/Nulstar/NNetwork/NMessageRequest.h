@@ -11,8 +11,8 @@
 
 namespace NulstarNS {
   const QString lRequestAckFieldName("RequestAck");
-  const QString lSubscriptionEventCounterFieldName("SubscriptionEventCounter");
-  const QString lSubscriptionPeriodFieldName("SubscriptionPeriod");
+  const QString cFieldName_SubscriptionEventCounter("SubscriptionEventCounter");
+  const QString cFieldName_SubscriptionPeriod("SubscriptionPeriod");
   const QString lSubscriptionRangeFieldName("SubscriptionRange");
   const QString lResponseMaxSizeFieldName("ResponseMaxSize");
   const QString cFieldName_RequestMethods("RequestMethods");
@@ -46,6 +46,18 @@ namespace NulstarNS {
       quint64 mSubscriptionPeriod;
       QString mSubscriptionRange;
       QVariantMap mRequestMethods;
+  };
+
+  struct TMessageRequestToProcess {
+      QString mWebSocketsServerName;
+      QString mWebSocketID;
+      QString mMessageID;
+      QString mMethodName;
+      QVariantMap mParameters;
+      quint64 mSubscriptionEventCounter;
+      quint64 mSubscriptionPeriod;
+      qint64 mMSecsSinceEpoch;
+      quint64 mEventCounter;
   };
 } // namespace NulstarNS
 
