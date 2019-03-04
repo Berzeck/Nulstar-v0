@@ -38,9 +38,14 @@ namespace NulstarNS {
   const QString cFieldName_Methods(QStringLiteral("Methods"));
   const QString cFieldName_RegisterAPI(QStringLiteral("RegisterAPI"));
 
+  const QString cFieldName_Admin(QStringLiteral("Admin"));
+  const QString cFieldName_Public(QStringLiteral("Public"));
+  const QString cFieldName_Private(QStringLiteral("Private"));
   const QString cFunctionTag_Admin(QStringLiteral("API_ADMIN_FUNCTION"));
   const QString cFunctionTag_Public(QStringLiteral("API_PUBLIC_FUNCTION"));
   const QString cFunctionTag_Private(QStringLiteral("API_PRIVATE_FUNCTION"));
+
+  const QString cCommand_GetConsolidatedAPI = QStringLiteral("getconsolidatedapi");
 }
 
 #endif // NCORECONSTANTS_H

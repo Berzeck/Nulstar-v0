@@ -123,8 +123,51 @@ namespace NulstarNS {
     }
   }
 
-  void NServiceManagerController::getconsolidatedapi() {
+  void NServiceManagerController::getconsolidatedapi(const TMessageRequestToProcess& lMessageRequest) {
+    QVariantMap lMethods;
+    lMethods[cFieldName_Admin] = QVariantMap();
+    lMethods[cFieldName_Private] = QVariantMap();
+    lMethods[cFieldName_Public] = QVariantMap();
 
+    NMessageResponse::EResponseStatus lConsolidationSuccess = NMessageResponse::EResponseStatus::eResponseSuccessful;
+    QString lLastErrorMessage;
+    QMapIterator<QString, NModuleAPI> i1(mModuleAPIActive);
+    while(i1.hasNext()) {
+      i1.next();
+      QString lModuleDomain(i1.value().fModuleDomain());
+      QString lModuleName(i1.value().fModuleName());
+//      QVersionNumber lModuleVersion(QVersionNumber::fromString(i1.value().fModuleVersion()));
+
+      for(const QVariant& lApiMethod : i1.value().fMethods()) {
+        QVariantMap lMethod(lApiMethod.toMap());
+        QString lMethodName(lMethod.value(cFieldName_MethodName).toString());
+        QString lMethodScope(lMethod.value(cFieldName_MethodScope).toString());
+        QString lMethodEffectiveName(QString("%1.%2").arg(lModuleDomain).arg(lMethodName));
+        QString lMethodEffectiveScope;
+        if(lMethodScope == cFieldName_Admin.toLower())
+          lMethodEffectiveScope = cFieldName_Admin;
+        if(lMethodScope == cFieldName_Public.toLower())
+          lMethodEffectiveScope = cFieldName_Public;
+        if(lMethodScope == cFieldName_Private.toLower())
+          lMethodEffectiveScope = cFieldName_Private;
+
+        if(lMethods.value(lMethodEffectiveScope).toMap().contains(lMethodEffectiveName)) {
+          lConsolidationSuccess = NMessageResponse::EResponseStatus::eResponseError;
+          lLastErrorMessage = tr("Method called '%1' from module '%2' already exists!!").arg(lMethodEffectiveName).arg(lModuleName);
+          qDebug("%s", qUtf8Printable(lLastErrorMessage));
+        }
+        else {
+          QVariantMap lCurrentMethods = lMethods.value(lMethodEffectiveScope).toMap();
+          lCurrentMethods.insert(lMethodEffectiveName, lMethod);
+          lMethods[lMethodEffectiveScope] = lCurrentMethods;
+        }
+      }
+    }
+    QVariantMap lGetConsolidatedAPIResponse { {cCommand_GetConsolidatedAPI, lMethods } };
+    qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequest.mMSecsSinceEpoch);
+    NMessageResponse* lConsolidateAPIResponse = nullptr;
+    lConsolidateAPIResponse = new NMessageResponse(lMessageRequest.mWebSocketID, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, lConsolidationSuccess, lLastErrorMessage, 0, lGetConsolidatedAPIResponse);
+    fSendMessage(lMessageRequest.mWebSocketsServerName, lConsolidateAPIResponse);
   }
 
   void NServiceManagerController::registerapi(const TMessageRequestToProcess& lMessageRequest) {

@@ -2,16 +2,6 @@
 #include "NMessageResponse.h"
 
 namespace NulstarNS {
-  const QString cRequestIDFieldName("RequestID");
-  const QString cResponseProcessingTimeFieldName("ResponseProcessingTime");
-  const QString cResponseStatusFieldName("ResponseStatus");
-  const QString cResponseCommentFieldName("ResponseComment");
-  const QString cResponseMaxSizeFieldName("ResponseMaxSize");
-  const QString cResponseDataFieldName("ResponseData");
-  const int cResponseStatusSuccess = 1;
-  const int cResponseStatusFailure = 0;
-
-
   NMessageResponse::NMessageResponse(const QString& lConnectionName, const QString& lMessageID, const QString& lRequestID, const qint64 lResponseProcessingTime, const EResponseStatus lResponseStatus,
                                      const QString& lResponseComment, const quint64 lResponseMaxSize, const QVariantMap& lResponseData, QObject *rParent)
                   : NMessage(lConnectionName, lMessageID, rParent), mRequestID(lRequestID), mResponseProcessingTime(lResponseProcessingTime), mResponseStatus(lResponseStatus), mResponseComment(lResponseComment),
@@ -50,40 +40,41 @@ namespace NulstarNS {
   }
 
   bool NMessageResponse::fValidateMessageObject(const QJsonObject& lMessageObject) {
-    if(!lMessageObject.contains(cMessageTypeFieldName)) {
-        qDebug("Message received without 'MessageType' field!");
-        return false;
+    if(!NMessage::fValidateMessageObject(lMessageObject)) {
+      return false;
     }
-    if (lMessageObject.value(cMessageTypeFieldName).toString() != cTypeReponse){
-        qDebug("Message type is not 'Response'!");
-        return false;
-    }
-    if(!lMessageObject.contains(cRequestIDFieldName)) {
+
+    QJsonObject lDataObject = lMessageObject.value(cFieldName_MessageData).toObject();
+    if(lMessageObject.value(cMessageTypeFieldName).toString() != cTypeReponse){
+      qDebug("Message type is not 'Response'!");
+      return false;
+    }    
+    if(!lDataObject.contains(cRequestIDFieldName)) {
       qDebug("Message received without 'RequestID' field!");
       return false;
     }
-    if(!lMessageObject.contains(cResponseProcessingTimeFieldName)) {
+    if(!lDataObject.contains(cResponseProcessingTimeFieldName)) {
       qDebug("Message received without 'ResponseProcessingTime' field!");
       return false;
     }
-    if(!lMessageObject.contains(cResponseStatusFieldName)) {
+    if(!lDataObject.contains(cResponseStatusFieldName)) {
       qDebug("Message received without 'ResponseStatus' field!");
       return false;
     }
-    int lResponseStatus = lMessageObject.value(cResponseStatusFieldName).toInt();
-    if((lResponseStatus !=  cResponseStatusSuccess) || (lResponseStatus !=  cResponseStatusFailure)) {
+    int lResponseStatus = lDataObject.value(cResponseStatusFieldName).toInt();
+    if((lResponseStatus !=  cResponseStatusSuccess) && (lResponseStatus !=  cResponseStatusFailure)) {
       qDebug("ResponseStatus value out of scope!");
       return false;
     }
-    if(!lMessageObject.contains(cResponseCommentFieldName)) {
+    if(!lDataObject.contains(cResponseCommentFieldName)) {
       qDebug("Message received without 'ResponseComment' field!");
       return false;
     }
-    if(!lMessageObject.contains(cResponseMaxSizeFieldName)) {
+    if(!lDataObject.contains(cResponseMaxSizeFieldName)) {
       qDebug("Message received without 'ResponseMaxSize' field!");
       return false;
     }
-    if(!lMessageObject.contains(cResponseDataFieldName)) {
+    if(!lDataObject.contains(cResponseDataFieldName)) {
       qDebug("Message received without 'ResponseData' field!");
       return false;
     }

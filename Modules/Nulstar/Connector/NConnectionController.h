@@ -13,10 +13,10 @@
 //***#include <NResponse.h>
 
 namespace NulstarNS {
-  const QString lAdminServerLabel = "Nulstar Management";
-  const QString lAdminServerName = "WebAdminServer";
-  const QString lClientServerLabel = "Nulstar Client Channel";
-  const QString lClientServerName = "WebClientServer";
+  const QString cAdminServerLabel = "Nulstar Management";
+  const QString cAdminServerName = "WebAdminServer";
+  const QString cClientServerLabel = "Nulstar Client Channel";
+  const QString cClientServerName = "WebClientServer";
 
   class NWebSocketServer;
   class NConnectionController : public NCoreService {
@@ -44,14 +44,19 @@ namespace NulstarNS {
     private:
       quint64 mRequestID;
       quint8 mCompressionLevel;
+      QVariantMap mAdminMethods;
+      QVariantMap mPublicMethods;
+      QVariantMap mPrivateMethods;
 
     public Q_SLOTS:
+      API_PUBLIC_FUNCTION void listapi(const TMessageRequestToProcess& lMessageRequest);
   /***    API_ADMIN_FUNCTION NResponse setmaxconnections(int lMaxConnections) { return fSetMaxConnections(lClientServerName, lMaxConnections); }
       API_ADMIN_FUNCTION NResponse getmaxconnections() { return fMaxConnections(lClientServerName); }
       API_ADMIN_FUNCTION NResponse gettotalconnections() { return fTotalConnections(lClientServerName); }
       API_ADMIN_FUNCTION NResponse setcompressionlevel(quint8 lCompressionLevel);
       API_PUBLIC_FUNCTION NResponse getcompressionlevel();  ***/
-
+    protected Q_SLOTS:
+      void fProcessResponse(const QVariantMap& lMessageResponse) override;
   };
 }
 

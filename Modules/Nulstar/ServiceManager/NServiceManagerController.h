@@ -34,7 +34,7 @@ namespace NulstarNS {
 
     public Q_SLOTS:
       API_PRIVATE_FUNCTION void registerapi(const TMessageRequestToProcess& lMessageRequest);
-      API_PRIVATE_FUNCTION void getconsolidatedapi();
+      API_PRIVATE_FUNCTION void getconsolidatedapi(const TMessageRequestToProcess& lMessageRequest);
 
     protected Q_SLOTS:
       void fOnWebSocketDisconnected(const QString& lWebSocketID) override;

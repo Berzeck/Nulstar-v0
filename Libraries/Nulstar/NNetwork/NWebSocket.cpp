@@ -7,6 +7,7 @@
 #include "NMessageNegotiateConnection.h"
 #include "NMessageNegotiateConnectionResponse.h"
 #include "NMessageRequest.h"
+#include "NMessageResponse.h"
 
 namespace NulstarNS {
   NWebSocket::NWebSocket(const QString &lName, const QString &lProtocolVersion, const QUrl& lConnectionUrl, quint8 lConnectionRetryInterval, QWebSocket *rSocket, QObject* rParent)
@@ -74,12 +75,17 @@ namespace NulstarNS {
   }
 
   void NWebSocket::fOnTextMessageReceived(const QString& lMessage) {
- qDebug() << "Text Message received:" << lMessage;
+ qDebug() << "\nText Message received:" << lMessage;
     QString lMessageType;
-    QJsonObject lMessageObject(NMessageFactory::fMessageObjectFromString(lMessage, &lMessageType));
+    QJsonObject lMessageObject(NMessageFactory::fMessageObjectFromString(lMessage, &lMessageType));    
     if(lMessageType == cTypeNegotiateConnectionResponse && NMessageNegotiateConnectionResponse::fValidateMessageObject(lMessageObject))
       fProcessNegotiateConnectionResponse(lMessageObject);
-    emit sTextMessageReceived(lMessage);
+    if(lMessageType == cTypeReponse && NMessageResponse::fValidateMessageObject(lMessageObject))
+      emit sMessageReceived(lMessageType, lMessageObject.toVariantMap());
+    if(lMessageType == cTypeNegotiateConnection && NMessageNegotiateConnection::fValidateMessageObject(lMessageObject))
+      emit sMessageReceived(lMessageType, lMessageObject.toVariantMap());
+    if(lMessageType == cTypeRequest && NMessageRequest::fValidateMessageObject(lMessageObject))
+      emit sMessageReceived(lMessageType, lMessageObject.toVariantMap());
   }
 
   void NWebSocket::fNegotiateConnection() {

@@ -9,6 +9,15 @@
 #include "NNetwork.h"
 
 namespace NulstarNS {
+  const QString cRequestIDFieldName("RequestID");
+  const QString cResponseProcessingTimeFieldName("ResponseProcessingTime");
+  const QString cResponseStatusFieldName("ResponseStatus");
+  const QString cResponseCommentFieldName("ResponseComment");
+  const QString cResponseMaxSizeFieldName("ResponseMaxSize");
+  const QString cResponseDataFieldName("ResponseData");
+  const int cResponseStatusSuccess = 1;
+  const int cResponseStatusFailure = 0;
+
   class NETWORKSHARED_EXPORT NMessageResponse : public NMessage {
     Q_OBJECT
 

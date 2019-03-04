@@ -18,7 +18,10 @@ namespace NulstarNS {
       bool fIsValid() { return mIsValid; }
       QVariantMap fDependencies() const { return mDependencies; }
       quint8 fFindDependenciesRetryCounter() const { return mFindDependenciesRetryCounter; }
+      QVariantList fMethods() const { return mMethods; }
+      QString fModuleDomain() const { return mModuleDomain; }
       QString fModuleName() const { return mModuleName; }
+      QString fModuleVersion() const { return mModuleVersion; }
       QString fMessageID() const { return mMessageID; }
       qint64 fMSecsSinceEpoch() const { return mMSecsSinceEpoch; }
       QString fWebSocketID() const { return mWebSocketID; }
@@ -36,6 +39,7 @@ namespace NulstarNS {
       bool operator==(NModuleAPI const& lTargetAPI) { if((mModuleName == lTargetAPI.fModuleName()) && (mWebSocketID == lTargetAPI.fWebSocketID())) return true; return false; }
       bool operator<(NModuleAPI const& lTargetAPI) { if((mModuleName < lTargetAPI.fModuleName())) return true; return false; }
 
+
     protected:
       void fFillFields(const QVariantMap& lModuleApiMap);
 
@@ -44,7 +48,7 @@ namespace NulstarNS {
       quint8 mFindDependenciesRetryCounter;
       QVariantMap mDependencies;
       QHostAddress mIP;
-      QVariantMap mMethods;
+      QVariantList mMethods;
       QString mModuleAbbreviation;
       QString mModuleDomain;
       QString mModuleName;

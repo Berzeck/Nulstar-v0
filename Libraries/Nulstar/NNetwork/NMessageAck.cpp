@@ -15,6 +15,10 @@ namespace NulstarNS {
   }
 
   bool fValidateMessageObject(const QJsonObject& lMessageObject) {
+    if (!NMessage::fValidateMessageObject(lMessageObject)) {
+      return false;
+    }
+
     if(!lMessageObject.contains(cMessageTypeFieldName)) {
         qDebug("Message received without 'MessageType' field!");
         return false;

@@ -2,8 +2,10 @@
 #include <QSettings>
 #include <QStringList>
 #include <QWebSocket>
+#include <NMessage.h>
 #include <NWebSocketServer.h>
 #include <NApiBuilder.h>
+
 #include "NConnectionController.h"
 
 namespace NulstarNS {
@@ -12,8 +14,8 @@ namespace NulstarNS {
 
     if(lCommPort)
       fAddWebSocketServer(lCommPort, lBindAddress);
-    fAddWebSocketServer(lAdminPort, QHostAddress::Any, lAdminServerName, lAdminServerLabel, false);
-    fAddWebSocketServer(lClientPort, QHostAddress::Any, lClientServerName, lClientServerLabel, false);
+    fAddWebSocketServer(lAdminPort, QHostAddress::Any, cAdminServerName, cAdminServerLabel, false);
+    fAddWebSocketServer(lClientPort, QHostAddress::Any, cClientServerName, cClientServerLabel, false);
     fFillMethodDescriptions();
     fFillMethodMinEventAndMinPeriod();
   }
@@ -59,6 +61,43 @@ namespace NulstarNS {
     fAddMethodMinEventAndMinPeriod("gettotalconnections", QString("1,0"));
     fAddMethodMinEventAndMinPeriod("getcompressionlevel", QString("1,0"));
     fAddMethodMinEventAndMinPeriod("setcompressionlevel", QString("0,0"));
+  }
+
+  void NConnectionController::fProcessResponse(const QVariantMap& lMessageResponse) {
+    bool lResponseSuccessfull(lMessageResponse.value(cFieldName_MessageData).toMap().value(cResponseStatusFieldName).toBool());
+    QVariantMap lResponseData(lMessageResponse.value(cFieldName_MessageData).toMap().value(cResponseDataFieldName).toMap());
+    if(lResponseData.contains(cFieldName_RegisterAPI) && lResponseSuccessfull) {
+      QVariantMap lGetConsolidatedAPI;
+      lGetConsolidatedAPI[cCommand_GetConsolidatedAPI] = QVariant();
+      fSendMessage(cServiceManagerName, new NMessageRequest(cServiceManagerName, QString(), false, 1, 0, QString(), 0, lGetConsolidatedAPI, this), NWebSocket::EConnectionState::eConnectionActive);
+    }
+    if(lResponseData.contains(cCommand_GetConsolidatedAPI) && lResponseSuccessfull) {
+      mPrivateMethods = lResponseData.value(cCommand_GetConsolidatedAPI).toMap().value(cFieldName_Private).toMap();
+      mPublicMethods = lResponseData.value(cCommand_GetConsolidatedAPI).toMap().value(cFieldName_Public).toMap();
+      mAdminMethods = lResponseData.value(cCommand_GetConsolidatedAPI).toMap().value(cFieldName_Admin).toMap();
+    }
+  }
+
+  void NConnectionController::listapi(const TMessageRequestToProcess& lMessageRequest) {
+      QVariantMap lListAPIResponse { {"listapi", QVariantMap() } };
+      if(lMessageRequest.mWebSocketsServerName == cClientServerName) {
+        lListAPIResponse["listapi"] = mPublicMethods;
+      }
+      if(lMessageRequest.mWebSocketsServerName == cAdminServerName) {
+        QVariantMap lCurrentMap(mPublicMethods);
+        lCurrentMap = lCurrentMap.unite(mAdminMethods);
+        lListAPIResponse["listapi"] = lCurrentMap;
+      }
+      if(lMessageRequest.mWebSocketsServerName == cAdminServerName) {
+        QVariantMap lCurrentMap(mPublicMethods);
+        lCurrentMap = lCurrentMap.unite(mAdminMethods);
+        lCurrentMap = lCurrentMap.unite(mPrivateMethods);
+        lListAPIResponse["listapi"] = lCurrentMap;
+      }
+
+    qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequest.mMSecsSinceEpoch);
+    NMessageResponse* lResponse = new NMessageResponse(lMessageRequest.mWebSocketID, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseSuccessful, QString(), 0, lListAPIResponse);
+    fSendMessage(lMessageRequest.mWebSocketsServerName, lResponse);
   }
 }
 

@@ -44,7 +44,7 @@ namespace NulstarNS {
       qDebug("%s", qUtf8Printable(QString("API from module '%1', field '%2' does not contain valid information!)").arg(mModuleName).arg(cFieldName_Methods)));
       return;
     }
-    mMethods = lModuleApiMap.value(cFieldName_Methods).toMap();
+    mMethods = lModuleApiMap.value(cFieldName_Methods).toList();
 
     if(!lModuleApiMap.contains(cFieldName_Abbreviation))  {
       qDebug("%s", qUtf8Printable(QString("API from unknown module received! (Field '%1' does not contain valid information)").arg(cFieldName_Abbreviation)));

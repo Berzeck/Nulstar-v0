@@ -4,6 +4,7 @@
 #include <QHostAddress>
 #include <QList>
 #include <QMap>
+#include <QVariantMap>
 #include <QObject>
 #include <QWebSocketServer>
 #include <QVersionNumber>
@@ -37,9 +38,9 @@ namespace NulstarNS {
       void fSendMessage(const qint64 lWebSocketID, NMessage* lMessage);
 
     protected:
-      bool fVersionSupported(const QJsonObject& lObjectMessage);
-      void fProcessNegotiateConnection(const QJsonObject& lObjectMessage, NWebSocket* rConnection);
-      void fProcessRequest(const QJsonObject& lObjectMessage, NWebSocket* rConnection);
+      bool fVersionSupported(const QVariantMap& lMessage);
+      void fProcessNegotiateConnection(const QVariantMap& lMessage, NWebSocket* rConnection);
+      void fProcessRequest(const QVariantMap& lMessage, NWebSocket* rConnection);
 
     private:
       int mMaxConnections;
@@ -55,7 +56,7 @@ namespace NulstarNS {
 
     private Q_SLOTS:
       void fOnNewConnection();
-      void fProcessTextMessage(const QString& lMessage);
+      void fProcessTextMessage(const QString &lMessageType, const QVariantMap &lMessage);
       void fSocketDisconnected();
 
     Q_SIGNALS:

@@ -37,7 +37,7 @@ namespace NulstarNS {
     if(rPendingConnection != nullptr) {
       qint64 lMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch());
       NWebSocket* rSocket = new NWebSocket(QString::number(lMSecsSinceEpoch), QString(), QUrl(), 0, rPendingConnection, this);
-      connect(rSocket, &NWebSocket::sTextMessageReceived, this, &NWebSocketServer::fProcessTextMessage, Qt::UniqueConnection);
+      connect(rSocket, &NWebSocket::sMessageReceived, this, &NWebSocketServer::fProcessTextMessage, Qt::UniqueConnection);
       connect(rSocket, &NWebSocket::sDisconnected, this, &NWebSocketServer::fSocketDisconnected, Qt::UniqueConnection);
       mConnections[lMSecsSinceEpoch] = rSocket;
     }
@@ -51,17 +51,15 @@ namespace NulstarNS {
     }
   }
 
-  void NWebSocketServer::fProcessTextMessage(const QString& lMessage) {
+  void NWebSocketServer::fProcessTextMessage(const QString& lMessageType, const QVariantMap& lMessage) {
     NWebSocket* rSocket = qobject_cast<NWebSocket*>(sender());
     if(rSocket) {
-      QString lMessageType;
-      QJsonObject lMessageObject(NMessageFactory::fMessageObjectFromString(lMessage, &lMessageType));
-      if(lMessageType == cTypeNegotiateConnection && NMessageNegotiateConnection::fValidateMessageObject(lMessageObject))
-        fProcessNegotiateConnection(lMessageObject, rSocket);
+      if(lMessageType == cTypeNegotiateConnection)
+        fProcessNegotiateConnection(lMessage, rSocket);
   /*    if(lMessageType == cTypeNegotiateConnectionResponse && NMessageNegotiateConnectionResponse::fValidateMessageObject(lMessageObject))
         fProcessNegotiateConnectionResponse(lMessageObject, rSocket); // Request is always received in NWebSocket*/
-      if(lMessageType == cTypeRequest && NMessageRequest::fValidateMessageObject(lMessageObject))
-        fProcessRequest(lMessageObject, rSocket);
+      if(lMessageType == cTypeRequest)
+        fProcessRequest(lMessage, rSocket);
     }
   }
 
@@ -94,8 +92,8 @@ qDebug() << "socketDisconnected:" << rSocket->fName();
     }
   }
 
-  bool NWebSocketServer::fVersionSupported(const QJsonObject& lObjectMessage) {
-    QVersionNumber lIncommingVersion = QVersionNumber::fromString(lObjectMessage.value(cFieldName_MessageData).toObject().value(cProtocolVersionFieldName).toString());
+  bool NWebSocketServer::fVersionSupported(const QVariantMap &lMessage) {
+    QVersionNumber lIncommingVersion = QVersionNumber::fromString(lMessage.value(cFieldName_MessageData).toMap().value(cProtocolVersionFieldName).toString());
 qDebug() << QString("Inc Version: '%1'").arg(lIncommingVersion.toString());
     for(const QVersionNumber& lVersionSupported : mProtocolVersionsSupported) {
       if(lIncommingVersion == lVersionSupported) {
@@ -106,12 +104,12 @@ qDebug() << QString("Protocol Version '%1' not supported!").arg(lIncommingVersio
     return false;
   }
 
-  void NWebSocketServer::fProcessNegotiateConnection(const QJsonObject& lObjectMessage, NWebSocket* rConnection) {
+  void NWebSocketServer::fProcessNegotiateConnection(const QVariantMap& lMessage, NWebSocket* rConnection) {
     if(!rConnection) {
       qDebug() << QString("Connection '%1' no longer exists!").arg(rConnection->fName());
       return;
     }
-    if(fVersionSupported(lObjectMessage)) {
+    if(fVersionSupported(lMessage)) {
       NMessageNegotiateConnectionResponse rNegotiationResponse(rConnection->fName(), QString(), NMessageNegotiateConnectionResponse::ENegotiationStatus::eNegotiationSuccessful, QString("Negotiation successful!"));
       QString lJsonMessage(rNegotiationResponse.fToJsonString());
        rConnection->fSetConnectionState(NWebSocket::EConnectionState::eConnectionActive);
@@ -128,16 +126,16 @@ qDebug() << QString("Protocol Version '%1' not supported!").arg(lIncommingVersio
     }
   }
 
-  void NWebSocketServer::fProcessRequest(const QJsonObject& lObjectMessage, NWebSocket* rConnection) {
+  void NWebSocketServer::fProcessRequest(const QVariantMap &lMessage, NWebSocket* rConnection) {
     if(!rConnection) {
       qDebug() << QString("Connection '%1' no longer exists!").arg(rConnection->fName());
       return;
     }
 
-    QVariantMap lRequestMethods(lObjectMessage.toVariantMap().value(cFieldName_MessageData).toMap().value(cFieldName_RequestMethods).toMap());
-    QString lMessageID(lObjectMessage.toVariantMap().value(cFieldName_MessageID).toString());
-    quint64 lSubscriptionEventCounter(lObjectMessage.toVariantMap().value(cFieldName_MessageData).toMap().value(cFieldName_SubscriptionEventCounter).toULongLong());
-    quint64 lSubscriptionPeriod(lObjectMessage.toVariantMap().value(cFieldName_MessageData).toMap().value(cFieldName_SubscriptionPeriod).toULongLong());
+    QVariantMap lRequestMethods(lMessage.value(cFieldName_MessageData).toMap().value(cFieldName_RequestMethods).toMap());
+    QString lMessageID(lMessage.value(cFieldName_MessageID).toString());
+    quint64 lSubscriptionEventCounter(lMessage.value(cFieldName_MessageData).toMap().value(cFieldName_SubscriptionEventCounter).toULongLong());
+    quint64 lSubscriptionPeriod(lMessage.value(cFieldName_MessageData).toMap().value(cFieldName_SubscriptionPeriod).toULongLong());
     for(const QString& lRequestMethodName : lRequestMethods.keys()) {
       QVariantMap lRequestMethodParams = lRequestMethods.value(lRequestMethodName).toMap();
       TMessageRequestToProcess tMessageRequest({fName(), rConnection->fName(),lMessageID, lRequestMethodName, lRequestMethodParams, lSubscriptionEventCounter, lSubscriptionPeriod, 0, 0} );

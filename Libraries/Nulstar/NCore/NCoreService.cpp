@@ -78,6 +78,10 @@ namespace NulstarNS {
     else {
       rWebSocket = new NWebSocket(cServiceManagerName, fProtocolVersionsSupported().at(0).toString(), mServiceManagerUrl, lReconnectionTryInterval);
       connect(rWebSocket, &NWebSocket::sStateChanged, this, &NCoreService::fOnConnectionStateChanged);
+      connect(rWebSocket, &NWebSocket::sMessageReceived, [this](const QString& lMessageType, const QVariantMap& lMessage) {
+              if(lMessageType == cTypeReponse)
+                 fProcessResponse(lMessage);
+              });
       mWebSockets.insert(cServiceManagerName, rWebSocket);
       rWebSocket->fConnect();
     }
@@ -152,12 +156,15 @@ namespace NulstarNS {
     else return cDefaultMinEventAndMinPeriod;
   }
 
-  void NCoreService::fSendMessage(const QString& lWebSocketsServerName, NMessage* rMessage) {
-    if(mWebServers.contains(lWebSocketsServerName)) {
-      mWebServers.value(lWebSocketsServerName)->fSendMessage(rMessage->fConnectionName().toLongLong(), rMessage);
+  void NCoreService::fSendMessage(const QString& lWebSocketsID, NMessage* rMessage, NWebSocket::EConnectionState lMinStateRequired) {
+    if(mWebServers.contains(lWebSocketsID)) {
+      mWebServers.value(lWebSocketsID)->fSendMessage(rMessage->fConnectionName().toLongLong(), rMessage);
     }
     else {
-      qDebug("%s", qUtf8Printable(QString("Message '%1' couldn't be sent because WebSocket server '%2' wasn't found!").arg(rMessage->fMessageID()).arg(lWebSocketsServerName)));
+      if(mWebSockets.contains(lWebSocketsID))
+        mWebSockets.value(lWebSocketsID)->fQueueMessage(rMessage, lMinStateRequired);
+      else
+        qDebug("%s", qUtf8Printable(QString("Message '%1' couldn't be sent because WebSocket '%2' wasn't found!").arg(rMessage->fMessageID()).arg(lWebSocketsID)));
     }
   }
 

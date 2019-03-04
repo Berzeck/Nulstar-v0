@@ -63,7 +63,7 @@ namespace NulstarNS {
       void fSetServiceManagerUrl(const QUrl& lServiceManagerUrl) { if(lServiceManagerUrl.isValid()) mServiceManagerUrl = lServiceManagerUrl; }
       void fSetAllowedNetworks(const QList<QNetworkAddressEntry>& lAllowedNetworks) { mAllowedNetworks = lAllowedNetworks; }
       void fSetHost(const QHostAddress& lIP) { mIP = lIP; }
-      void fSendMessage(const QString& lWebSocketsServerName, NMessage* rMessage);
+      void fSendMessage(const QString& lWebSocketsID, NMessage* rMessage, NWebSocket::EConnectionState lMinStateRequired = NWebSocket::EConnectionState::eConnectionActive);
 
     public Q_SLOTS:
       virtual void fConnectToServiceManager(quint8 lReconnectionTryInterval);
@@ -73,10 +73,12 @@ namespace NulstarNS {
 
     Q_SIGNALS:
       void sEventTriggered(const QString& lMethodName);
+      void sMessageReceived(const QVariantMap& lMessage);
 
     protected Q_SLOTS:
       virtual void fOnRequestMessageArrived(TMessageRequestToProcess& lMessageRequestToProcess);
       virtual void fOnWebSocketDisconnected(const QString& lWebSocketID) { Q_UNUSED(lWebSocketID); }  
+      virtual void fProcessResponse(const QVariantMap& lMessageResponse) { Q_UNUSED(lMessageResponse); }
 
     protected:
       virtual void fFillMethodMetadata() = 0;

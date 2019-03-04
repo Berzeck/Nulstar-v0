@@ -7,6 +7,7 @@
 #include <QMap>
 #include <QObject>
 #include <QUrl>
+#include <QVariantMap>
 #include <QWebSocket>
 
 #include "NMessage.h"
@@ -64,7 +65,7 @@ namespace NulstarNS {
        void sDisconnected();
        void sError(QAbstractSocket::SocketError lErrorCode);
        void sStateChanged(EConnectionState lNewState);
-       void sTextMessageReceived(const QString& lMessage);
+       void sMessageReceived(const QString& lMessageType, const QVariantMap& lMessage);
   };
 }
 
