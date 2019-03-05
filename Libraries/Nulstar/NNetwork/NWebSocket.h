@@ -9,6 +9,7 @@
 #include <QUrl>
 #include <QVariantMap>
 #include <QWebSocket>
+#include <QSettings>
 
 #include "NMessage.h"
 #include "NNetwork.h"
@@ -52,6 +53,7 @@ namespace NulstarNS {
       QTimer* pRetryTimer;
       QUrl mConnectionUrl;
       QWebSocket* mWebSocket;
+      QSettings* mLog;
 
     protected Q_SLOTS:
        virtual void fNegotiateConnection();              
