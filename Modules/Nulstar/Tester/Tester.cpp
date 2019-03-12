@@ -78,11 +78,11 @@ int main(int argc, char *argv[])
   NulstarNS::NTesterController lController(lSslMode, static_cast<NulstarNS::NTesterController::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")),
                                            QUrl(lServiceManagerUrl), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::Any);
   //lController.fControlWebServer(QString(), NulstarNS::NTesterController::EServiceAction::eStartService);
-  const int lRetryInterval = 5;
+  //const int lRetryInterval = 5;
   //lController.fConnectToServiceManager(lRetryInterval);
 
-  NulstarNS::NTesterMessage lMessage(lController.fProtocolVersionsSupported().at(0).toString(), QUrl(lServiceManagerUrl), lRetryInterval);
-  lMessage.fConnectServiceManager();
+  //NulstarNS::NTesterMessage lMessage(lController.fProtocolVersionsSupported().at(0).toString(), QUrl(lServiceManagerUrl), lRetryInterval);
+  //lMessage.fConnectServiceManager();
 
   return lApp.exec();
 }
