@@ -11,9 +11,9 @@ namespace NulstarNS {
               QMutableMapIterator<QString, TMessageRequestToProcess> i1(mMessageRequestEventQueue);
               while(i1.hasNext()) {
                 i1.next();
-                if((lMethodName == i1.value().mMethodName) && ((i1.value().mEventCounter % i1.value().mSubscriptionEventCounter) == 0  )) {
+                if((lMethodName == i1.value().mEffectiveMethodName) && ((i1.value().mEventCounter % i1.value().mSubscriptionEventCounter) == 0  )) {
                   fOnRequestMessageArrived(i1.value());
-                  qDebug("%s", qUtf8Printable(QString("Message '%1' using method '%2' has been executed '%3' times.").arg(i1.key()).arg(i1.value().mMethodName).arg(i1.value().mEventCounter)));
+                  qDebug("%s", qUtf8Printable(QString("Message '%1' using method '%2' has been executed '%3' times.").arg(i1.key()).arg(i1.value().mEffectiveMethodName).arg(i1.value().mEventCounter)));
                 }
               }
             } );
@@ -48,6 +48,7 @@ namespace NulstarNS {
     pWebServer->fSetBindAddress(lBindAddress);
     connect(pWebServer, &NWebSocketServer::sRequestMessageArrived, this, &NCoreService::fOnRequestMessageArrived);
     connect(pWebServer, &NWebSocketServer::sWebSocketDisconnected, this, &NCoreService::fOnWebSocketDisconnected);
+    connect(pWebServer, &NWebSocketServer::sResponseMessageReceived, this, &NCoreService::fProcessResponse);
     mWebServers[pWebServer->fName()] = pWebServer;
     if(lStartImmediatly)
       fControlWebServer(pWebServer->fName(), EServiceAction::eStartService);
@@ -78,24 +79,29 @@ namespace NulstarNS {
     else {
       rWebSocket = new NWebSocket(cServiceManagerName, fProtocolVersionsSupported().at(0).toString(), mServiceManagerUrl, lReconnectionTryInterval);
       connect(rWebSocket, &NWebSocket::sStateChanged, this, &NCoreService::fOnConnectionStateChanged);
-      connect(rWebSocket, &NWebSocket::sMessageReceived, [this](const QString& lMessageType, const QVariantMap& lMessage) {
+      connect(rWebSocket, &NWebSocket::sMessageReceived, [this, rWebSocket](const QString& lMessageType, const QVariantMap& lMessage) {
               if(lMessageType == cTypeReponse)
-                 fProcessResponse(lMessage);
+                fProcessResponse(lMessage);
+              if(lMessageType == cTypeRequest)
+                fProcessRequest(rWebSocket->fName(), lMessage);
               });
       mWebSockets.insert(cServiceManagerName, rWebSocket);
       rWebSocket->fConnect();
     }
   }
 
-  /*** NResponse NCoreService::fSetMaxConnections(const QString& lName, int lMaxconnections) {
-    if(mWebServers.contains(lName)) {
-      mWebServers[lName]->fSetMaxConnections(lMaxconnections);
-      NResponse lResponse(true, true);
-      return lResponse;
+  void NCoreService::fProcessRequest(const QString& lWebSocketName, const QVariantMap &lMessage) {
+
+    QVariantMap lRequestMethods(lMessage.value(cFieldName_MessageData).toMap().value(cFieldName_RequestMethods).toMap());
+    QString lMessageID(lMessage.value(cFieldName_MessageID).toString());
+    quint64 lSubscriptionEventCounter(lMessage.value(cFieldName_MessageData).toMap().value(cFieldName_SubscriptionEventCounter).toULongLong());
+    quint64 lSubscriptionPeriod(lMessage.value(cFieldName_MessageData).toMap().value(cFieldName_SubscriptionPeriod).toULongLong());
+    for(const QString& lRequestMethodName : lRequestMethods.keys()) {
+      QVariantMap lRequestMethodParams = lRequestMethods.value(lRequestMethodName).toMap();
+      TMessageRequestToProcess lMessageRequest({lWebSocketName, lWebSocketName,lMessageID, lRequestMethodName, lRequestMethodName,lRequestMethodParams, lSubscriptionEventCounter, lSubscriptionPeriod, 0, 0} );
+      fOnRequestMessageArrived(lMessageRequest);
     }
-    NResponse lResponse(false, false, QDate::currentDate().toString("yyyy-MM-dd"), QTime::currentTime().toString("hh:mm:ss"), tr("Web server '%1' not found.").arg(lName));
-    return lResponse;
-  } ***/
+  }
 
   void NCoreService::fOnConnectionStateChanged(NWebSocket::EConnectionState lNewState) {
      NWebSocket* rWebSocket = qobject_cast<NWebSocket* > (sender());
@@ -171,16 +177,20 @@ namespace NulstarNS {
   void NCoreService::fOnRequestMessageArrived(TMessageRequestToProcess& lMessageRequestToProcess) {
     lMessageRequestToProcess.mMSecsSinceEpoch = QDateTime::currentMSecsSinceEpoch();
     if(fApiMethodLowercase())
-      lMessageRequestToProcess.mMethodName = lMessageRequestToProcess.mMethodName.toLower();
-    bool lSuccess = metaObject()->invokeMethod(this, lMessageRequestToProcess.mMethodName.toLatin1().data(), Qt::DirectConnection, Q_ARG(TMessageRequestToProcess, lMessageRequestToProcess));
-      if(lSuccess) {
-        if(lMessageRequestToProcess.mSubscriptionEventCounter) {
-          lMessageRequestToProcess.mEventCounter += 1;
-          if(!mMessageRequestEventQueue.contains(lMessageRequestToProcess.mMessageID))
-            mMessageRequestEventQueue.insert(lMessageRequestToProcess.mMessageID, lMessageRequestToProcess);
-        }
-      }
-      else
-        qDebug("%s", qUtf8Printable(QString("Method '%1' couldn't be executed successfully!").arg(lMessageRequestToProcess.mMethodName)));
+      lMessageRequestToProcess.mEffectiveMethodName = lMessageRequestToProcess.mEffectiveMethodName.toLower();
+    fInvokeMethod(lMessageRequestToProcess);
   }  
+
+  void NCoreService::fInvokeMethod(TMessageRequestToProcess& lMessageRequestToProcess) {
+    bool lSuccess =  metaObject()->invokeMethod(this, lMessageRequestToProcess.mEffectiveMethodName.toLatin1().data(), Qt::DirectConnection, Q_ARG(TMessageRequestToProcess, lMessageRequestToProcess));
+    if(lSuccess) {
+      if(lMessageRequestToProcess.mSubscriptionEventCounter) {
+        lMessageRequestToProcess.mEventCounter += 1;
+        if(!mMessageRequestEventQueue.contains(lMessageRequestToProcess.mMessageID))
+          mMessageRequestEventQueue.insert(lMessageRequestToProcess.mMessageID, lMessageRequestToProcess);
+      }
+    }
+    else
+      qDebug("%s", qUtf8Printable(QString("Method '%1' couldn't be executed successfully!").arg(lMessageRequestToProcess.mEffectiveMethodName)));
+  }
 }

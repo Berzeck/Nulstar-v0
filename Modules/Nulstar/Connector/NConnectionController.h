@@ -4,6 +4,7 @@
 
 #include <QHostAddress>
 #include <QList>
+#include <QMap>
 #include <QObject>
 #include <QUrl>
 #include <NCoreService.h>
@@ -40,6 +41,7 @@ namespace NulstarNS {
       void fFillMethodMetadata() override { }
       void fFillMethodDescriptions();
       void fFillMethodMinEventAndMinPeriod();
+      void fInvokeMethod(TMessageRequestToProcess& lMessageRequestToProcess) override;
 
     private:
       quint64 mRequestID;
@@ -47,6 +49,10 @@ namespace NulstarNS {
       QVariantMap mAdminMethods;
       QVariantMap mPublicMethods;
       QVariantMap mPrivateMethods;
+      QMap<QString, TMessageRequestToProcess> mForwardedMessages; // Forwarded MessageID, Data
+      void fSendBadMethodResponse(const TMessageRequestToProcess& lMessageRequestToProcess);
+      void fForwardMessage(const TMessageRequestToProcess& lMessageRequestToProcess);
+      bool fMethodValid(const QString& lMethodName, const QVariantMap& lMethodList);
 
     public Q_SLOTS:
       API_PUBLIC_FUNCTION void listapi(const TMessageRequestToProcess& lMessageRequest);

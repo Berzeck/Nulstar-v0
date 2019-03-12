@@ -65,17 +65,32 @@ namespace NulstarNS {
 
   void NConnectionController::fProcessResponse(const QVariantMap& lMessageResponse) {
     bool lResponseSuccessfull(lMessageResponse.value(cFieldName_MessageData).toMap().value(cResponseStatusFieldName).toBool());
+    QString lRequestID(lMessageResponse.value(cFieldName_MessageData).toMap().value(cRequestIDFieldName).toString());
     QVariantMap lResponseData(lMessageResponse.value(cFieldName_MessageData).toMap().value(cResponseDataFieldName).toMap());
+    if(mForwardedMessages.contains(lRequestID)) {
+      TMessageRequestToProcess lMessageResponseStructure = mForwardedMessages.value(lRequestID);
+      qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageResponseStructure.mMSecsSinceEpoch);
+      NMessageResponse* rRequestResponse = new NMessageResponse(lMessageResponseStructure.mWebSocketID, QString(), lMessageResponseStructure.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseSuccessful,
+                                           tr(""), 0, QVariantMap({{lMessageResponseStructure.mOriginalMethodName, lResponseData.value(lMessageResponseStructure.mOriginalMethodName).toMap() }} ));
+      fSendMessage(lMessageResponseStructure.mWebSocketsServerName, rRequestResponse);
+
+      if(!lMessageResponseStructure.mSubscriptionPeriod && !lMessageResponseStructure.mSubscriptionEventCounter)
+         mForwardedMessages.remove(lRequestID);
+      return;
+    }
     if(lResponseData.contains(cFieldName_RegisterAPI) && lResponseSuccessfull) {
       QVariantMap lGetConsolidatedAPI;
       lGetConsolidatedAPI[cCommand_GetConsolidatedAPI] = QVariant();
       fSendMessage(cServiceManagerName, new NMessageRequest(cServiceManagerName, QString(), false, 1, 0, QString(), 0, lGetConsolidatedAPI, this), NWebSocket::EConnectionState::eConnectionActive);
+      return;
     }
     if(lResponseData.contains(cCommand_GetConsolidatedAPI) && lResponseSuccessfull) {
       mPrivateMethods = lResponseData.value(cCommand_GetConsolidatedAPI).toMap().value(cFieldName_Private).toMap();
       mPublicMethods = lResponseData.value(cCommand_GetConsolidatedAPI).toMap().value(cFieldName_Public).toMap();
       mAdminMethods = lResponseData.value(cCommand_GetConsolidatedAPI).toMap().value(cFieldName_Admin).toMap();
+      return;
     }
+
   }
 
   void NConnectionController::listapi(const TMessageRequestToProcess& lMessageRequest) {
@@ -98,6 +113,59 @@ namespace NulstarNS {
     qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequest.mMSecsSinceEpoch);
     NMessageResponse* lResponse = new NMessageResponse(lMessageRequest.mWebSocketID, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseSuccessful, QString(), 0, lListAPIResponse);
     fSendMessage(lMessageRequest.mWebSocketsServerName, lResponse);
+  }
+
+  void NConnectionController::fInvokeMethod(TMessageRequestToProcess& lMessageRequestToProcess) {
+    if(lMessageRequestToProcess.mEffectiveMethodName == QString("listapi"))
+      NCoreService::fInvokeMethod(lMessageRequestToProcess);
+    else {
+      if(lMessageRequestToProcess.mWebSocketsServerName == cAdminServerName) {
+        if(fMethodValid(lMessageRequestToProcess.mEffectiveMethodName, mAdminMethods) || fMethodValid(lMessageRequestToProcess.mEffectiveMethodName, mPublicMethods))
+          fForwardMessage(lMessageRequestToProcess);  
+        else 
+          fSendBadMethodResponse(lMessageRequestToProcess);  
+      }
+      if(lMessageRequestToProcess.mWebSocketsServerName == cCommServerName) {
+        if(fMethodValid(lMessageRequestToProcess.mEffectiveMethodName, mAdminMethods) || fMethodValid(lMessageRequestToProcess.mEffectiveMethodName, mPublicMethods) || fMethodValid(lMessageRequestToProcess.mEffectiveMethodName, mPrivateMethods))
+          fForwardMessage(lMessageRequestToProcess);  
+        else 
+          fSendBadMethodResponse(lMessageRequestToProcess);
+      }
+      if(lMessageRequestToProcess.mWebSocketsServerName == cClientServerName) {
+        if(fMethodValid(lMessageRequestToProcess.mEffectiveMethodName, mPublicMethods))
+          fForwardMessage(lMessageRequestToProcess);  
+        else 
+          fSendBadMethodResponse(lMessageRequestToProcess);
+      }
+    }
+  }
+  bool NConnectionController::fMethodValid(const QString& lMethodName, const QVariantMap& lMethodList) {
+    QMapIterator<QString, QVariant> i1(lMethodList);
+    while(i1.hasNext()) {
+      i1.next();
+      QStringList lMethod(i1.key().split("."));
+      if(lMethod.size() != 2) {
+        qDebug("%s", qUtf8Printable(QString("API method does not contain domain!")));
+        continue;
+      }
+      if(lMethodName == lMethod.at(1))
+        return true;
+    }
+    return false;
+  }
+
+  void NConnectionController::fForwardMessage(const TMessageRequestToProcess& lMessageRequestToProcess) {
+    QVariantMap lParameters({{QStringLiteral("forwardmessage"), QVariantMap( {{lMessageRequestToProcess.mEffectiveMethodName, lMessageRequestToProcess.mParameters }}) }} );
+    NMessageRequest* rForwardedRequest =   new  NMessageRequest(cServiceManagerName, QString(), false, lMessageRequestToProcess.mSubscriptionEventCounter, lMessageRequestToProcess.mSubscriptionPeriod, QString(), 0, lParameters, this);
+    mForwardedMessages.insert(rForwardedRequest->fMessageID(), lMessageRequestToProcess);
+    fSendMessage(cServiceManagerName, rForwardedRequest);
+  }
+  
+  void NConnectionController::fSendBadMethodResponse(const TMessageRequestToProcess& lMessageRequestToProcess) {
+    qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequestToProcess.mMSecsSinceEpoch);
+    NMessageResponse* rRequestResponse = new NMessageResponse(lMessageRequestToProcess.mWebSocketID, QString(), lMessageRequestToProcess.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseError,
+                                         tr("Method '%1' not found in current channel!").arg(lMessageRequestToProcess.mEffectiveMethodName), 0, QVariantMap({{lMessageRequestToProcess.mOriginalMethodName, QVariantMap()}} ));
+    fSendMessage(lMessageRequestToProcess.mWebSocketsServerName, rRequestResponse);
   }
 }
 

@@ -36,6 +36,7 @@ namespace NulstarNS {
       void fSetFindDependenciesRetryCounter(quint8 lFindDependenciesRetryCounter) { mFindDependenciesRetryCounter = lFindDependenciesRetryCounter; }
       bool fIsRoleSupported(const NModuleAPIRole& lModuleRoleName) const;
       bool fAreRolesNeeded(const QList<NModuleAPIRole>& lModuleRoles) const;
+      bool fIsMethodSupported(const QString& lMethodName) const;
       bool operator==(NModuleAPI const& lTargetAPI) { if((mModuleName == lTargetAPI.fModuleName()) && (mWebSocketID == lTargetAPI.fWebSocketID())) return true; return false; }
       bool operator<(NModuleAPI const& lTargetAPI) { if((mModuleName < lTargetAPI.fModuleName())) return true; return false; }
 

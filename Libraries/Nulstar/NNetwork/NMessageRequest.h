@@ -52,7 +52,8 @@ namespace NulstarNS {
       QString mWebSocketsServerName;
       QString mWebSocketID;
       QString mMessageID;
-      QString mMethodName;
+      QString mOriginalMethodName;
+      QString mEffectiveMethodName;
       QVariantMap mParameters;
       quint64 mSubscriptionEventCounter;
       quint64 mSubscriptionPeriod;

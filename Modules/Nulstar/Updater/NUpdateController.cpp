@@ -29,4 +29,12 @@ namespace NulstarNS {
     }
     return lApiRolesMap;
   }
+
+  void NUpdateController::checkupdates(const TMessageRequestToProcess& lMessageRequest) {
+     qDebug("%s", qUtf8Printable(QString("Updater-%1").arg(lMessageRequest.mMessageID)));
+     QVariantMap lGetUpdatesResponse { {"checkupdates", QVariantMap({{ "Update1", "Version1" }, { "Update2", "Version2" } }) } };
+     qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequest.mMSecsSinceEpoch);
+     NMessageResponse* rGetUpdatesResponse = new NMessageResponse(lMessageRequest.mWebSocketID, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseSuccessful, QString(), 0, lGetUpdatesResponse);
+     fSendMessage(lMessageRequest.mWebSocketsServerName, rGetUpdatesResponse);
+  }
 }

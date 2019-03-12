@@ -30,12 +30,15 @@ namespace NulstarNS {
       QVariantMap fApiRoles() const override;
       QList<QVersionNumber> fProtocolVersionsSupported() const override { QList<QVersionNumber> lApiVersionsSupported; QVersionNumber lMainVersion(QVersionNumber::fromString(APP_PROTOCOL_VERSIONS)); lApiVersionsSupported << lMainVersion; return lApiVersionsSupported; }
 
+    public Q_SLOTS:
+      API_PUBLIC_FUNCTION void checkupdates(const TMessageRequestToProcess& lMessageRequest);
+
     protected:
       void fFillMethodMetadata() override { }
 
     private:
       quint64 mRequestID;
-      quint8 mCompressionLevel;
+      quint8 mCompressionLevel;      
   };
 }
 

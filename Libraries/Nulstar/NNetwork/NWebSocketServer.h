@@ -61,6 +61,7 @@ namespace NulstarNS {
 
     Q_SIGNALS:
       void fTextMessageArrived(QString lWebServerName, QString lMessage);
+      void sResponseMessageReceived(const QVariantMap& lMessage);
       void sRequestMessageArrived(TMessageRequestToProcess& lMessageRequest);
       void sWebSocketDisconnected(const QString& lWebSocketID);
   };

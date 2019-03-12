@@ -4,6 +4,7 @@
 
 #include "NMessageNegotiateConnection.h"
 #include "NMessageNegotiateConnectionResponse.h"
+#include "NMessageResponse.h"
 #include "NWebSocket.h"
 #include "NWebSocketServer.h"
 
@@ -60,6 +61,8 @@ namespace NulstarNS {
         fProcessNegotiateConnectionResponse(lMessageObject, rSocket); // Request is always received in NWebSocket*/
       if(lMessageType == cTypeRequest)
         fProcessRequest(lMessage, rSocket);
+      if(lMessageType == cTypeReponse)
+        emit sResponseMessageReceived(lMessage);
     }
   }
 
@@ -138,8 +141,8 @@ qDebug() << QString("Protocol Version '%1' not supported!").arg(lIncommingVersio
     quint64 lSubscriptionPeriod(lMessage.value(cFieldName_MessageData).toMap().value(cFieldName_SubscriptionPeriod).toULongLong());
     for(const QString& lRequestMethodName : lRequestMethods.keys()) {
       QVariantMap lRequestMethodParams = lRequestMethods.value(lRequestMethodName).toMap();
-      TMessageRequestToProcess tMessageRequest({fName(), rConnection->fName(),lMessageID, lRequestMethodName, lRequestMethodParams, lSubscriptionEventCounter, lSubscriptionPeriod, 0, 0} );
-      emit sRequestMessageArrived(tMessageRequest);
+      TMessageRequestToProcess lMessageRequest({fName(), rConnection->fName(),lMessageID, lRequestMethodName, lRequestMethodName,lRequestMethodParams, lSubscriptionEventCounter, lSubscriptionPeriod, 0, 0} );
+      emit sRequestMessageArrived(lMessageRequest);
     }
   }
 

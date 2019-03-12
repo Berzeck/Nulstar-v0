@@ -86,8 +86,15 @@ namespace NulstarNS {
       return;
     }
     mPort = lModuleApiMap.value(cFieldName_ConnectionInformation).toMap().value(cFieldName_Port).toString().toUShort();
-
     mIsValid = true;
+  }
+
+  bool NModuleAPI::fIsMethodSupported(const QString& lMethodName) const {
+    for(const QVariant& lMethod : mMethods) {
+       if((lMethod.toMap().value(cFieldName_MethodName).toString() == lMethodName))
+          return true;
+    }
+    return false;
   }
 
   bool NModuleAPI::fIsRoleSupported(const NModuleAPIRole& lModuleRole) const {

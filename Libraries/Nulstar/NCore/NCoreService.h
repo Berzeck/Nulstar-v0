@@ -76,12 +76,14 @@ namespace NulstarNS {
       void sMessageReceived(const QVariantMap& lMessage);
 
     protected Q_SLOTS:
-      virtual void fOnRequestMessageArrived(TMessageRequestToProcess& lMessageRequestToProcess);
+      virtual void fOnRequestMessageArrived(TMessageRequestToProcess& lMessageRequestToProcess);      
       virtual void fOnWebSocketDisconnected(const QString& lWebSocketID) { Q_UNUSED(lWebSocketID); }  
       virtual void fProcessResponse(const QVariantMap& lMessageResponse) { Q_UNUSED(lMessageResponse); }
+      virtual void fProcessRequest(const QString &lWebSocketName, const QVariantMap &lMessage);
 
     protected:
       virtual void fFillMethodMetadata() = 0;
+      virtual void fInvokeMethod(TMessageRequestToProcess& lMessageRequestToProcess);
       ELogLevel mLogLevel;
 
     private:

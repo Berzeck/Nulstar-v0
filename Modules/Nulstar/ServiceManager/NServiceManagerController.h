@@ -35,8 +35,10 @@ namespace NulstarNS {
     public Q_SLOTS:
       API_PRIVATE_FUNCTION void registerapi(const TMessageRequestToProcess& lMessageRequest);
       API_PRIVATE_FUNCTION void getconsolidatedapi(const TMessageRequestToProcess& lMessageRequest);
+      API_PRIVATE_FUNCTION void forwardmessage(const TMessageRequestToProcess& lMessageRequest);
 
     protected Q_SLOTS:
+      void fProcessResponse(const QVariantMap& lMessageResponse) override;
       void fOnWebSocketDisconnected(const QString& lWebSocketID) override;
       void fFindDependencies();
 
@@ -44,7 +46,10 @@ namespace NulstarNS {
       QTimer mFindDependenciesRetryTimer;
       QList<NModuleAPI> mModuleAPIPendingDependencies;
       QMap<QString, NModuleAPI> mModuleAPIActive;
-      void fFillMethodMetadata() override { }           
+      void fFillMethodMetadata() override { }
+
+    private:
+      QMap<QString, TMessageRequestToProcess> mForwardedMessages; // Forwarded MessageID, Data
   };
 }
 

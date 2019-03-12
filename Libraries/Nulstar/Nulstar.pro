@@ -1,4 +1,5 @@
 TEMPLATE = subdirs
 SUBDIRS += NCore \
-           NNetwork
+           NNetwork \
+    NTools
 NCore.depends += NNetwork

@@ -43,7 +43,6 @@ namespace NulstarNS {
   }
 
   void NWebSocket::fSendMessage(NMessage* rMessage) {
-    QString ddd = rMessage->fMessageID();
     qint64 lBytesSent = mWebSocket->sendTextMessage(rMessage->fToJsonString());
     if(lBytesSent) {
       rMessage->fSetStatus(NMessage::EMessageStatus::eSent);
