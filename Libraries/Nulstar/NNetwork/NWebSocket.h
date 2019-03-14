@@ -10,6 +10,7 @@
 #include <QVariantMap>
 #include <QWebSocket>
 #include <QSettings>
+#include <NLogger.h>
 
 #include "NMessage.h"
 #include "NNetwork.h"
@@ -53,7 +54,6 @@ namespace NulstarNS {
       QTimer* pRetryTimer;
       QUrl mConnectionUrl;
       QWebSocket* mWebSocket;
-      QSettings* mLog;
 
     protected Q_SLOTS:
        virtual void fNegotiateConnection();              
@@ -68,6 +68,7 @@ namespace NulstarNS {
        void sError(QAbstractSocket::SocketError lErrorCode);
        void sStateChanged(EConnectionState lNewState);
        void sMessageReceived(const QString& lMessageType, const QVariantMap& lMessage);
+       void sLog(ELogLevel eLogLevel, ELogMessageType eLogMessageType, const QString& lMessage);
   };
 }
 

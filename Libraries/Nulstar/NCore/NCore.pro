@@ -30,5 +30,6 @@ SOURCES += NCoreService.cpp \
 
 # Dependencies
 
-INCLUDEPATH += $$LIBRARIES_PATH/Nulstar/NNetwork
-LIBS += -lNNetwork
+INCLUDEPATH += $$LIBRARIES_PATH/Nulstar/NNetwork \
+               $$LIBRARIES_PATH/Nulstar/NTools
+LIBS += -lNNetwork -lNTools

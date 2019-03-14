@@ -40,6 +40,7 @@ namespace NulstarNS {
       NWebSocket* rSocket = new NWebSocket(QString::number(lMSecsSinceEpoch), QString(), QUrl(), 0, rPendingConnection, this);
       connect(rSocket, &NWebSocket::sMessageReceived, this, &NWebSocketServer::fProcessTextMessage, Qt::UniqueConnection);
       connect(rSocket, &NWebSocket::sDisconnected, this, &NWebSocketServer::fSocketDisconnected, Qt::UniqueConnection);
+      connect(rSocket, &NWebSocket::sLog, this, &NWebSocketServer::sLog, Qt::UniqueConnection);
       mConnections[lMSecsSinceEpoch] = rSocket;
     }
   }
@@ -48,7 +49,7 @@ namespace NulstarNS {
       mConnections.value(lWebSocketID)->fSendMessage(rMessage);
     }
     else {
-      qDebug("%s", qUtf8Printable(QString("Message '%1' couldn't be sent because WebSocket '%2' wasn't found!").arg(rMessage->fMessageID()).arg(lWebSocketID)));
+      emit sLog(ELogLevel::eLogCritical, ELogMessageType::eMessageSent, QString("Message '%1' couldn't be sent because WebSocket '%2' wasn't found!").arg(rMessage->fMessageID()).arg(lWebSocketID));
     }
   }
 
@@ -68,7 +69,7 @@ namespace NulstarNS {
 
   void NWebSocketServer::fSocketDisconnected() {
     NWebSocket* rSocket = qobject_cast<NWebSocket*>(sender());
-qDebug() << "socketDisconnected:" << rSocket->fName();
+    emit sLog(ELogLevel::eLogWarning, ELogMessageType::eResourceManagement, QString("WebSocket '%1' disconneted!").arg(rSocket->fName()));
     if(rSocket) {
       fRemoveConnections(QList<qint64> () << rSocket->fName().toLongLong());
       emit sWebSocketDisconnected(rSocket->fName());
@@ -97,19 +98,20 @@ qDebug() << "socketDisconnected:" << rSocket->fName();
 
   bool NWebSocketServer::fVersionSupported(const QVariantMap &lMessage) {
     QVersionNumber lIncommingVersion = QVersionNumber::fromString(lMessage.value(cFieldName_MessageData).toMap().value(cProtocolVersionFieldName).toString());
-qDebug() << QString("Inc Version: '%1'").arg(lIncommingVersion.toString());
+    emit sLog(ELogLevel::eLogInfo, ELogMessageType::eMessageReceived, QString("Incoming protocol version '%1' supported!").arg(lIncommingVersion.toString()));
+
     for(const QVersionNumber& lVersionSupported : mProtocolVersionsSupported) {
       if(lIncommingVersion == lVersionSupported) {
         return true;
       }
     }
-qDebug() << QString("Protocol Version '%1' not supported!").arg(lIncommingVersion.toString());
+    emit sLog(ELogLevel::eLogWarning, ELogMessageType::eMessageReceived, QString("Protocol Version '%1' not supported!").arg(lIncommingVersion.toString()));
     return false;
   }
 
   void NWebSocketServer::fProcessNegotiateConnection(const QVariantMap& lMessage, NWebSocket* rConnection) {
     if(!rConnection) {
-      qDebug() << QString("Connection '%1' no longer exists!").arg(rConnection->fName());
+      emit sLog(ELogLevel::eLogCritical, ELogMessageType::eResourceManagement, QString("Connection '%1' no longer exists!").arg(rConnection->fName()));
       return;
     }
     if(fVersionSupported(lMessage)) {
@@ -117,8 +119,7 @@ qDebug() << QString("Protocol Version '%1' not supported!").arg(lIncommingVersio
       QString lJsonMessage(rNegotiationResponse.fToJsonString());
        rConnection->fSetConnectionState(NWebSocket::EConnectionState::eConnectionActive);
        qint64 lBytesSent = rConnection->fSendTextMessage(lJsonMessage);
-
- qDebug() << QString("Bytes Sent: '%1'\n  - Message: '%2'").arg(QString::number(lBytesSent)).arg(lJsonMessage);
+       emit sLog(ELogLevel::eLogInfo, ELogMessageType::eMessageSent, QString("Bytes Sent: '%1'\n  - Message: '%2'").arg(QString::number(lBytesSent)).arg(lJsonMessage));
     }
     else {
       NMessageNegotiateConnectionResponse lNegotiationResponse(rConnection->fName(), QString(), NMessageNegotiateConnectionResponse::ENegotiationStatus::eNegotiationError, QString("Negotiation unsuccessful! Protocol Version not supported!"));
@@ -131,7 +132,7 @@ qDebug() << QString("Protocol Version '%1' not supported!").arg(lIncommingVersio
 
   void NWebSocketServer::fProcessRequest(const QVariantMap &lMessage, NWebSocket* rConnection) {
     if(!rConnection) {
-      qDebug() << QString("Connection '%1' no longer exists!").arg(rConnection->fName());
+      emit sLog(ELogLevel::eLogCritical, ELogMessageType::eResourceManagement, QString("Connection '%1' no longer exists!").arg(rConnection->fName()));
       return;
     }
 

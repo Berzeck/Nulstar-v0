@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  NulstarNS::NUpdateController lController(lSslMode, static_cast<NulstarNS::NUpdateController::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")),
+  NulstarNS::NUpdateController lController(lSslMode, static_cast<NulstarNS::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")),
                                                QUrl(lServiceManagerUrl),
                                                lAllowedNetworks,
                                                lParser.value("commport").toUShort(),

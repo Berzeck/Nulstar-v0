@@ -19,6 +19,7 @@
 #include <NMessage.h>
 #include <NMessageRequest.h>
 #include <NMessageResponse.h>
+#include <NLogger.h>
 #include <NWebSocket.h>
 #include <NWebSocketServer.h>
 #include "NApiBuilder.h"
@@ -30,8 +31,7 @@ namespace NulstarNS {
     Q_OBJECT
 
     public:
-      enum class ELogLevel {eLogCritical = 1, eLogImportant = 2, eLogWarning = 3, eLogInfo = 4, eLogEverything = 5};
-      enum class EServiceAction {eStartService = 0, eStopService = 1, eRestartService = 2};      
+      enum class EServiceAction {eStartService = 0, eStopService = 1, eRestartService = 2};
 
       NCoreService(QWebSocketServer::SslMode lSslMode = QWebSocketServer::SslMode::NonSecureMode, ELogLevel lLogLevel = ELogLevel::eLogWarning, const QHostAddress& lIP = QHostAddress::SpecialAddress::LocalHost,
                    const QUrl& lServiceManagerUrl = QUrl(), const QList<QNetworkAddressEntry>& lAllowedNetworks = QList<QNetworkAddressEntry> (), QObject* rParent = nullptr);
@@ -85,6 +85,7 @@ namespace NulstarNS {
       virtual void fFillMethodMetadata() = 0;
       virtual void fInvokeMethod(TMessageRequestToProcess& lMessageRequestToProcess);
       ELogLevel mLogLevel;
+      NLogger* pLogger;
 
     private:
       quint64 mLastID;

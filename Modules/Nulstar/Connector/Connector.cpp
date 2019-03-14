@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
       lAllowedNetworks << lNetworkAddress;
     }
   }
-  NulstarNS::NConnectionController lController(lSslMode, static_cast<NulstarNS::NConnectionController::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")), QUrl(lServiceManagerUrl),
+  NulstarNS::NConnectionController lController(lSslMode, static_cast<NulstarNS::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")), QUrl(lServiceManagerUrl),
                                    lAllowedNetworks, lParser.value("commport").toUShort(), lParser.value("adminport").toUShort(), lParser.value("clientport").toUShort(), QHostAddress::Any);
   lController.fControlWebServer(QString(), NulstarNS::NConnectionController::EServiceAction::eStartService);  // Start all web sockets servers
   lController.fConnectToServiceManager(NulstarNS::cRetryInterval);

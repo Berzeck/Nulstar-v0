@@ -47,3 +47,5 @@ SOURCES += NMessageResponse.cpp \
 
 # Dependencies
 
+INCLUDEPATH += $$LIBRARIES_PATH/Nulstar/NTools
+LIBS += -lNNetwork -lNTools

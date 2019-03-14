@@ -8,6 +8,7 @@
 #include <QObject>
 #include <QWebSocketServer>
 #include <QVersionNumber>
+#include <NLogger.h>
 
 #include "NMessage.h"
 #include "NMessageFactory.h"
@@ -64,6 +65,7 @@ namespace NulstarNS {
       void sResponseMessageReceived(const QVariantMap& lMessage);
       void sRequestMessageArrived(TMessageRequestToProcess& lMessageRequest);
       void sWebSocketDisconnected(const QString& lWebSocketID);
+      void sLog(ELogLevel eLogLevel, ELogMessageType eLogMessageType, const QString& lMessage);
   };
 }
 

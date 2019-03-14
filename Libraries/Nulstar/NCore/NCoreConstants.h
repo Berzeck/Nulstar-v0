@@ -46,6 +46,9 @@ namespace NulstarNS {
   const QString cFunctionTag_Private(QStringLiteral("API_PRIVATE_FUNCTION"));
 
   const QString cCommand_GetConsolidatedAPI = QStringLiteral("getconsolidatedapi");
+
+  const QString cDirectory_Logs = QStringLiteral("Logs");
+  const QString cSeparator_Logs = QStringLiteral("\t");
 }
 
 #endif // NCORECONSTANTS_H

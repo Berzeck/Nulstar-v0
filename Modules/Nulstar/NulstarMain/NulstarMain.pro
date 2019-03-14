@@ -41,8 +41,9 @@ OTHER_FILES += Module.ncf
 # Dependencies
 
 INCLUDEPATH += $$LIBRARIES_PATH/Nulstar/NNetwork \
-            $$LIBRARIES_PATH/Nulstar/NCore
-LIBS += -lNNetwork -lNCore
+               $$LIBRARIES_PATH/Nulstar/NCore  \
+               $$LIBRARIES_PATH/Nulstar/NTools
+LIBS += -lNNetwork -lNCore -lNTools
 
 # Install Settings
 

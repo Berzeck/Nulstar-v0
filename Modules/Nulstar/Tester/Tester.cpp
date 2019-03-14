@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
       lSslMode = QWebSocketServer::SslMode::SecureMode;
   }
 
-  NulstarNS::NTesterController lController(lSslMode, static_cast<NulstarNS::NTesterController::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")),
+  NulstarNS::NTesterController lController(lSslMode, static_cast<NulstarNS::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")),
                                            QUrl(lServiceManagerUrl), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::Any);
   //lController.fControlWebServer(QString(), NulstarNS::NTesterController::EServiceAction::eStartService);
   //const int lRetryInterval = 5;

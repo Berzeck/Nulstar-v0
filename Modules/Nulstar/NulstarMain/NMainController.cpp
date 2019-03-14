@@ -58,7 +58,7 @@ namespace NulstarNS {
     }
 
     fSetSslMode(lSslMode);
-    fSetLogLevel(static_cast<NulstarNS::NMainController::ELogLevel>(lLogLevel.toUInt()));
+    fSetLogLevel(static_cast<NulstarNS::ELogLevel>(lLogLevel.toUInt()));
     fSetServiceManagerUrl(QUrl(lServiceManagerUrl));
     fSetAllowedNetworks(lAllowedNetworks);
     fSetHost(QHostAddress(lIP));

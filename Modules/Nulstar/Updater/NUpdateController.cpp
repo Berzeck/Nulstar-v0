@@ -6,7 +6,7 @@
 
 namespace NulstarNS {
   NUpdateController::NUpdateController(QWebSocketServer::SslMode lSslMode,
-                                                NulstarNS::NCoreService::ELogLevel lLogLevel, const QHostAddress &lIP,
+                                                NulstarNS::ELogLevel lLogLevel, const QHostAddress &lIP,
                                                 const QUrl &lServiceManagerUrl,
                                                 QList<QNetworkAddressEntry> lAllowedNetworks,
                                                 quint16 lCommPort,

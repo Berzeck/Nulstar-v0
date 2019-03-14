@@ -24,8 +24,6 @@ namespace NulstarNS {
 
     pRetryTimer = new QTimer(this);
     connect(pRetryTimer, &QTimer::timeout, this, &NWebSocket::fConnect);
-
-    mLog = new QSettings(QString("Message-%1.log").arg(fName()), QSettings::IniFormat);
   }
 
   void NWebSocket::fConnect() {
@@ -51,8 +49,7 @@ namespace NulstarNS {
     else
       rMessage->fSetStatus(NMessage::EMessageStatus::eWithErrorAndWitheld);
 // qDebug("%s", qUtf8Printable(QString::number(mWebSocket->state())));
-
-    mLog->setValue(rMessage->fMessageID(),QString("Send message: %1-%2").arg(QTime::currentTime().toString("hh:mm:ss")).arg(rMessage->fToJsonString()));
+    emit sLog(ELogLevel::eLogInfo, ELogMessageType::eMessageSent, rMessage->fToJsonString());
   }
 
   void NWebSocket::fOnConnectionError(QAbstractSocket::SocketError lErrorCode) {
@@ -90,7 +87,7 @@ namespace NulstarNS {
     if(lMessageType == cTypeRequest && NMessageRequest::fValidateMessageObject(lMessageObject))
       emit sMessageReceived(lMessageType, lMessageObject.toVariantMap());
 
-    mLog->setValue(lMessageObject.toVariantMap().value(cFieldName_MessageID).toString(), QString("Received message: %1-%2").arg(QTime::currentTime().toString("hh:mm:ss")).arg(lMessage));
+    emit sLog(ELogLevel::eLogInfo, ELogMessageType::eMessageReceived, lMessage);
  }
 
   void NWebSocket::fNegotiateConnection() {
