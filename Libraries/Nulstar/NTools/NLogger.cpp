@@ -60,7 +60,7 @@ namespace NulstarNS {
         break;
     }
     QTextStream lLogStream(&mLogFile);
-    lLogStream << QDateTime::currentDateTime().time().toString("hh:mm:ss") << qSetFieldWidth(8) << mSeparator << lLogLevel << qSetFieldWidth(12) << left << lLogType << qSetFieldWidth(20) << left <<
-                  lMessage << left;
+    lLogStream << QDateTime::currentDateTime().time().toString("hh:mm:ss") << qSetFieldWidth(8) << mSeparator << lLogLevel << qSetFieldWidth(14) << left << lLogType << qSetFieldWidth(22) << left <<
+                  lMessage << left << endl;
   }
 }

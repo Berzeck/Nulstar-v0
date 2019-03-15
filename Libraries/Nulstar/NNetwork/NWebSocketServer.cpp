@@ -56,13 +56,13 @@ namespace NulstarNS {
   void NWebSocketServer::fProcessTextMessage(const QString& lMessageType, const QVariantMap& lMessage) {
     NWebSocket* rSocket = qobject_cast<NWebSocket*>(sender());
     if(rSocket) {
-      if(lMessageType == cTypeNegotiateConnection)
+      if(lMessageType == cTypeNegotiateConnection && NMessageNegotiateConnection::fValidateMessageObject(QJsonObject::fromVariantMap(lMessage)))
         fProcessNegotiateConnection(lMessage, rSocket);
   /*    if(lMessageType == cTypeNegotiateConnectionResponse && NMessageNegotiateConnectionResponse::fValidateMessageObject(lMessageObject))
         fProcessNegotiateConnectionResponse(lMessageObject, rSocket); // Request is always received in NWebSocket*/
-      if(lMessageType == cTypeRequest)
+      if(lMessageType == cTypeRequest && NMessageRequest::fValidateMessageObject(QJsonObject::fromVariantMap(lMessage)))
         fProcessRequest(lMessage, rSocket);
-      if(lMessageType == cTypeReponse)
+      if(lMessageType == cTypeReponse && NMessageResponse::fValidateMessageObject(QJsonObject::fromVariantMap(lMessage)))
         emit sResponseMessageReceived(lMessage);
     }
   }
