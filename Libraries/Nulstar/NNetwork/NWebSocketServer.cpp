@@ -119,7 +119,7 @@ namespace NulstarNS {
       QString lJsonMessage(rNegotiationResponse.fToJsonString());
        rConnection->fSetConnectionState(NWebSocket::EConnectionState::eConnectionActive);
        qint64 lBytesSent = rConnection->fSendTextMessage(lJsonMessage);
-       emit sLog(ELogLevel::eLogInfo, ELogMessageType::eMessageSent, QString("Bytes Sent: '%1'\n  - Message: '%2'").arg(QString::number(lBytesSent)).arg(lJsonMessage));
+       emit sLog(ELogLevel::eLogInfo, ELogMessageType::eMessageSent, QString("Bytes Sent: '%1' - Message: '%2'").arg(QString::number(lBytesSent)).arg(lJsonMessage));
     }
     else {
       NMessageNegotiateConnectionResponse lNegotiationResponse(rConnection->fName(), QString(), NMessageNegotiateConnectionResponse::ENegotiationStatus::eNegotiationError, QString("Negotiation unsuccessful! Protocol Version not supported!"));
