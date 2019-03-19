@@ -3,6 +3,7 @@
 #include <QString>
 #include <QStringList>
 #include <NCoreConstants.h>
+#include <NSignalWatcher.h>
 
 #include "NMainController.h"
 
@@ -25,5 +26,14 @@ int main(int argc, char* argv[])
   lController.startmodule(APP_DOMAIN, NulstarNS::cServiceManagerName);
   lController.startallmodules();
   lController.fConnectToServiceManager(NulstarNS::cRetryInterval);
+
+#ifdef Q_OS_UNIX
+  NSignalWatcher lSignalWatcher;
+  lSignalWatcher.watchForSignal(SIGINT);
+  lSignalWatcher.watchForSignal(SIGTERM);
+  QObject::connect(&lSignalWatcher, SIGNAL(unixSignal(int)), &lApp, SLOT(quit()));
+#endif
+
   return lApp.exec();
 }
+

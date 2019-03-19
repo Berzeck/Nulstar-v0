@@ -26,7 +26,7 @@ namespace NulstarNS {
 
     NModuleInfo lControllerInfo = mModuleManager.fModuleInfo(APP_DOMAIN, APP_NAME);
     QList<QNetworkAddressEntry> lAllowedNetworks;
-    QHostAddress::SpecialAddress lBindAddress = QHostAddress::Any;
+    QHostAddress::SpecialAddress lBindAddress = QHostAddress::AnyIPv4;
     QHostAddress lHostAddress;
     lHostAddress.setAddress(lControllerInfo.fParameterValue(cMainControllerIPParameter));
 

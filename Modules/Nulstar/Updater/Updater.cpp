@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
                                                QUrl(lServiceManagerUrl),
                                                lAllowedNetworks,
                                                lParser.value("commport").toUShort(),
-                                               QHostAddress::Any);
+                                               QHostAddress::AnyIPv4);
   lController.fControlWebServer(QString(), NulstarNS::NUpdateController::EServiceAction::eStartService);  // Start all web sockets servers
   lController.fConnectToServiceManager(NulstarNS::cRetryInterval);
 

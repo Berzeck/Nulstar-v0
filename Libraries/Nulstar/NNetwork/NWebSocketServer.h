@@ -52,7 +52,7 @@ namespace NulstarNS {
       QHostAddress mBindAddress;
       QMap<qint64, NWebSocket* > mConnections;
       QMap<qint64, QMap<QString, NMessage*> > mMessageQueue; // ConnectionID, <MessageID, Message>
-      bool listen(const QHostAddress &address = QHostAddress::Any, quint16 port = 0) { return QWebSocketServer::listen(address, port); }
+      bool listen(const QHostAddress &address = QHostAddress::AnyIPv4, quint16 port = 0) { return QWebSocketServer::listen(address, port); }
       void setServerName(const QString& serverName) { QWebSocketServer::setServerName(serverName); }
 
     private Q_SLOTS:

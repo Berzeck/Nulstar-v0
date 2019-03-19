@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
   }
 
   NulstarNS::NTesterController lController(lSslMode, static_cast<NulstarNS::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")),
-                                           QUrl(lServiceManagerUrl), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::Any);
+                                           QUrl(lServiceManagerUrl), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::AnyIPv4);
   //lController.fControlWebServer(QString(), NulstarNS::NTesterController::EServiceAction::eStartService);
   //const int lRetryInterval = 5;
   //lController.fConnectToServiceManager(lRetryInterval);

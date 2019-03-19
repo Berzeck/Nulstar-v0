@@ -14,8 +14,8 @@ namespace NulstarNS {
 
     if(lCommPort)
       fAddWebSocketServer(lCommPort, lBindAddress);
-    fAddWebSocketServer(lAdminPort, QHostAddress::Any, cAdminServerName, cAdminServerLabel, false);
-    fAddWebSocketServer(lClientPort, QHostAddress::Any, cClientServerName, cClientServerLabel, false);
+    fAddWebSocketServer(lAdminPort, QHostAddress::AnyIPv4, cAdminServerName, cAdminServerLabel, false);
+    fAddWebSocketServer(lClientPort, QHostAddress::AnyIPv4, cClientServerName, cClientServerLabel, false);
     fFillMethodDescriptions();
     fFillMethodMinEventAndMinPeriod();
   }
