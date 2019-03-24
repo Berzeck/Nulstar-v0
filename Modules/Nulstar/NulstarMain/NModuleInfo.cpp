@@ -5,6 +5,7 @@ namespace NulstarNS {
   const QString cModuleConfigGroupScript("Script");
   const QString cModuleConfigGroupScripted("Scripted");
   const QString cModuleConfigGroupScriptStart("StartScript");
+  const QString cModuleConfigGroupScriptStop("StopScript");
   const QString cModuleConfigGroupLibJre("JRE");
 
   NModuleInfo::NModuleInfo(const QString& lModuleName, const QString& lModuleNamespace, const QString& lModuleVersion, const QString& lModuleLanguage,
@@ -46,6 +47,19 @@ namespace NulstarNS {
     lAppName.append(".exe");
 #endif
     return QString("%1/%2").arg(mModuleWorkingDirectory).arg(lAppName);
+  }
+
+  QString NModuleInfo::fModuleStopScript() const {
+    if(bool(fScriptParameterValue(cModuleConfigGroupScripted) == QString("%1").arg(1))){
+      QString lStopScriptName(fScriptParameterValue(cModuleConfigGroupScriptStop));
+#ifdef Q_OS_WIN
+      lStopScriptName.append(".bat");
+#else
+      lStopScriptName.append(".sh");
+#endif
+      return QString("%1/%2").arg(mModuleWorkingDirectory).arg(lStopScriptName);
+    }
+    return QString();
   }
 
   bool NModuleInfo::fIsValid() const {

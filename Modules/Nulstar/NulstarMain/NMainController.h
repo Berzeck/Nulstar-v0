@@ -38,6 +38,7 @@ namespace NulstarNS {
 
     protected:
       void fFillMethodMetadata() override;
+      void fStopModuleByScript(const QString& lModuleNamespace, const QString& lModuleName, const QString& lEffectiveModuleVersion);
 
     private:
       NModuleManager mModuleManager;

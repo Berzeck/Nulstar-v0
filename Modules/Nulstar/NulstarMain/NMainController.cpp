@@ -152,7 +152,7 @@ namespace NulstarNS {
       qDebug("Module '%s' can't be managed fron this interface!", lModuleName.toStdString().data());
       return false;
     }
-
+    fStopModuleByScript(lModuleNamespace, lModuleName, lEffectiveModuleVersion);
     QString lProcessIndex(QString("%1%2%3%4%5").arg(lModuleNamespace).arg(cIndexSeparator).arg(lModuleName).arg(cIndexSeparator).arg(lEffectiveModuleVersion));
     if(mModulesRunning.contains(lProcessIndex)) {
       QProcess* lModuleProcess = mModulesRunning.value(lProcessIndex);
@@ -205,5 +205,25 @@ namespace NulstarNS {
     fAddMethodMinEventAndMinPeriod(QStringLiteral("stopmodule"), QString("0,0"));
     fAddMethodMinEventAndMinPeriod(QStringLiteral("stopallmodules"), QString("0,0"));
     fAddMethodMinEventAndMinPeriod(QStringLiteral("shutdownsystem"), QString("0,0"));
+  }
+
+  void NMainController::fStopModuleByScript(const QString& lModuleNamespace, const QString& lModuleName, const QString& lEffectiveModuleVersion) {
+      NModuleInfo lModuleInfo = mModuleManager.fModuleInfo(lModuleNamespace, lModuleName, lEffectiveModuleVersion);
+      QString lStopScript = lModuleInfo.fModuleStopScript();
+      if (lStopScript.isNull()) {
+        qDebug("Module '%s' and version '%s' is not stoped by scirpt!", lModuleName.toStdString().data(), lEffectiveModuleVersion.toStdString().data());
+        return;
+      }
+      QProcess* lModuleProcess = new QProcess(this);
+      lModuleProcess->start(lStopScript);
+      if(lModuleProcess->waitForStarted(cProcessStartMaxSeconds * 1000)) {
+          QEventLoop lExtraDelay;
+          QTimer lDelayTimer;
+          connect(&lDelayTimer, &QTimer::timeout, &lExtraDelay, &QEventLoop::quit);
+          lDelayTimer.start(cTimePeriod_ExtraDelayMSecs);
+          lExtraDelay.exec();
+      }
+      qDebug("Module '%s' and version '%s' could not start successfully!", lModuleName.toStdString().data(), lEffectiveModuleVersion.toStdString().data());
+      lModuleProcess->deleteLater();
   }
 }

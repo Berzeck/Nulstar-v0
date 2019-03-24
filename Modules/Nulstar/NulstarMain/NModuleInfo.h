@@ -16,6 +16,7 @@ namespace NulstarNS {
 
       bool fIsValid() const;
       QString fModuleAppPath() const;
+      QString fModuleStopScript() const;
       QString fModuleName() const { return mModuleName; }
       QString fModuleVersion() const { return mModuleVersion; }
       QString fModuleNamespace() const { return mModuleNamespace; }
