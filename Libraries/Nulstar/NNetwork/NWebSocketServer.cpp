@@ -114,15 +114,16 @@ namespace NulstarNS {
       emit sLog(ELogLevel::eLogCritical, ELogMessageType::eResourceManagement, QString("Connection '%1' no longer exists!").arg(rConnection->fName()));
       return;
     }
+    QString lMessageID = lMessage.value(cFieldName_MessageID).toString();
     if(fVersionSupported(lMessage)) {
-      NMessageNegotiateConnectionResponse rNegotiationResponse(rConnection->fName(), QString(), NMessageNegotiateConnectionResponse::ENegotiationStatus::eNegotiationSuccessful, QString("Negotiation successful!"));
+      NMessageNegotiateConnectionResponse rNegotiationResponse(rConnection->fName(), QString(), lMessageID, NMessageNegotiateConnectionResponse::ENegotiationStatus::eNegotiationSuccessful, QString("Negotiation successful!"));
       QString lJsonMessage(rNegotiationResponse.fToJsonString());
        rConnection->fSetConnectionState(NWebSocket::EConnectionState::eConnectionActive);
        qint64 lBytesSent = rConnection->fSendTextMessage(lJsonMessage);
        emit sLog(ELogLevel::eLogInfo, ELogMessageType::eMessageSent, QString("Bytes Sent: '%1' - Message: '%2'").arg(QString::number(lBytesSent)).arg(lJsonMessage));
     }
     else {
-      NMessageNegotiateConnectionResponse lNegotiationResponse(rConnection->fName(), QString(), NMessageNegotiateConnectionResponse::ENegotiationStatus::eNegotiationError, QString("Negotiation unsuccessful! Protocol Version not supported!"));
+      NMessageNegotiateConnectionResponse lNegotiationResponse(rConnection->fName(), QString(), lMessageID, NMessageNegotiateConnectionResponse::ENegotiationStatus::eNegotiationError, QString("Negotiation unsuccessful! Protocol Version not supported!"));
       QString lJsonMessage(lNegotiationResponse.fToJsonString());
  //qDebug() << QString("Message Sent: '%1'").arg(lJsonMessage) << rConnection->state();
       rConnection->fSendTextMessage(lJsonMessage);
