@@ -16,6 +16,7 @@
 #include <QUrl>
 #include <QVariantMap>
 #include <QVersionNumber>
+#include <NConnectionInfo.h>
 #include <NMessage.h>
 #include <NMessageRequest.h>
 #include <NMessageResponse.h>
@@ -66,6 +67,7 @@ namespace NulstarNS {
       void fSendMessage(const QString& lWebSocketsID, NMessage* rMessage, NWebSocket::EConnectionState lMinStateRequired = NWebSocket::EConnectionState::eConnectionActive);
 
     public Q_SLOTS:
+      virtual void fConnectToModule(const NConnectionInfo& lConnectionInfo);
       virtual void fConnectToServiceManager(quint8 lReconnectionTryInterval);
       virtual void fOnConnectionStateChanged(NWebSocket::EConnectionState lNewState);
       virtual bool fControlWebServer(const QString& lName, EServiceAction lAction); // If lName is empty then it controls all web sockets servers
@@ -78,6 +80,7 @@ namespace NulstarNS {
     protected Q_SLOTS:
       virtual void fOnRequestMessageArrived(TMessageRequestToProcess& lMessageRequestToProcess);      
       virtual void fOnWebSocketDisconnected(const QString& lWebSocketID) { Q_UNUSED(lWebSocketID); }  
+      virtual void fProcessBaseResponse(const QVariantMap& lMessageResponse);
       virtual void fProcessResponse(const QVariantMap& lMessageResponse) { Q_UNUSED(lMessageResponse); }
       virtual void fProcessRequest(const QString &lWebSocketName, const QVariantMap &lMessage);
 

@@ -1,5 +1,6 @@
 #include <QCoreApplication>
 #include <QDir>
+#include <QMetaEnum>
 #include <QTimer>
 #include "NModuleAPI.h"
 #include "NCoreService.h"
@@ -99,7 +100,7 @@ namespace NulstarNS {
       connect(rWebSocket, &NWebSocket::sStateChanged, this, &NCoreService::fOnConnectionStateChanged);
       connect(rWebSocket, &NWebSocket::sMessageReceived, [this, rWebSocket](const QString& lMessageType, const QVariantMap& lMessage) {
               if(lMessageType == cTypeReponse)
-                fProcessResponse(lMessage);
+                fProcessBaseResponse(lMessage);
               if(lMessageType == cTypeRequest)
                 fProcessRequest(rWebSocket->fName(), lMessage);
               });
@@ -108,8 +109,43 @@ namespace NulstarNS {
     }
   }
 
-  void NCoreService::fProcessRequest(const QString& lWebSocketName, const QVariantMap &lMessage) {
+  void NCoreService::fConnectToModule(const NConnectionInfo& lConnectionInfo) {
+    NWebSocket* rWebSocket = nullptr;
+    quint8 lReconnectionTryInterval(lConnectionInfo.fGetReconnectionTryInterval());
+    QString lRole(lConnectionInfo.fGetRole());
+    QString lPort(lConnectionInfo.fGetPort());
+    QString lIP(lConnectionInfo.fGetIP());
+    QString lAPIVersion(lConnectionInfo.fGetRole());
 
+    if(!fDependencies().contains(lRole)) {
+      pLogger->fLog(ELogLevel::eLogWarning, ELogMessageType::eResourceManagement, tr("Role '%1' not found in dependencies!").arg(lRole));
+      return;
+    }
+
+    if(mWebSockets.contains(lRole)) {
+      rWebSocket = mWebSockets.value(lRole);
+      rWebSocket->fConnect();
+    }
+    else {
+      QString lUrl(QString("ws://%1:%2").arg(lIP).arg(lPort));
+      if(mSslMode == NWebSocketServer::SslMode::SecureMode)
+        lUrl = QString("ws://%1:%2").arg(lIP).arg(lPort);
+
+      rWebSocket = new NWebSocket(lRole, fDependencies().value(lRole).toString(), lUrl, lReconnectionTryInterval);
+      connect(rWebSocket, &NWebSocket::sStateChanged, this, &NCoreService::fOnConnectionStateChanged);
+      connect(rWebSocket, &NWebSocket::sMessageReceived, [this](const QString& lMessageType, const QVariantMap& lMessage) {
+        if(lMessageType == cTypeReponse)
+          fProcessBaseResponse(lMessage);
+        else {
+          pLogger->fLog(ELogLevel::eLogWarning, ELogMessageType::eMessageReceived, tr("Incoming message with MessageID: '%1' has unexpected Message Type: '%2'").arg(lMessage.value(cFieldName_MessageID).toString()));
+        }
+      });
+      mWebSockets.insert(lRole, rWebSocket);
+      rWebSocket->fConnect();
+    }
+  }
+
+  void NCoreService::fProcessRequest(const QString& lWebSocketName, const QVariantMap &lMessage) {
     QVariantMap lRequestMethods(lMessage.value(cFieldName_MessageData).toMap().value(cFieldName_RequestMethods).toMap());
     QString lMessageID(lMessage.value(cFieldName_MessageID).toString());
     quint64 lSubscriptionEventCounter(lMessage.value(cFieldName_MessageData).toMap().value(cFieldName_SubscriptionEventCounter).toULongLong());
@@ -122,19 +158,59 @@ namespace NulstarNS {
   }
 
   void NCoreService::fOnConnectionStateChanged(NWebSocket::EConnectionState lNewState) {
-     NWebSocket* rWebSocket = qobject_cast<NWebSocket* > (sender());
-     if(rWebSocket) {
-         switch(lNewState) {
-           case NWebSocket::EConnectionState::eConnectionActive: {
-             rWebSocket->fRegisterApi(mApiBuilder.fApi());
-             break;
-           }
-           default:
-             break;
-         }
-     }
+    NWebSocket* rWebSocket = qobject_cast<NWebSocket* > (sender());
+    if(rWebSocket) {
+      switch(lNewState) {
+        case NWebSocket::EConnectionState::eConnectionActive: {
+          if(rWebSocket->fName() == cServiceManagerName)
+            rWebSocket->fRegisterApi(mApiBuilder.fApi());
+          break;
+        }
+        default:
+          break;
+      }
+      QMetaEnum lConnectionState(QMetaEnum::fromType<NWebSocket::EConnectionState>());
+      pLogger->fLog(ELogLevel::eLogInfo, ELogMessageType::eResourceManagement, tr("Connection '%1' changed to state '%2'.").arg(rWebSocket->fName()).arg(lConnectionState.enumName()));
+    }
   }
 
+  void NCoreService::fProcessBaseResponse(const QVariantMap& lMessageResponse) {  
+    bool lResponseStatus(lMessageResponse.value(cFieldName_MessageData).toMap().value(cResponseStatusFieldName).toBool()); 
+    QString lResponseMessageID(lMessageResponse.value(cFieldName_MessageID).toString());
+    QString lRequestMessageID(lMessageResponse.value(cFieldName_MessageData).toMap().value(cRequestIDFieldName).toString());
+    if(lResponseStatus) {
+      if(lMessageResponse.value(cFieldName_MessageData).toMap().value(cResponseDataFieldName).toMap().contains(cFieldName_RegisterAPI)) {
+        QVariantMap lDependencies(lMessageResponse.value(cFieldName_MessageData).toMap().value(cResponseDataFieldName).toMap().value(cFieldName_RegisterAPI).toMap()
+                                  .value(cFieldName_Dependencies).toMap());
+        QMapIterator<QString, QVariant> i1(lDependencies);
+        while(i1.hasNext()) {
+          i1.next();
+          QString lRole(i1.key());
+          QString lIP, lPort, lAPIVersion;
+          QMapIterator<QString, QVariant> i2(i1.value().toMap());
+          while(i2.hasNext()) {
+            i2.next();
+            if(i2.key() == cFieldName_IP)
+              lIP = i2.key();
+            if(i2.key() == cFieldName_Port)
+              lPort = i2.key();
+            if(i2.key() == cFieldName_ModuleRoleVersion)
+              lAPIVersion = i2.key();
+          }
+          NConnectionInfo lConnectionInfo(cRetryInterval, lRole, lIP, lPort, lAPIVersion);
+          if(lConnectionInfo.fIsValid())
+            fConnectToModule(lConnectionInfo);
+          else
+            pLogger->fLog(ELogLevel::eLogWarning, ELogMessageType::eMessageReceived, tr("Connection info of dependency not valid from RegisterAPI request, RequestID: '%1'. Role: '%2'.").arg(lRequestMessageID).arg(lRole));
+        }
+      }
+    }
+    else {
+      pLogger->fLog(ELogLevel::eLogWarning, ELogMessageType::eMessageReceived, tr("Error returned from request '%1'. Response ID: '%2'.").arg(lRequestMessageID).arg(lResponseMessageID));  
+    }
+    fProcessResponse(lMessageResponse);
+  }
+  
   bool NCoreService::fControlWebServer(const QString &lName, EServiceAction lAction) {
     QStringList lWebServerNames;
     if(lName.isEmpty()) lWebServerNames = mWebServers.keys();

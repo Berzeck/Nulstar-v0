@@ -15,7 +15,8 @@ DESTDIR=$$LIBRARIES_OUTDIR
 # Source Files
 
 HEADERS += NTools.h \
-    NLogger.h
+    NLogger.h \
+    NConnectionInfo.h
 macos:HEADERS += NSignalWatcher.h
 linux:HEADERS += NSignalWatcher.h
 
@@ -23,7 +24,8 @@ linux:HEADERS += NSignalWatcher.h
 # Dependencies
 
 SOURCES += \
-    NLogger.cpp
+    NLogger.cpp \
+    NConnectionInfo.cpp
 macos:SOURCES += NSignalWatcher.cpp
 linux:SOURCES += NSignalWatcher.cpp
 

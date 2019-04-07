@@ -23,6 +23,7 @@ namespace NulstarNS {
 
     public:
       enum class EConnectionState { eConnectionNotNegotiated = 1, eConnectionAuthorized = 2, eConnectionActive = 3 };
+      Q_ENUM(EConnectionState)
 
       NWebSocket(const QString& lName, const QString& lProtocolVersion, const QUrl& lConnectionUrl, quint8 lConnectionRetryInterval = 0, QWebSocket* rSocket = nullptr, QObject* rParent = nullptr);
       virtual ~NWebSocket() {}
