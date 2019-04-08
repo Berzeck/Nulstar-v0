@@ -15,6 +15,7 @@ namespace NulstarNS {
   const QString cResponseCommentFieldName("ResponseComment");
   const QString cResponseMaxSizeFieldName("ResponseMaxSize");
   const QString cResponseDataFieldName("ResponseData");
+  const QString cResponseDataDependencies("Dependencies");
   const int cResponseStatusSuccess = 1;
   const int cResponseStatusFailure = 0;
 
