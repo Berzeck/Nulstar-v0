@@ -5,7 +5,7 @@
 
 namespace NulstarNS {
   const int cTimeSeconds_DependencesSearchRetryPeriod = 1;
-  const int cTotal_DependencesSearchRetryTimes = 4;
+  const int cTotal_DependencesSearchRetryTimes = 9;
 
   NServiceManagerController::NServiceManagerController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress &lIP, const QUrl &lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, QHostAddress::SpecialAddress lBindAddress, QObject* rParent)
                            : NCoreService(lSslMode, lLogLevel, lIP, lServiceManagerUrl, lAllowedNetworks, rParent) {
@@ -49,7 +49,18 @@ namespace NulstarNS {
     }
     for(const NModuleAPI& lModuleAPI : mModuleAPIPendingDependencies) {
       if(lModuleAPI.fWebSocketID() == lWebSocketID) {
+        QMapIterator<QString, NModuleAPI> i2(mModuleAPIActive);
+        while(i2.hasNext()) {
+          i2.next();
+          if((lWebSocketID != i2.value().fWebSocketID()) && i2.value().fAreRolesNeeded(lModuleAPI.fModuleRoles())) {
+            fCloseConnection(i2.value().fWebSocketServerName(), i2.value().fWebSocketID());
+          }
+        }
+
+        qDebug("%s", qUtf8Printable(QString("Pending API from module '%1' using WebSocket connection '%2' has been removed!").arg(lModuleAPI.fModuleName()).arg(lModuleAPI.fWebSocketID())));
         mModuleAPIPendingDependencies.removeOne(lModuleAPI);
+        emit sEventTriggered("getconsolidatedapi");
+        break;
       }
     }
   }
@@ -60,7 +71,7 @@ namespace NulstarNS {
       lTempLog.setValue(lModuleAPIPending.fModuleName(), QTime::currentTime().toString("hh:mm:ss"));
     }
     for(NModuleAPI& lModuleAPIPending : mModuleAPIPendingDependencies) {
-      if(lModuleAPIPending.fFindDependenciesRetryCounter() >= 255 /*cTotal_DependencesSearchRetryTimes*/) {
+      if(lModuleAPIPending.fFindDependenciesRetryCounter() >= cTotal_DependencesSearchRetryTimes) {
          QVariantMap lDependencies;
          QMapIterator<QString, QVariant> i1(lModuleAPIPending.fDependencies());
          while(i1.hasNext()) {
@@ -103,6 +114,19 @@ namespace NulstarNS {
               break;
             }
           }
+          for(NModuleAPI& lModuleAPIPendingDependency : mModuleAPIPendingDependencies) {
+            if(lModuleAPIPendingDependency.fIsRoleSupported(lDependency)) {
+              lDependencySatisfied = true;
+              QVariantMap lConnectionData( {{i1.key(), QVariantMap( {{cFieldName_IP, lModuleAPIPendingDependency.fIP().toString() }, {cFieldName_Port, QString::number(lModuleAPIPendingDependency.fPort()) },
+                                                                   {cFieldName_ModuleRoleVersion, i1.value().toString() } } ) }});
+              if(lDependencies.size())
+                lDependencies[cFieldName_RegisterAPI] = QVariantMap( {{cFieldName_Dependencies, lDependencies[cFieldName_RegisterAPI].toMap()[cFieldName_Dependencies].toMap().unite(lConnectionData) }} );
+              else
+                lDependencies[cFieldName_RegisterAPI] = QVariantMap( {{cFieldName_Dependencies, lConnectionData }} );
+              break;
+            }
+          }
+
           if(!lDependencySatisfied) {
             lAllDependenciesSatisfied = false;
             lModuleAPIPending.fSetFindDependenciesRetryCounter(lModuleAPIPending.fFindDependenciesRetryCounter() + 1);

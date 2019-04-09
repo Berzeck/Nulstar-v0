@@ -90,9 +90,11 @@ namespace NulstarNS {
         }
         mMessageQueue.remove(lConnectionID);
       }
-      mConnections[lConnectionID]->fClose();
-      mConnections[lConnectionID]->deleteLater();
-      mConnections.remove(lConnectionID);
+      if(mConnections.contains(lConnectionID)) {
+        mConnections[lConnectionID]->fClose();
+        mConnections[lConnectionID]->deleteLater();
+        mConnections.remove(lConnectionID);
+      }
     }
   }
 
