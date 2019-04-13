@@ -44,6 +44,7 @@ namespace NulstarNS {
       mConnections[lMSecsSinceEpoch] = rSocket;
     }
   }
+
   void NWebSocketServer::fSendMessage(const qint64 lWebSocketID, NMessage* rMessage) {
     if(mConnections.contains(lWebSocketID)) {
       mConnections.value(lWebSocketID)->fSendMessage(rMessage);

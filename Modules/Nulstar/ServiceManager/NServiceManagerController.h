@@ -28,7 +28,7 @@ namespace NulstarNS {
       QString fName() const override { return QString(APP_NAME); }
       QString fVersion() const override { return QString(APP_VERSION); }
       QString fDomain() const override { return QString(APP_DOMAIN); }
-      QVariantMap fDependencies() const override {  return QVariantMap(); }
+      QVariantMap fDependencies() const override {  QVariantMap lDependencies({ }); return lDependencies; }
       QVariantMap fApiRoles() const override;
       QList<QVersionNumber> fProtocolVersionsSupported() const override { QList<QVersionNumber> lApiVersionsSupported; QVersionNumber lMainVersion(QVersionNumber::fromString(APP_PROTOCOL_VERSIONS)); lApiVersionsSupported << lMainVersion; return lApiVersionsSupported; }
 

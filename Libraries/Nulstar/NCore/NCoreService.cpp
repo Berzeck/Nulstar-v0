@@ -191,11 +191,11 @@ namespace NulstarNS {
           while(i2.hasNext()) {
             i2.next();
             if(i2.key() == cFieldName_IP)
-              lIP = i2.key();
+              lIP = i2.value().toString();
             if(i2.key() == cFieldName_Port)
-              lPort = i2.key();
+              lPort = i2.value().toString();
             if(i2.key() == cFieldName_ModuleRoleVersion)
-              lAPIVersion = i2.key();
+              lAPIVersion = i2.value().toString();
           }
           NConnectionInfo lConnectionInfo(cRetryInterval, lRole, lIP, lPort, lAPIVersion);
           if(lConnectionInfo.fIsValid())
