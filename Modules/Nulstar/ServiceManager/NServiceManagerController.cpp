@@ -87,6 +87,7 @@ namespace NulstarNS {
          NMessageResponse* lRegisterAPIResponse = new NMessageResponse(lModuleAPIPending.fWebSocketID(), QString(), lModuleAPIPending.fMessageID(), lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseError,
                                                tr("Dependencies of module '%1' not found!").arg(lModuleAPIPending.fModuleName()), 0,lDependencies);
          fSendMessage(lModuleAPIPending.fWebSocketServerName(), lRegisterAPIResponse);
+         fCloseConnection(lModuleAPIPending.fWebSocketServerName(), lModuleAPIPending.fWebSocketID());
          mModuleAPIPendingDependencies.removeOne(lModuleAPIPending);
       }
       else {
