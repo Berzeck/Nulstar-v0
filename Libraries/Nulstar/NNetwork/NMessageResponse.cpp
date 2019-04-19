@@ -15,7 +15,7 @@ namespace NulstarNS {
     QVariantMap lMessageData;
     lMessageData.insert(cRequestIDFieldName, mRequestID);
     lMessageData.insert(cResponseProcessingTimeFieldName, QString::number(mResponseProcessingTime));
-    lMessageData.insert(cResponseStatusFieldName, mResponseStatus == EResponseStatus::eResponseSuccessful ? QString("1") : QString("0"));
+    lMessageData.insert(cResponseStatusFieldName, int(mResponseStatus));
     lMessageData.insert(cResponseCommentFieldName, mResponseComment);
     lMessageData.insert(cResponseMaxSizeFieldName, QString::number(mResponseMaxSize));
     lMessageData.insert(cResponseDataFieldName, mResponseData);
@@ -64,7 +64,8 @@ namespace NulstarNS {
       return false;
     }
     int lResponseStatus = lDataObject.value(cResponseStatusFieldName).toInt();
-    if((lResponseStatus !=  cResponseStatusSuccess) && (lResponseStatus !=  cResponseStatusFailure)) {
+    //if((lResponseStatus !=  cResponseStatusSuccess) && (lResponseStatus !=  cResponseStatusFailure))
+    if (lResponseStatus < 0) {
       qDebug("ResponseStatus value out of scope!");
       return false;
     }

@@ -64,7 +64,7 @@ namespace NulstarNS {
   }
 
   void NConnectionController::fProcessResponse(const QVariantMap& lMessageResponse) {
-    bool lResponseSuccessfull(lMessageResponse.value(cFieldName_MessageData).toMap().value(cResponseStatusFieldName).toBool());
+    bool lResponseSuccessfull = (NMessageResponse::EResponseStatus(lMessageResponse.value(cFieldName_MessageData).toMap().value(cResponseStatusFieldName).toInt()) == NMessageResponse::EResponseStatus::eResponseSuccessful);
     QString lRequestID(lMessageResponse.value(cFieldName_MessageData).toMap().value(cRequestIDFieldName).toString());
     QVariantMap lResponseData(lMessageResponse.value(cFieldName_MessageData).toMap().value(cResponseDataFieldName).toMap());
     if(mForwardedMessages.contains(lRequestID)) {
@@ -163,7 +163,7 @@ namespace NulstarNS {
   
   void NConnectionController::fSendBadMethodResponse(const TMessageRequestToProcess& lMessageRequestToProcess) {
     qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequestToProcess.mMSecsSinceEpoch);
-    NMessageResponse* rRequestResponse = new NMessageResponse(lMessageRequestToProcess.mWebSocketID, QString(), lMessageRequestToProcess.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseError,
+    NMessageResponse* rRequestResponse = new NMessageResponse(lMessageRequestToProcess.mWebSocketID, QString(), lMessageRequestToProcess.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseNoMethodError,
                                          tr("Method '%1' not found in current channel!").arg(lMessageRequestToProcess.mEffectiveMethodName), 0, QVariantMap({{lMessageRequestToProcess.mOriginalMethodName, QVariantMap()}} ));
     fSendMessage(lMessageRequestToProcess.mWebSocketsServerName, rRequestResponse);
   }

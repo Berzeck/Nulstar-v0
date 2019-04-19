@@ -23,7 +23,8 @@ namespace NulstarNS {
     Q_OBJECT
 
     public:
-      enum class EResponseStatus { eResponseError = 0, eResponseSuccessful = 1 };
+      enum class EResponseStatus { eResponseSuccessful = 0, eResponseNoMethodError = 1, eResponseDependenciesNoFoundError = 2,
+                                   eResponseMethodExistedError = 3, eResponseMethodUnavailableError = 4, eResponseMethodListEmptyError = 5 };
 
       explicit NMessageResponse(const QString& lConnectionName, const QString& lMessageID = QString(), const QString& lRequestID = QString(), const qint64 lResponseProcessingTime = 0, const EResponseStatus lResponseStatus = EResponseStatus::eResponseSuccessful,
                                 const QString& lResponseComment = QString(), const quint64 lResponseMaxSize = 0, const QVariantMap& lResponseData = QVariantMap(), QObject* rParent = nullptr);
