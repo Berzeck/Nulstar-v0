@@ -1,10 +1,14 @@
 #ifndef NCONNECTIONINFO_H
 #define NCONNECTIONINFO_H
 
+#include <QObject>
 #include <QString>
+#include "NTools.h"
 
 namespace NulstarNS {
-  class NConnectionInfo {
+  class NTOOLSSHARED_EXPORT NConnectionInfo  : public QObject {
+    Q_OBJECT
+
     public:
       NConnectionInfo(const quint8 lReconnectionTryInterval, const QString& lRole, const QString& lIP, const QString& lPort, const QString& lAPIVersion);
 
