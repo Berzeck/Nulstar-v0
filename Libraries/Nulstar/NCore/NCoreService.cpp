@@ -1,20 +1,30 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QMetaEnum>
+#include <QMetaObject>
 #include <QTimer>
+#include <NRunGuard.h>
 #include "NModuleAPI.h"
 #include "NCoreService.h"
 
 namespace NulstarNS {
   NCoreService::NCoreService(NWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress& lIP, const QUrl& lServiceManagerUrl, const QList<QNetworkAddressEntry>& lAllowedNetworks,
                              QObject *rParent)
-              : QObject(rParent), mLogLevel(lLogLevel), mServiceManagerUrl(lServiceManagerUrl), mIP(lIP), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks) {
-    QTimer::singleShot(0, this, [this] { mApiBuilder.fBuildApi(this);
+              : QObject(rParent), mLogLevel(lLogLevel), pRunGuard(nullptr), mServiceManagerUrl(lServiceManagerUrl), mIP(lIP), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks) {
+    QTimer::singleShot(0, this, [this] {
+                                         mApiBuilder.fBuildApi(this);
                                          QDir lLogDir(qApp->applicationDirPath());
                                          lLogDir.cdUp();lLogDir.cdUp();lLogDir.cdUp();lLogDir.cdUp();
                                          QString lLogDirString(QString("%1/%2/%3").arg(lLogDir.path()).arg(cDirectory_Logs).arg(fName()));
                                          lLogDir.mkpath(lLogDirString);
                                          pLogger = new NLogger(fName(), lLogDirString, cSeparator_Logs, mLogLevel, this);
+                                         connect(this, &NCoreService::sLog, pLogger, &NLogger::fLog);
+                                         pRunGuard = new NRunGuard(QString("%1%2").arg(NulstarNS::cSharedMemoryKey).arg(qApp->applicationDirPath()));//
+                                         if(!pRunGuard->fTryToRun()) {
+                                           fLog(NulstarNS::ELogLevel::eLogCritical, NulstarNS::ELogMessageType::eMemoryTransaction, QString("Module '%1' couldn't be started because its already running!").arg(fName()));
+                                           QMetaObject::invokeMethod(qApp, "quit", Qt::QueuedConnection);
+                                         }
+
                                          QMapIterator<QString, NWebSocketServer*> i1(mWebServers);
                                          while(i1.hasNext()) {
                                            i1.next();
@@ -32,10 +42,11 @@ namespace NulstarNS {
                 i1.next();
                 if((lMethodName == i1.value().mEffectiveMethodName) && ((i1.value().mEventCounter % i1.value().mSubscriptionEventCounter) == 0  )) {
                   fOnRequestMessageArrived(i1.value());
-                  pLogger->fLog(ELogLevel::eLogInfo, ELogMessageType::eMemoryTransaction, QString("Message '%1' using method '%2' has been executed '%3' times.").arg(i1.key()).arg(i1.value().mEffectiveMethodName).arg(i1.value().mEventCounter));
+                  fLog(ELogLevel::eLogInfo, ELogMessageType::eMemoryTransaction, QString("Message '%1' using method '%2' has been executed '%3' times.").arg(i1.key()).arg(i1.value().mEffectiveMethodName).arg(i1.value().mEventCounter));
                 }
               }
             } );
+
   }
 
   NCoreService::~NCoreService() {
@@ -49,6 +60,8 @@ namespace NulstarNS {
         rWebSocket->deleteLater();
       }
     }
+    if(pRunGuard)
+      delete pRunGuard;
   }
 
   bool NCoreService::fAddWebSocketServer(quint16 lPort, QHostAddress::SpecialAddress lBindAddress, const QString& lName, const QString& lLabel, bool lStartImmediatly) {
@@ -79,7 +92,7 @@ namespace NulstarNS {
       mWebServers.value(lWebServerName)->fRemoveConnections(QList<qint64>() << lWebSocketID.toLongLong());
     }
     else {
-      pLogger->fLog(ELogLevel::eLogCritical, ELogMessageType::eMemoryTransaction,QString("WebServer '%1' has not been found when trying to remove Connection ID '%2'").arg(lWebServerName).arg(lWebSocketID));
+      fLog(ELogLevel::eLogCritical, ELogMessageType::eMemoryTransaction,QString("WebServer '%1' has not been found when trying to remove Connection ID '%2'").arg(lWebServerName).arg(lWebSocketID));
     }
   }
 
@@ -118,7 +131,7 @@ namespace NulstarNS {
     QString lAPIVersion(lConnectionInfo.fGetRole());
 
     if(!fDependencies().contains(lRole)) {
-      pLogger->fLog(ELogLevel::eLogWarning, ELogMessageType::eResourceManagement, tr("Role '%1' not found in dependencies!").arg(lRole));
+      fLog(ELogLevel::eLogWarning, ELogMessageType::eResourceManagement, tr("Role '%1' not found in dependencies!").arg(lRole));
       return;
     }
 
@@ -137,7 +150,7 @@ namespace NulstarNS {
         if(lMessageType == cTypeReponse)
           fProcessBaseResponse(lMessage);
         else {
-          pLogger->fLog(ELogLevel::eLogWarning, ELogMessageType::eMessageReceived, tr("Incoming message with MessageID: '%1' has unexpected Message Type: '%2'").arg(lMessage.value(cFieldName_MessageID).toString()));
+          fLog(ELogLevel::eLogWarning, ELogMessageType::eMessageReceived, tr("Incoming message with MessageID: '%1' has unexpected Message Type: '%2'").arg(lMessage.value(cFieldName_MessageID).toString()));
         }
       });
       mWebSockets.insert(lRole, rWebSocket);
@@ -170,7 +183,7 @@ namespace NulstarNS {
           break;
       }
       QMetaEnum lConnectionState(QMetaEnum::fromType<NWebSocket::EConnectionState>());
-      pLogger->fLog(ELogLevel::eLogInfo, ELogMessageType::eResourceManagement, tr("Connection '%1' changed to state '%2'.").arg(rWebSocket->fName()).arg(lConnectionState.enumName()));
+      fLog(ELogLevel::eLogInfo, ELogMessageType::eResourceManagement, tr("Connection '%1' changed to state '%2'.").arg(rWebSocket->fName()).arg(lConnectionState.enumName()));
     }
   }
 
@@ -201,12 +214,12 @@ namespace NulstarNS {
           if(lConnectionInfo.fIsValid())
             fConnectToModule(lConnectionInfo);
           else
-            pLogger->fLog(ELogLevel::eLogWarning, ELogMessageType::eMessageReceived, tr("Connection info of dependency not valid from RegisterAPI request, RequestID: '%1'. Role: '%2'.").arg(lRequestMessageID).arg(lRole));
+            fLog(ELogLevel::eLogWarning, ELogMessageType::eMessageReceived, tr("Connection info of dependency not valid from RegisterAPI request, RequestID: '%1'. Role: '%2'.").arg(lRequestMessageID).arg(lRole));
         }
       }
     }
     else {
-      pLogger->fLog(ELogLevel::eLogWarning, ELogMessageType::eMessageReceived, tr("Error returned from request '%1'. Response ID: '%2'.").arg(lRequestMessageID).arg(lResponseMessageID));  
+      fLog(ELogLevel::eLogWarning, ELogMessageType::eMessageReceived, tr("Error returned from request '%1'. Response ID: '%2'.").arg(lRequestMessageID).arg(lResponseMessageID));
     }
     fProcessResponse(lMessageResponse);
   }
@@ -220,7 +233,7 @@ namespace NulstarNS {
         return false;
       if(lAction == EServiceAction::eStartService) {
         if(!mWebServers[lCurrentName]->fListen()) {
-          pLogger->fLog(ELogLevel::eLogCritical, ELogMessageType::eResourceManagement, QString("Websockets server '%1' of module '%2' could not initiated!").arg(lCurrentName).arg(fName()) );
+          fLog(ELogLevel::eLogCritical, ELogMessageType::eResourceManagement, QString("Websockets server '%1' of module '%2' could not initiated!").arg(lCurrentName).arg(fName()) );
           return false;
         }
       }
@@ -230,7 +243,7 @@ namespace NulstarNS {
       if(lAction == EServiceAction::eRestartService) {
         mWebServers[lCurrentName]->close();
         if(!mWebServers[lCurrentName]->fListen()) {
-          pLogger->fLog(ELogLevel::eLogCritical, ELogMessageType::eResourceManagement, QString("Websockets server '%1' of module '%2' could not initiated!").arg(lCurrentName).arg(fName()) );
+          fLog(ELogLevel::eLogCritical, ELogMessageType::eResourceManagement, QString("Websockets server '%1' of module '%2' could not initiated!").arg(lCurrentName).arg(fName()) );
           return false;
         }
       }
@@ -264,7 +277,7 @@ namespace NulstarNS {
       if(mWebSockets.contains(lWebSocketsID))
         mWebSockets.value(lWebSocketsID)->fQueueMessage(rMessage, lMinStateRequired);
       else
-        pLogger->fLog(ELogLevel::eLogCritical, ELogMessageType::eMemoryTransaction, QString("Message '%1' couldn't be sent because WebSocket '%2' wasn't found!").arg(rMessage->fMessageID()).arg(lWebSocketsID));
+        fLog(ELogLevel::eLogCritical, ELogMessageType::eMemoryTransaction, QString("Message '%1' couldn't be sent because WebSocket '%2' wasn't found!").arg(rMessage->fMessageID()).arg(lWebSocketsID));
     }
   }
 
@@ -284,7 +297,13 @@ namespace NulstarNS {
           mMessageRequestEventQueue.insert(lMessageRequestToProcess.mMessageID, lMessageRequestToProcess);
       }
     }
-    else
-      pLogger->fLog(ELogLevel::eLogCritical, ELogMessageType::eMemoryTransaction, QString("Method '%1' couldn't be executed successfully!").arg(lMessageRequestToProcess.mEffectiveMethodName));
+    else {
+      QVariantMap lResponseMap({ {lMessageRequestToProcess.mEffectiveMethodName, QVariantMap({}) }} );
+      qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequestToProcess.mMSecsSinceEpoch);
+      NMessageResponse* lMethodNotFoundResponse = new NMessageResponse(lMessageRequestToProcess.mWebSocketID, QString(), lMessageRequestToProcess.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseError,
+                                                  tr("Method '%1' couldn't be executed successfully!").arg(lMessageRequestToProcess.mEffectiveMethodName), 0, lResponseMap);
+      fSendMessage(lMessageRequestToProcess.mWebSocketsServerName, lMethodNotFoundResponse);
+      fLog(ELogLevel::eLogCritical, ELogMessageType::eMemoryTransaction, QString("Method '%1' couldn't be executed successfully!").arg(lMessageRequestToProcess.mEffectiveMethodName));
+    }
   }
 }

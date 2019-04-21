@@ -49,6 +49,8 @@ namespace NulstarNS {
 
   const QString cDirectory_Logs = QStringLiteral("Logs");
   const QString cSeparator_Logs = QStringLiteral("\t");
+
+  const QString cSharedMemoryKey(QStringLiteral("__NulstarMemoryKey__"));
 }
 
 #endif // NCORECONSTANTS_H

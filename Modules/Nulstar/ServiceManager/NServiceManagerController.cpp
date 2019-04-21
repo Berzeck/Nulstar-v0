@@ -82,10 +82,10 @@ namespace NulstarNS {
            lParams[cFieldName_Port] = QString();
            lDependencies[i1.key()] = lParams;
          }
-         QVariantMap lReponseMap({ {cFieldName_RegisterAPI, { QVariantMap( {{ cFieldName_Dependencies, lDependencies }} ) }}} );
+         QVariantMap lResponseMap({ {cFieldName_RegisterAPI, { QVariantMap( {{ cFieldName_Dependencies, lDependencies }} ) }}} );
          qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lModuleAPIPending.fMSecsSinceEpoch());
          NMessageResponse* lRegisterAPIResponse = new NMessageResponse(lModuleAPIPending.fWebSocketID(), QString(), lModuleAPIPending.fMessageID(), lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseError,
-                                               tr("Dependencies of module '%1' not found!").arg(lModuleAPIPending.fModuleName()), 0,lDependencies);
+                                               tr("Dependencies of module '%1' not found!").arg(lModuleAPIPending.fModuleName()), 0,lResponseMap);
          fSendMessage(lModuleAPIPending.fWebSocketServerName(), lRegisterAPIResponse);
          fCloseConnection(lModuleAPIPending.fWebSocketServerName(), lModuleAPIPending.fWebSocketID());
          mModuleAPIPendingDependencies.removeOne(lModuleAPIPending);

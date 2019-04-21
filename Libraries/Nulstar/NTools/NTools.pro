@@ -16,7 +16,8 @@ DESTDIR=$$LIBRARIES_OUTDIR
 
 HEADERS += NTools.h \
     NLogger.h \
-    NConnectionInfo.h
+    NConnectionInfo.h \
+    NRunGuard.h
 macos:HEADERS += NSignalWatcher.h
 linux:HEADERS += NSignalWatcher.h
 
@@ -25,7 +26,8 @@ linux:HEADERS += NSignalWatcher.h
 
 SOURCES += \
     NLogger.cpp \
-    NConnectionInfo.cpp
+    NConnectionInfo.cpp \
+    NRunGuard.cpp
 macos:SOURCES += NSignalWatcher.cpp
 linux:SOURCES += NSignalWatcher.cpp
 

@@ -27,6 +27,8 @@
 #include "Core.h"
 #include "NCoreConstants.h"
 
+class NRunGuard;
+
 namespace NulstarNS {    
   class CORESHARED_EXPORT NCoreService : public QObject {
     Q_OBJECT
@@ -56,6 +58,8 @@ namespace NulstarNS {
    /***   NMessageResponse fMaxConnections(const QString &lName);
       NResponse fTotalConnections(const QString &lName);
       NResponse fSetMaxConnections(const QString& lName, int lMaxconnections); ***/
+      void fLog(ELogLevel eLogLevel, ELogMessageType eLogMessageType, const QString& lMessage) { emit sLog(eLogLevel, eLogMessageType, lMessage); }
+      void fExit(ELogLevel eLogLevel, const QString& lMessage) { emit sExit(eLogLevel, lMessage); }
       QString fMethodDescription(const QString& lMethodName) const;
       QString fMethodMinEventAndMinPeriod(const QString& lMethodName) const;
       QUrl fServiceManagerUrl() const { return mServiceManagerUrl; }
@@ -76,6 +80,8 @@ namespace NulstarNS {
     Q_SIGNALS:
       void sEventTriggered(const QString& lMethodName);
       void sMessageReceived(const QVariantMap& lMessage);
+      void sLog(ELogLevel eLogLevel, ELogMessageType eLogMessageType, const QString& lMessage);
+      void sExit(ELogLevel eLogLevel, const QString& lMessage);
 
     protected Q_SLOTS:
       virtual void fOnRequestMessageArrived(TMessageRequestToProcess& lMessageRequestToProcess);      
@@ -92,6 +98,7 @@ namespace NulstarNS {
 
     private:
       quint64 mLastID;
+      NRunGuard* pRunGuard;
       QUrl mServiceManagerUrl;
       QHostAddress mIP;
       NWebSocketServer::SslMode mSslMode;
