@@ -188,10 +188,10 @@ namespace NulstarNS {
   }
 
   void NCoreService::fProcessBaseResponse(const QVariantMap& lMessageResponse) {  
-    bool lResponseStatus(lMessageResponse.value(cFieldName_MessageData).toMap().value(cResponseStatusFieldName).toBool()); 
+    int lResponseStatus(lMessageResponse.value(cFieldName_MessageData).toMap().value(cResponseStatusFieldName).toInt());
     QString lResponseMessageID(lMessageResponse.value(cFieldName_MessageID).toString());
     QString lRequestMessageID(lMessageResponse.value(cFieldName_MessageData).toMap().value(cRequestIDFieldName).toString());
-    if(lResponseStatus) {
+    if(NMessageResponse::EResponseStatus(lResponseStatus) == NMessageResponse::EResponseStatus::eResponseSuccessful) {
       if(lMessageResponse.value(cFieldName_MessageData).toMap().value(cResponseDataFieldName).toMap().contains(cFieldName_RegisterAPI)) {
         QVariantMap lDependencies(lMessageResponse.value(cFieldName_MessageData).toMap().value(cResponseDataFieldName).toMap().value(cFieldName_RegisterAPI).toMap()
                                   .value(cFieldName_Dependencies).toMap());
