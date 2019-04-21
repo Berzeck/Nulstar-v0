@@ -300,7 +300,7 @@ namespace NulstarNS {
     else {
       QVariantMap lResponseMap({ {lMessageRequestToProcess.mEffectiveMethodName, QVariantMap({}) }} );
       qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequestToProcess.mMSecsSinceEpoch);
-      NMessageResponse* lMethodNotFoundResponse = new NMessageResponse(lMessageRequestToProcess.mWebSocketID, QString(), lMessageRequestToProcess.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseError,
+      NMessageResponse* lMethodNotFoundResponse = new NMessageResponse(lMessageRequestToProcess.mWebSocketID, QString(), lMessageRequestToProcess.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseNoMethodError,
                                                   tr("Method '%1' couldn't be executed successfully!").arg(lMessageRequestToProcess.mEffectiveMethodName), 0, lResponseMap);
       fSendMessage(lMessageRequestToProcess.mWebSocketsServerName, lMethodNotFoundResponse);
       fLog(ELogLevel::eLogCritical, ELogMessageType::eMemoryTransaction, QString("Method '%1' couldn't be executed successfully!").arg(lMessageRequestToProcess.mEffectiveMethodName));
