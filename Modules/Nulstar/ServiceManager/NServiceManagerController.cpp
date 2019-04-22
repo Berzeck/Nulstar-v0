@@ -86,7 +86,7 @@ namespace NulstarNS {
          qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lModuleAPIPending.fMSecsSinceEpoch());
 
          NMessageResponse* lRegisterAPIResponse = new NMessageResponse(lModuleAPIPending.fWebSocketID(), QString(), lModuleAPIPending.fMessageID(), lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseDependenciesNoFoundError,
-                                               tr("Dependencies of module '%1' not found!").arg(lModuleAPIPending.fModuleName()), 0,lDependencies);
+                                               tr("Dependencies of module '%1' not found!").arg(lModuleAPIPending.fModuleName()), 0,lDependencies, QString("%1-%2").arg(fAbbreviation()).arg(int(NMessageResponse::EResponseStatus::eResponseDependenciesNoFoundError)));
 
          fSendMessage(lModuleAPIPending.fWebSocketServerName(), lRegisterAPIResponse);
          fCloseConnection(lModuleAPIPending.fWebSocketServerName(), lModuleAPIPending.fWebSocketID());
@@ -140,7 +140,7 @@ namespace NulstarNS {
           QString lModuleAPIIndexName(QString("%1|%2").arg(lModuleAPIPending.fModuleName()).arg(lModuleAPIPending.fWebSocketID()));
           qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lModuleAPIPending.fMSecsSinceEpoch());
           NMessageResponse* lRegisterAPIResponse = new NMessageResponse(lModuleAPIPending.fWebSocketID(), QString(), lModuleAPIPending.fMessageID(), lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseSuccessful,
-                                                  tr("Module '%1' is active!").arg(lModuleAPIPending.fModuleName()), 0,lDependencies);
+                                                  tr("Module '%1' is active!").arg(lModuleAPIPending.fModuleName()), 0,lDependencies, QString());
           fSendMessage(lModuleAPIPending.fWebSocketServerName(), lRegisterAPIResponse);
           mModuleAPIActive[lModuleAPIIndexName] = lModuleAPIPending;
           mModuleAPIPendingDependencies.removeOne(lModuleAPIPending);
@@ -192,7 +192,11 @@ namespace NulstarNS {
     }
     QVariantMap lGetConsolidatedAPIResponse { {cCommand_GetConsolidatedAPI, lMethods } };
     qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequest.mMSecsSinceEpoch);
-    NMessageResponse* lConsolidateAPIResponse = new NMessageResponse(lMessageRequest.mWebSocketID, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, lConsolidationSuccess, lLastErrorMessage, 0, lGetConsolidatedAPIResponse);
+    QString lResponseErrorCode = QString();
+    if (lConsolidationSuccess != NMessageResponse::EResponseStatus::eResponseSuccessful){
+        lResponseErrorCode = QString("%1-%2").arg(fAbbreviation()).arg(int(lConsolidationSuccess));
+    }
+    NMessageResponse* lConsolidateAPIResponse = new NMessageResponse(lMessageRequest.mWebSocketID, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, lConsolidationSuccess, lLastErrorMessage, 0, lGetConsolidatedAPIResponse, lResponseErrorCode);
     fSendMessage(lMessageRequest.mWebSocketsServerName, lConsolidateAPIResponse);
   }
 
@@ -227,13 +231,13 @@ namespace NulstarNS {
       }
       qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequest.mMSecsSinceEpoch);
       NMessageResponse* rRequestResponse = new NMessageResponse(lMessageRequest.mWebSocketID, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseMethodUnavailableError,
-                                           tr("Method '%1' not available anymore!").arg(lMethods.at(0)), 0, QVariantMap({{lMessageRequest.mOriginalMethodName, QVariantMap()}} ));
+                                           tr("Method '%1' not available anymore!").arg(lMethods.at(0)), 0, QVariantMap({{lMessageRequest.mOriginalMethodName, QVariantMap()}} ), QString("%1-%2").arg(fAbbreviation()).arg(int(NMessageResponse::EResponseStatus::eResponseMethodUnavailableError)));
       fSendMessage(lMessageRequest.mWebSocketsServerName, rRequestResponse);
       return;
     }
     qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequest.mMSecsSinceEpoch);
     NMessageResponse* rRequestResponse = new NMessageResponse(lMessageRequest.mWebSocketID, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseMethodListEmptyError,
-                                         tr("Method list is empty!"), 0, QVariantMap({{lMessageRequest.mOriginalMethodName, QVariantMap()}} ));
+                                         tr("Method list is empty!"), 0, QVariantMap({{lMessageRequest.mOriginalMethodName, QVariantMap()}} ), QString("%1-%2").arg(fAbbreviation()).arg(int(NMessageResponse::EResponseStatus::eResponseMethodListEmptyError)));
     fSendMessage(lMessageRequest.mWebSocketsServerName, rRequestResponse);
   }
 
@@ -246,7 +250,7 @@ namespace NulstarNS {
       QVariantMap lParams(lResponseData.value(lMessageResponseStructure.mOriginalMethodName).toMap());
       qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageResponseStructure.mMSecsSinceEpoch);
       NMessageResponse* rRequestResponse = new NMessageResponse(lMessageResponseStructure.mWebSocketID, QString(), lMessageResponseStructure.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseSuccessful,
-                                           tr(""), 0, QVariantMap({{lMessageResponseStructure.mOriginalMethodName, lParams }} ));
+                                           tr(""), 0, QVariantMap({{lMessageResponseStructure.mOriginalMethodName, lParams }} ), QString());
       fSendMessage(lMessageResponseStructure.mWebSocketsServerName, rRequestResponse);
 
       if(!lMessageResponseStructure.mSubscriptionPeriod && !lMessageResponseStructure.mSubscriptionEventCounter)

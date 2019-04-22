@@ -3,9 +3,9 @@
 
 namespace NulstarNS {
   NMessageResponse::NMessageResponse(const QString& lConnectionName, const QString& lMessageID, const QString& lRequestID, const qint64 lResponseProcessingTime, const EResponseStatus lResponseStatus,
-                                     const QString& lResponseComment, const quint64 lResponseMaxSize, const QVariantMap& lResponseData, QObject *rParent)
+                                     const QString& lResponseComment, const quint64 lResponseMaxSize, const QVariantMap& lResponseData, const QString& lResponseErrorCode, QObject *rParent)
                   : NMessage(lConnectionName, lMessageID, rParent), mRequestID(lRequestID), mResponseProcessingTime(lResponseProcessingTime), mResponseStatus(lResponseStatus), mResponseComment(lResponseComment),
-                    mResponseMaxSize(lResponseMaxSize), mResponseData(lResponseData) {
+                    mResponseMaxSize(lResponseMaxSize), mResponseData(lResponseData), mResponseErrorCode(lResponseErrorCode) {
       if (mResponseData.isEmpty()){
           mResponseData = QVariantMap( {{cResponseDataDependencies, QVariantMap() }} );
       }
@@ -18,6 +18,7 @@ namespace NulstarNS {
     lMessageData.insert(cResponseStatusFieldName, int(mResponseStatus));
     lMessageData.insert(cResponseCommentFieldName, mResponseComment);
     lMessageData.insert(cResponseMaxSizeFieldName, QString::number(mResponseMaxSize));
+    lMessageData.insert(cResponseErrorCodeFieldName, mResponseErrorCode);
     lMessageData.insert(cResponseDataFieldName, mResponseData);
     return lMessageData;
   }
@@ -67,6 +68,10 @@ namespace NulstarNS {
     //if((lResponseStatus !=  cResponseStatusSuccess) && (lResponseStatus !=  cResponseStatusFailure))
     if (lResponseStatus < 0) {
       qDebug("ResponseStatus value out of scope!");
+      return false;
+    }
+    if(!lDataObject.contains(cResponseErrorCodeFieldName)) {
+      qDebug("Message received without 'ResponseErrorCode' field!");
       return false;
     }
     if(!lDataObject.contains(cResponseCommentFieldName)) {

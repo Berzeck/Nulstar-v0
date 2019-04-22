@@ -71,7 +71,7 @@ namespace NulstarNS {
       TMessageRequestToProcess lMessageResponseStructure = mForwardedMessages.value(lRequestID);
       qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageResponseStructure.mMSecsSinceEpoch);
       NMessageResponse* rRequestResponse = new NMessageResponse(lMessageResponseStructure.mWebSocketID, QString(), lMessageResponseStructure.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseSuccessful,
-                                           tr(""), 0, QVariantMap({{lMessageResponseStructure.mOriginalMethodName, lResponseData.value(lMessageResponseStructure.mOriginalMethodName).toMap() }} ));
+                                           tr(""), 0, QVariantMap({{lMessageResponseStructure.mOriginalMethodName, lResponseData.value(lMessageResponseStructure.mOriginalMethodName).toMap() }} ), QString());
       fSendMessage(lMessageResponseStructure.mWebSocketsServerName, rRequestResponse);
 
       if(!lMessageResponseStructure.mSubscriptionPeriod && !lMessageResponseStructure.mSubscriptionEventCounter)
@@ -111,7 +111,7 @@ namespace NulstarNS {
       }
 
     qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequest.mMSecsSinceEpoch);
-    NMessageResponse* lResponse = new NMessageResponse(lMessageRequest.mWebSocketID, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseSuccessful, QString(), 0, lListAPIResponse);
+    NMessageResponse* lResponse = new NMessageResponse(lMessageRequest.mWebSocketID, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseSuccessful, QString(), 0, lListAPIResponse, QString());
     fSendMessage(lMessageRequest.mWebSocketsServerName, lResponse);
   }
 
@@ -164,7 +164,8 @@ namespace NulstarNS {
   void NConnectionController::fSendBadMethodResponse(const TMessageRequestToProcess& lMessageRequestToProcess) {
     qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequestToProcess.mMSecsSinceEpoch);
     NMessageResponse* rRequestResponse = new NMessageResponse(lMessageRequestToProcess.mWebSocketID, QString(), lMessageRequestToProcess.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseNoMethodError,
-                                         tr("Method '%1' not found in current channel!").arg(lMessageRequestToProcess.mEffectiveMethodName), 0, QVariantMap({{lMessageRequestToProcess.mOriginalMethodName, QVariantMap()}} ));
+                                         tr("Method '%1' not found in current channel!").arg(lMessageRequestToProcess.mEffectiveMethodName), 0, QVariantMap({{lMessageRequestToProcess.mOriginalMethodName, QVariantMap()}} ),
+                                         QString("%1-%2").arg(fAbbreviation()).arg(int(NMessageResponse::EResponseStatus::eResponseNoMethodError)));
     fSendMessage(lMessageRequestToProcess.mWebSocketsServerName, rRequestResponse);
   }
 }

@@ -16,6 +16,7 @@ namespace NulstarNS {
   const QString cResponseMaxSizeFieldName("ResponseMaxSize");
   const QString cResponseDataFieldName("ResponseData");
   const QString cResponseDataDependencies("Dependencies");
+  const QString cResponseErrorCodeFieldName("ResponseErrorCode");
   const int cResponseStatusSuccess = 1;
   const int cResponseStatusFailure = 0;
 
@@ -23,11 +24,19 @@ namespace NulstarNS {
     Q_OBJECT
 
     public:
-      enum class EResponseStatus { eResponseSuccessful = 0, eResponseNoMethodError = 1, eResponseDependenciesNoFoundError = 2,
-                                   eResponseMethodExistedError = 3, eResponseMethodUnavailableError = 4, eResponseMethodListEmptyError = 5 };
+      enum class EResponseStatus { eResponseSuccessful = 0,
+                                   /* for NULStar modules*/
+                                   eResponseMethodExeError = 1, eResponseNoMethodError = 2,
+                                   eResponseDependenciesNoFoundError = 3, eResponseMethodExistedError = 4,
+                                   eResponseMethodUnavailableError = 5, eResponseMethodListEmptyError = 6,
+
+
+                                   /*for NULS 2.0 modules*/
+                                   eResponseHandleException = 65536,
+                                 };
 
       explicit NMessageResponse(const QString& lConnectionName, const QString& lMessageID = QString(), const QString& lRequestID = QString(), const qint64 lResponseProcessingTime = 0, const EResponseStatus lResponseStatus = EResponseStatus::eResponseSuccessful,
-                                const QString& lResponseComment = QString(), const quint64 lResponseMaxSize = 0, const QVariantMap& lResponseData = QVariantMap(), QObject* rParent = nullptr);
+                                const QString& lResponseComment = QString(), const quint64 lResponseMaxSize = 0, const QVariantMap& lResponseData = QVariantMap(), const QString& lResponseErrorCode = QString(), QObject* rParent = nullptr);
       ~NMessageResponse() override {}
 
       QString fRequestID() const { return mRequestID; }
@@ -53,6 +62,7 @@ namespace NulstarNS {
       QString mResponseComment;
       quint64 mResponseMaxSize;
       QVariantMap mResponseData;
+      QString mResponseErrorCode;
   };
 } // namespace NulstarNS
 
