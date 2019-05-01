@@ -276,8 +276,10 @@ namespace NulstarNS {
     else {
       if(mWebSockets.contains(lWebSocketsID))
         mWebSockets.value(lWebSocketsID)->fQueueMessage(rMessage, lMinStateRequired);
-      else
+      else {
         fLog(ELogLevel::eLogCritical, ELogMessageType::eMemoryTransaction, QString("Message '%1' couldn't be sent because WebSocket '%2' wasn't found!").arg(rMessage->fMessageID()).arg(lWebSocketsID));
+        rMessage->deleteLater();
+      }
     }
   }
 

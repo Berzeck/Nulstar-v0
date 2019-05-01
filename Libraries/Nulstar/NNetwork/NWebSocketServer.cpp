@@ -48,6 +48,7 @@ namespace NulstarNS {
   void NWebSocketServer::fSendMessage(const qint64 lWebSocketID, NMessage* rMessage) {
     if(mConnections.contains(lWebSocketID)) {
       mConnections.value(lWebSocketID)->fSendMessage(rMessage);
+      rMessage->deleteLater();
     }
     else {
       emit sLog(ELogLevel::eLogCritical, ELogMessageType::eMessageSent, QString("Message '%1' couldn't be sent because WebSocket '%2' wasn't found!").arg(rMessage->fMessageID()).arg(lWebSocketID));

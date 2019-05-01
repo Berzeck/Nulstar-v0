@@ -38,18 +38,25 @@ namespace NulstarNS {
     rMessage->fSetStatus(NMessage::EMessageStatus::eAwaitingDelivery);
     if((lMinStateRequired <= fConnectionState()) && (mWebSocket->state() == QAbstractSocket::ConnectedState))
       fSendMessage(rMessage);
+    else {
+      rMessage->deleteLater();
+      emit sLog(ELogLevel::eLogWarning, ELogMessageType::eMessageSent, rMessage->fToJsonString());
+    }
   }
 
   void NWebSocket::fSendMessage(NMessage* rMessage) {
+    if(!rMessage)
+      return;
     qint64 lBytesSent = mWebSocket->sendTextMessage(rMessage->fToJsonString());
     if(lBytesSent) {
       rMessage->fSetStatus(NMessage::EMessageStatus::eSent);
-      rMessage->deleteLater();
+      emit sLog(ELogLevel::eLogInfo, ELogMessageType::eMessageSent, rMessage->fToJsonString());
     }
-    else
+    else {
       rMessage->fSetStatus(NMessage::EMessageStatus::eWithErrorAndWitheld);
-// qDebug("%s", qUtf8Printable(QString::number(mWebSocket->state())));
-    emit sLog(ELogLevel::eLogInfo, ELogMessageType::eMessageSent, rMessage->fToJsonString());
+      emit sLog(ELogLevel::eLogWarning, ELogMessageType::eMessageSent, rMessage->fToJsonString());
+    }
+    rMessage->deleteLater();
   }
 
   void NWebSocket::fOnConnectionError(QAbstractSocket::SocketError lErrorCode) {

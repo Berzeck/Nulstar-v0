@@ -90,7 +90,7 @@ namespace NulstarNS {
 
          fSendMessage(lModuleAPIPending.fWebSocketServerName(), lRegisterAPIResponse);
          fCloseConnection(lModuleAPIPending.fWebSocketServerName(), lModuleAPIPending.fWebSocketID());
-         mModuleAPIPendingDependencies.removeOne(lModuleAPIPending);
+     //    mModuleAPIPendingDependencies.removeOne(lModuleAPIPending);
       }
       else {
         QVariantMap lDependencies;
