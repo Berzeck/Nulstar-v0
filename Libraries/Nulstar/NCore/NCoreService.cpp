@@ -183,7 +183,7 @@ namespace NulstarNS {
           break;
       }
       QMetaEnum lConnectionState(QMetaEnum::fromType<NWebSocket::EConnectionState>());
-      fLog(ELogLevel::eLogInfo, ELogMessageType::eResourceManagement, tr("Connection '%1' changed to state '%2'.").arg(rWebSocket->fName()).arg(lConnectionState.enumName()));
+      fLog(ELogLevel::eLogInfo, ELogMessageType::eResourceManagement, tr("Connection '%1' changed to state '%2'.").arg(rWebSocket->fName()).arg(lConnectionState.value(int(lNewState))));
     }
   }
 
