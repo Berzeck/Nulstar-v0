@@ -39,7 +39,7 @@ namespace NulstarNS {
             lMethodDetail[cFieldName_MethodMinPeriod] = rTargetObject->fMethodMinEventAndMinPeriod(lApiMethod.name()).split(",").at(1).simplified();
 
             QList<QVariant> lParameters;
-            for(int j = 0; j < lApiMethod.parameterCount(); ++j) {
+            for(int j = 1; j < lApiMethod.parameterCount(); ++j) {
               QMap<QString, QVariant> lParameterDetail;
               lParameterDetail[cFieldName_ParameterName] = QString(lApiMethod.parameterNames().at(j));
               lParameterDetail[cFieldName_ParameterType] = QString(lApiMethod.parameterTypes().at(j));

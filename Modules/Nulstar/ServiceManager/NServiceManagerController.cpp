@@ -93,7 +93,7 @@ namespace NulstarNS {
      //    mModuleAPIPendingDependencies.removeOne(lModuleAPIPending);
       }
       else {
-        QVariantMap lDependencies;
+        QVariantMap lDependencies( {{cFieldName_RegisterAPI, QVariantMap()}} );
         QMapIterator<QString, QVariant> i1(lModuleAPIPending.fDependencies());
 
         bool lAllDependenciesSatisfied = true;
