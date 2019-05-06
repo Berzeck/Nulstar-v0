@@ -60,8 +60,7 @@ namespace NulstarNS {
         break;
     }
     QTextStream lLogStream(&mLogFile);
-    lLogStream << QDateTime::currentDateTime().date().toString("yyyy-dd-MM") << " "
-               << QDateTime::currentDateTime().time().toString("hh:mm:ss") << mSeparator
+    lLogStream << QDateTime::currentDateTime().toString("yyyy-dd-MM hh:mm:ss.zzz") << mSeparator
                << qSetFieldWidth(13) << left << lLogLevel
                << qSetFieldWidth(20) << left << lLogType
                << left << lMessage
