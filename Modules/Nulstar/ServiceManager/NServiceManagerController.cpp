@@ -5,7 +5,7 @@
 
 namespace NulstarNS {
   const int cTimeSeconds_DependencesSearchRetryPeriod = 1;
-  const int cTotal_DependencesSearchRetryTimes = 16;
+  const int cTotal_DependencesSearchRetryTimes = 32;
 
   NServiceManagerController::NServiceManagerController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress &lIP, const QUrl &lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, QHostAddress::SpecialAddress lBindAddress, QObject* rParent)
                            : NCoreService(lSslMode, lLogLevel, lIP, lServiceManagerUrl, lAllowedNetworks, rParent) {
