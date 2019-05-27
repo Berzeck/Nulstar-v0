@@ -12,7 +12,7 @@ namespace NulstarNS {
 
     if(lCommPort)
       fAddWebSocketServer(lCommPort, lBindAddress);
-    connect(&mFindDependenciesRetryTimer, &QTimer::timeout, this, &NServiceManagerController::fFindDependencies);
+    connect(&mFindDependenciesRetryTimer, &QTimer::timeout, this, &NServiceManagerController::fFindDependencies, Qt::QueuedConnection);
     mFindDependenciesRetryTimer.start(1000 * cTimeSeconds_DependencesSearchRetryPeriod);
   }
 
@@ -72,8 +72,9 @@ namespace NulstarNS {
     }
     for(NModuleAPI& lModuleAPIPending : mModuleAPIPendingDependencies) {
       if(lModuleAPIPending.fFindDependenciesRetryCounter() >= cTotal_DependencesSearchRetryTimes) {
-         QVariantMap lDependencies;
-         QMapIterator<QString, QVariant> i1(lModuleAPIPending.fDependencies());
+         QVariantMap lDependencies( {{cFieldName_RegisterAPI, QVariantMap()}} );
+         QVariantMap lModuleAPIPendingDependencies( lModuleAPIPending.fDependencies() );
+         QMapIterator<QString, QVariant> i1(lModuleAPIPendingDependencies);
          while(i1.hasNext()) {
            i1.next();
            QVariantMap lParams;
@@ -94,7 +95,8 @@ namespace NulstarNS {
       }
       else {
         QVariantMap lDependencies( {{cFieldName_RegisterAPI, QVariantMap()}} );
-        QMapIterator<QString, QVariant> i1(lModuleAPIPending.fDependencies());
+        QVariantMap lModuleAPIPendingDependencies( lModuleAPIPending.fDependencies() );
+        QMapIterator<QString, QVariant> i1(lModuleAPIPendingDependencies);
 
         bool lAllDependenciesSatisfied = true;
         while(i1.hasNext() && lAllDependenciesSatisfied) {

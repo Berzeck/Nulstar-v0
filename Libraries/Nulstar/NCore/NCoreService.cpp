@@ -10,8 +10,16 @@
 namespace NulstarNS {
   NCoreService::NCoreService(NWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress& lIP, const QUrl& lServiceManagerUrl, const QList<QNetworkAddressEntry>& lAllowedNetworks,
                              QObject *rParent)
-              : QObject(rParent), mLogLevel(lLogLevel), pRunGuard(nullptr), mServiceManagerUrl(lServiceManagerUrl), mIP(lIP), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks) {
-    QTimer::singleShot(0, this, [this] {
+              : QObject(rParent), mLogLevel(lLogLevel), mFirstInstance(true), pRunGuard(nullptr), mServiceManagerUrl(lServiceManagerUrl), mIP(lIP), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks) {
+
+    pRunGuard = new NRunGuard(QString("%1%2").arg(NulstarNS::cSharedMemoryKey).arg(qApp->applicationDirPath()));
+    if(!pRunGuard->fTryToRun()) {
+      mFirstInstance = false;
+      fLog(NulstarNS::ELogLevel::eLogCritical, NulstarNS::ELogMessageType::eMemoryTransaction, QString("Module '%1' couldn't be started because its already running!").arg(qAppName()));
+      QMetaObject::invokeMethod(qApp, "quit", Qt::QueuedConnection);
+    }
+    if(mFirstInstance) {
+      QTimer::singleShot(0, this, [this] {
                                          mApiBuilder.fBuildApi(this);
                                          QDir lLogDir(qApp->applicationDirPath());
                                          lLogDir.cdUp();lLogDir.cdUp();lLogDir.cdUp();lLogDir.cdUp();
@@ -19,12 +27,13 @@ namespace NulstarNS {
                                          lLogDir.mkpath(lLogDirString);
                                          pLogger = new NLogger(fName(), lLogDirString, cSeparator_Logs, mLogLevel, this);
                                          connect(this, &NCoreService::sLog, pLogger, &NLogger::fLog);
-                                         pRunGuard = new NRunGuard(QString("%1%2").arg(NulstarNS::cSharedMemoryKey).arg(qApp->applicationDirPath()));//
+                                     /*    pRunGuard = new NRunGuard(QString("%1%2").arg(NulstarNS::cSharedMemoryKey).arg(qApp->applicationDirPath()));//
+                                         bool lOneInstance = true;
                                          if(!pRunGuard->fTryToRun()) {
+                                           lOneInstance = false;
                                            fLog(NulstarNS::ELogLevel::eLogCritical, NulstarNS::ELogMessageType::eMemoryTransaction, QString("Module '%1' couldn't be started because its already running!").arg(fName()));
                                            QMetaObject::invokeMethod(qApp, "quit", Qt::QueuedConnection);
-                                         }
-
+                                         }*/
                                          QMapIterator<QString, NWebSocketServer*> i1(mWebServers);
                                          while(i1.hasNext()) {
                                            i1.next();
@@ -36,7 +45,7 @@ namespace NulstarNS {
                                            connect(i2.value(), &NWebSocket::sLog, pLogger, &NLogger::fLog);
                                          }
                                        });
-    connect(this, &NCoreService::sEventTriggered, [this](const QString& lMethodName) {
+      connect(this, &NCoreService::sEventTriggered, [this](const QString& lMethodName) {
               QMutableMapIterator<QString, TMessageRequestToProcess> i1(mMessageRequestEventQueue);
               while(i1.hasNext()) {
                 i1.next();
@@ -46,7 +55,7 @@ namespace NulstarNS {
                 }
               }
             } );
-
+    }
   }
 
   NCoreService::~NCoreService() {
@@ -103,6 +112,8 @@ namespace NulstarNS {
   }
 
   void NCoreService::fConnectToServiceManager(quint8 lReconnectionTryInterval) {
+    if(!mFirstInstance)
+      return;
     NWebSocket* rWebSocket = nullptr;
     if(mWebSockets.contains(cServiceManagerName)) {
       rWebSocket = mWebSockets.value(cServiceManagerName);
@@ -183,7 +194,7 @@ namespace NulstarNS {
           break;
       }
       QMetaEnum lConnectionState(QMetaEnum::fromType<NWebSocket::EConnectionState>());
-      fLog(ELogLevel::eLogInfo, ELogMessageType::eResourceManagement, tr("Connection '%1' changed to state '%2'.").arg(rWebSocket->fName()).arg(lConnectionState.value(int(lNewState))));
+      fLog(ELogLevel::eLogInfo, ELogMessageType::eResourceManagement, tr("Connection '%1' changed to state '%2'.").arg(rWebSocket->fName()).arg(lConnectionState.valueToKey(static_cast<int>(lNewState))));
     }
   }
 

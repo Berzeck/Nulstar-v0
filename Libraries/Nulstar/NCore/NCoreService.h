@@ -58,6 +58,7 @@ namespace NulstarNS {
    /***   NMessageResponse fMaxConnections(const QString &lName);
       NResponse fTotalConnections(const QString &lName);
       NResponse fSetMaxConnections(const QString& lName, int lMaxconnections); ***/
+
       void fLog(ELogLevel eLogLevel, ELogMessageType eLogMessageType, const QString& lMessage) { emit sLog(eLogLevel, eLogMessageType, lMessage); }
       void fExit(ELogLevel eLogLevel, const QString& lMessage) { emit sExit(eLogLevel, lMessage); }
       QString fMethodDescription(const QString& lMethodName) const;
@@ -97,6 +98,7 @@ namespace NulstarNS {
       NLogger* pLogger;
 
     private:
+      bool mFirstInstance;
       quint64 mLastID;
       NRunGuard* pRunGuard;
       QUrl mServiceManagerUrl;

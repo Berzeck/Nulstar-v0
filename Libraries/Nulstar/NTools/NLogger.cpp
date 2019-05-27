@@ -56,7 +56,7 @@ namespace NulstarNS {
         lLogType = QStringLiteral("Memory Transaction");
         break;
       case ELogMessageType::eResourceManagement:
-        lLogType = QStringLiteral("Resource Managment");
+        lLogType = QStringLiteral("Resource Management");
         break;
     }
     QTextStream lLogStream(&mLogFile);

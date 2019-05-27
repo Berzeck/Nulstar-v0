@@ -71,7 +71,7 @@ namespace NulstarNS {
 
   void NWebSocketServer::fSocketDisconnected() {
     NWebSocket* rSocket = qobject_cast<NWebSocket*>(sender());
-    emit sLog(ELogLevel::eLogWarning, ELogMessageType::eResourceManagement, QString("WebSocket '%1' disconneted!").arg(rSocket->fName()));
+    emit sLog(ELogLevel::eLogWarning, ELogMessageType::eResourceManagement, QString("WebSocket '%1' disconnected!").arg(rSocket->fName()));
     if(rSocket) {
       fRemoveConnections(QList<qint64> () << rSocket->fName().toLongLong());
       emit sWebSocketDisconnected(rSocket->fName());
