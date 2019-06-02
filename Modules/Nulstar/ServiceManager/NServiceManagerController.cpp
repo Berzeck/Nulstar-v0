@@ -4,8 +4,8 @@
 #include "NServiceManagerController.h"
 
 namespace NulstarNS {
-  const int cTimeSeconds_DependencesSearchRetryPeriod = 1;
-  const int cTotal_DependencesSearchRetryTimes = 32;
+  const double cTimeSeconds_DependencesSearchRetryPeriod = 0.5;
+  const int cTotal_DependencesSearchRetryTimes = 20;
 
   NServiceManagerController::NServiceManagerController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress &lIP, const QUrl &lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, QHostAddress::SpecialAddress lBindAddress, QObject* rParent)
                            : NCoreService(lSslMode, lLogLevel, lIP, lServiceManagerUrl, lAllowedNetworks, rParent) {
@@ -13,7 +13,7 @@ namespace NulstarNS {
     if(lCommPort)
       fAddWebSocketServer(lCommPort, lBindAddress);
     connect(&mFindDependenciesRetryTimer, &QTimer::timeout, this, &NServiceManagerController::fFindDependencies, Qt::QueuedConnection);
-    mFindDependenciesRetryTimer.start(1000 * cTimeSeconds_DependencesSearchRetryPeriod);
+    mFindDependenciesRetryTimer.start(static_cast<int>(1000 * cTimeSeconds_DependencesSearchRetryPeriod));
   }
 
   QVariantMap NServiceManagerController::fApiRoles() const {
@@ -66,15 +66,15 @@ namespace NulstarNS {
   }
 
   void NServiceManagerController::fFindDependencies() {
-    for(NModuleAPI& lModuleAPIPending : mModuleAPIActive) {
+   /* for(NModuleAPI& lModuleAPIPending : mModuleAPIActive) {
       QSettings lTempLog("ActiveModules.log", QSettings::IniFormat);
       lTempLog.setValue(lModuleAPIPending.fModuleName(), QTime::currentTime().toString("hh:mm:ss"));
-    }
-    for(NModuleAPI& lModuleAPIPending : mModuleAPIPendingDependencies) {
+    }*/
+    QList<NModuleAPI> lModuleAPIPendingDependencies(mModuleAPIPendingDependencies);
+    for(NModuleAPI& lModuleAPIPending : lModuleAPIPendingDependencies) {
       if(lModuleAPIPending.fFindDependenciesRetryCounter() >= cTotal_DependencesSearchRetryTimes) {
          QVariantMap lDependencies( {{cFieldName_RegisterAPI, QVariantMap()}} );
-         QVariantMap lModuleAPIPendingDependencies( lModuleAPIPending.fDependencies() );
-         QMapIterator<QString, QVariant> i1(lModuleAPIPendingDependencies);
+         QMapIterator<QString, QVariant> i1(lModuleAPIPending.fDependencies());
          while(i1.hasNext()) {
            i1.next();
            QVariantMap lParams;
@@ -91,12 +91,10 @@ namespace NulstarNS {
 
          fSendMessage(lModuleAPIPending.fWebSocketServerName(), lRegisterAPIResponse);
          fCloseConnection(lModuleAPIPending.fWebSocketServerName(), lModuleAPIPending.fWebSocketID());
-     //    mModuleAPIPendingDependencies.removeOne(lModuleAPIPending);
       }
       else {
         QVariantMap lDependencies( {{cFieldName_RegisterAPI, QVariantMap()}} );
-        QVariantMap lModuleAPIPendingDependencies( lModuleAPIPending.fDependencies() );
-        QMapIterator<QString, QVariant> i1(lModuleAPIPendingDependencies);
+        QMapIterator<QString, QVariant> i1(lModuleAPIPending.fDependencies());
 
         bool lAllDependenciesSatisfied = true;
         while(i1.hasNext() && lAllDependenciesSatisfied) {
@@ -208,7 +206,7 @@ namespace NulstarNS {
      lModuleAPI.fSetMSecsSinceEpoch(lMessageRequest.mMSecsSinceEpoch);
      lModuleAPI.fSetWebSocketID(lMessageRequest.mWebSocketID);
      lModuleAPI.fSetWebSocketServerName(lMessageRequest.mWebSocketsServerName);
-     if(lModuleAPI.fIsValid())
+     if(lModuleAPI.fIsValid() && !mModuleAPIPendingDependencies.contains(lModuleAPI))
        mModuleAPIPendingDependencies << lModuleAPI;
   }
 

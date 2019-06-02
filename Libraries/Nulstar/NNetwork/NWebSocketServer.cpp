@@ -102,8 +102,6 @@ namespace NulstarNS {
 
   bool NWebSocketServer::fVersionSupported(const QVariantMap &lMessage) {
     QVersionNumber lIncommingVersion = QVersionNumber::fromString(lMessage.value(cFieldName_MessageData).toMap().value(cProtocolVersionFieldName).toString());
-    emit sLog(ELogLevel::eLogInfo, ELogMessageType::eMessageReceived, QString("Incoming protocol version '%1' supported!").arg(lIncommingVersion.toString()));
-
     for(const QVersionNumber& lVersionSupported : mProtocolVersionsSupported) {
       if(lIncommingVersion == lVersionSupported) {
         return true;

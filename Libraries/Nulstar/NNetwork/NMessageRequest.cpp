@@ -11,7 +11,7 @@ namespace NulstarNS {
 
   QVariantMap NMessageRequest::fMessageData() const {
     QVariantMap lMessageData;
-    lMessageData.insert(lRequestAckFieldName, mRequestAck);
+    lMessageData.insert(lRequestAckFieldName, mRequestAck ? "1" : "0");
     lMessageData.insert(cFieldName_SubscriptionEventCounter, QString::number(mSubscriptionEventCounter));
     lMessageData.insert(cFieldName_SubscriptionPeriod, QString::number(mSubscriptionPeriod));
     lMessageData.insert(lSubscriptionRangeFieldName, mSubscriptionRange);

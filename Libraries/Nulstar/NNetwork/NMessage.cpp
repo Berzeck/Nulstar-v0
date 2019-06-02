@@ -26,8 +26,8 @@ namespace NulstarNS {
   QString NMessage::fToJsonString(QJsonDocument::JsonFormat lFormat) const {
     QVariantMap lMessage;
     lMessage.insert(cFieldName_MessageID, mMessageID);
-    lMessage.insert(cTimeStampFieldName, mTimeStamp);
-    lMessage.insert(cTimeZoneFieldName, mTimeZone);
+    lMessage.insert(cTimeStampFieldName, QString::number(mTimeStamp));
+    lMessage.insert(cTimeZoneFieldName, QString::number(mTimeZone));
     lMessage.insert(cMessageTypeFieldName, fMessageType());
     lMessage.insert(cFieldName_MessageData, fMessageData());
     return QString(QJsonDocument::fromVariant(lMessage).toJson(lFormat));
