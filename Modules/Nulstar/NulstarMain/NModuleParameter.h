@@ -10,6 +10,11 @@ namespace NulstarNS {
       QString mGroupName;
       QString mParamName;
       QString mParamValue;
+      inline NModuleParameter(const NModuleParameter& lModuleParam) {
+        mGroupName = lModuleParam.mGroupName;
+        mParamName = lModuleParam.mParamName;
+        mParamValue = lModuleParam.mParamValue;
+      }
       inline NModuleParameter &operator=(const NModuleParameter& lModuleParam) {
         mGroupName = lModuleParam.mGroupName;
         mParamName = lModuleParam.mParamName;
@@ -20,6 +25,9 @@ namespace NulstarNS {
       inline bool operator==(const NModuleParameter& lModuleParam) {
         return (mGroupName == lModuleParam.mGroupName) && (mParamName == lModuleParam.mParamName) && (mParamValue == lModuleParam.mParamValue);
       }
+
+   private:
+
   };
 }
 

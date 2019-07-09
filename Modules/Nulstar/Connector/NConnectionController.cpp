@@ -103,7 +103,7 @@ namespace NulstarNS {
         lCurrentMap = lCurrentMap.unite(mAdminMethods);
         lListAPIResponse["listapi"] = lCurrentMap;
       }
-      if(lMessageRequest.mWebSocketsServerName == cAdminServerName) {
+      if(lMessageRequest.mWebSocketsServerName == cCommServerName) {
         QVariantMap lCurrentMap(mPublicMethods);
         lCurrentMap = lCurrentMap.unite(mAdminMethods);
         lCurrentMap = lCurrentMap.unite(mPrivateMethods);

@@ -102,17 +102,17 @@ namespace NulstarNS {
       qDebug("Module '%s' can't be managed from this interface!", lModuleName.toStdString().data());
       return false;
     }
-    QProcess* lModuleProcess = new QProcess(this);
+    QProcess* rModuleProcess = new QProcess(this);
     NModuleInfo lModuleInfo = mModuleManager.fModuleInfo(lModuleNamespace, lModuleName, lEffectiveModuleVersion);
 /*  QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
   env.insert("LD_LIBRARY_PATH", "/home/Berzeck/Applications/Nulstar/Debug/Libraries/CPP/Nulstar/0.1.0"); // Add an environment variable
-  lModuleProcess->setProcessEnvironment(env);*/
+  rModuleProcess->setProcessEnvironment(env);*/
     QStringList lFormattedParameters(lModuleInfo.fFormattedParameters());
     if(lModuleInfo.fModuleName() != cServiceManagerName)
       lFormattedParameters << QString("--%1").arg(cParameter_ManagerURL) << fServiceManagerUrl().toString();
-    lModuleProcess->start(lModuleInfo.fModuleAppPath(), lFormattedParameters);
-    if(lModuleProcess->waitForStarted(cProcessStartMaxSeconds * 1000)) {
-      mModulesRunning.insert(lProcessIndex, lModuleProcess);
+    rModuleProcess->start(lModuleInfo.fModuleAppPath(), lFormattedParameters);
+    if(rModuleProcess->waitForStarted(cProcessStartMaxSeconds * 1000)) {
+      mModulesRunning.insert(lProcessIndex, rModuleProcess);
       QEventLoop lExtraDelay;  // So components have enough time to open the websocket servers
       QTimer lDelayTimer;
       connect(&lDelayTimer, &QTimer::timeout, &lExtraDelay, &QEventLoop::quit);
@@ -121,7 +121,7 @@ namespace NulstarNS {
       return true;
     }
     qDebug("Module '%s' and version '%s' could not start successfully!", lModuleName.toStdString().data(), lEffectiveModuleVersion.toStdString().data());
-    lModuleProcess->deleteLater();
+    rModuleProcess->deleteLater();
     return false;
   }
 
@@ -155,12 +155,12 @@ namespace NulstarNS {
     fStopModuleByScript(lModuleNamespace, lModuleName, lEffectiveModuleVersion);
     QString lProcessIndex(QString("%1%2%3%4%5").arg(lModuleNamespace).arg(cIndexSeparator).arg(lModuleName).arg(cIndexSeparator).arg(lEffectiveModuleVersion));
     if(mModulesRunning.contains(lProcessIndex)) {
-      QProcess* lModuleProcess = mModulesRunning.value(lProcessIndex);
-      if(lModuleProcess) {
-        lModuleProcess->close();
+      QProcess* rModuleProcess = mModulesRunning.value(lProcessIndex);
+      if(rModuleProcess) {
+        rModuleProcess->close();
         mModulesRunning.remove(lProcessIndex);
-        lModuleProcess->deleteLater();
-
+        rModuleProcess->deleteLater();
+        qDebug("Closing module '%s'.", lModuleName.toStdString().data());
         return true;
       }
     }
@@ -186,8 +186,19 @@ namespace NulstarNS {
     return lAllModulesSuccessfullyStoped;
   }
 
-  void NMainController::shutdownsystem() {
-    stopallmodules();
+  void NMainController::shutdownsystem(const TMessageRequestToProcess &lMessageRequest) {
+    QVariantMap lShutdownSystemMap { {"shutdownsystem", QVariantMap() } };
+    QString lResponseErrorCode;
+    bool lShutdownSuccess = stopallmodules();
+    NMessageResponse::EResponseStatus lMethodSuccess = NMessageResponse::EResponseStatus::eResponseSuccessful;
+    if(!lShutdownSuccess) {
+      lResponseErrorCode = QString("%1-%2").arg(fAbbreviation()).arg(int(lShutdownSuccess));
+      lMethodSuccess = NMessageResponse::EResponseStatus::eResponseMethodExeError;
+    }
+    qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequest.mMSecsSinceEpoch);
+    NMessageResponse* lShutdownSystemResponse = new NMessageResponse(lMessageRequest.mWebSocketID, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, lMethodSuccess, QString(), 0, lShutdownSystemMap, lResponseErrorCode);
+    fSendMessage(lMessageRequest.mWebSocketsServerName, lShutdownSystemResponse);
+
     qApp->quit();
   }
 
@@ -214,16 +225,15 @@ namespace NulstarNS {
         qDebug("Module '%s' and version '%s' is not stoped by scirpt!", lModuleName.toStdString().data(), lEffectiveModuleVersion.toStdString().data());
         return;
       }
-      QProcess* lModuleProcess = new QProcess(this);
-      lModuleProcess->start(lStopScript);
-      if(lModuleProcess->waitForStarted(cProcessStartMaxSeconds * 1000)) {
+      QProcess* rModuleProcess = new QProcess(this);
+      rModuleProcess->start(lStopScript);
+      if(rModuleProcess->waitForStarted(cProcessStartMaxSeconds * 1000)) {
           QEventLoop lExtraDelay;
           QTimer lDelayTimer;
           connect(&lDelayTimer, &QTimer::timeout, &lExtraDelay, &QEventLoop::quit);
           lDelayTimer.start(cTimePeriod_ExtraDelayMSecs);
           lExtraDelay.exec();
-      }
-      qDebug("Module '%s' and version '%s' could not start successfully!", lModuleName.toStdString().data(), lEffectiveModuleVersion.toStdString().data());
-      lModuleProcess->deleteLater();
+      }      
+      rModuleProcess->deleteLater();
   }
 }

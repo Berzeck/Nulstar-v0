@@ -18,7 +18,7 @@ namespace NulstarNS {
 
     public:
       explicit NMainController();
-      ~NMainController() override {}
+      ~NMainController() override { stopallmodules(); }
 
       QString fAbbreviation() const override { return "NMC"; }
       QString fName() const override { return QString(APP_NAME); }
@@ -29,12 +29,12 @@ namespace NulstarNS {
       QList<QVersionNumber> fProtocolVersionsSupported() const override { QList<QVersionNumber> lApiVersionsSupported; QVersionNumber lMainVersion(QVersionNumber::fromString(APP_PROTOCOL_VERSIONS)); lApiVersionsSupported << lMainVersion; return lApiVersionsSupported; }
 
     public Q_SLOTS:
-      API_ADMIN_FUNCTION quint8 scanmanagedmodules();
-      API_ADMIN_FUNCTION bool startmodule(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion = QString(), bool fRestartIfRunning = false);
-      API_ADMIN_FUNCTION bool startallmodules(const QString& lModuleNamespace = QString(), bool fRestartIfRunning = false);
-      API_ADMIN_FUNCTION bool stopmodule(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion = QString());
-      API_ADMIN_FUNCTION bool stopallmodules(const QString& lModuleNamespace = QString());
-      API_ADMIN_FUNCTION void shutdownsystem();
+      API_PRIVATE_FUNCTION quint8 scanmanagedmodules();
+      API_PRIVATE_FUNCTION bool startmodule(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion = QString(), bool fRestartIfRunning = false);
+      API_PRIVATE_FUNCTION bool startallmodules(const QString& lModuleNamespace = QString(), bool fRestartIfRunning = false);
+      API_PRIVATE_FUNCTION bool stopmodule(const QString& lModuleNamespace, const QString& lModuleName, const QString& lModuleVersion = QString());
+      API_PRIVATE_FUNCTION bool stopallmodules(const QString& lModuleNamespace = QString());
+      API_ADMIN_FUNCTION void shutdownsystem(const TMessageRequestToProcess& lMessageRequest);
 
     protected:
       void fFillMethodMetadata() override;
