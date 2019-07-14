@@ -98,7 +98,7 @@ void NSignalWatcherPrivate::watchForSignal(int signal)
     struct sigaction sigact;
     sigact.sa_handler = NSignalWatcherPrivate::signalHandler;
     sigact.sa_flags = 0;
-    ::sigemptyset(&sigact.sa_mask);
+    sigemptyset(&sigact.sa_mask);
     sigact.sa_flags |= SA_RESTART;
     if (::sigaction(signal, &sigact, NULL)) {
         qDebug() << "NSignalWatcher: sigaction: " << ::strerror(errno);

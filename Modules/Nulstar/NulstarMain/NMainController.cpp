@@ -221,8 +221,8 @@ namespace NulstarNS {
   void NMainController::fStopModuleByScript(const QString& lModuleNamespace, const QString& lModuleName, const QString& lEffectiveModuleVersion) {
       NModuleInfo lModuleInfo = mModuleManager.fModuleInfo(lModuleNamespace, lModuleName, lEffectiveModuleVersion);
       QString lStopScript = lModuleInfo.fModuleStopScript();
-      if (lStopScript.isNull()) {
-        qDebug("Module '%s' and version '%s' is not stoped by scirpt!", lModuleName.toStdString().data(), lEffectiveModuleVersion.toStdString().data());
+      if(lStopScript.isNull()) {
+        qDebug("Module '%s' and version '%s' is not stopped by script!", lModuleName.toStdString().data(), lEffectiveModuleVersion.toStdString().data());
         return;
       }
       QProcess* rModuleProcess = new QProcess(this);
