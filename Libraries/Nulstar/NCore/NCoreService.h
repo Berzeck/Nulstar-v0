@@ -50,7 +50,7 @@ namespace NulstarNS {
       virtual QList<QVersionNumber> fProtocolVersionsSupported() const = 0;
       virtual quint16 fCommPort() const;
     //  virtual int fApiMethodNameOffset() const { return 1; }
-      virtual bool fApiMethodLowercase() const { return true; }
+      virtual bool fApiMethodLowercase() const { return false; }
 
       virtual bool fAddWebSocketServer(quint16 lPort, QHostAddress::SpecialAddress lBindAddress, const QString& lName = QString(), const QString& lLabel = QString(), bool lStartImmediatly = false);
       void fAddMethodFunctionDescription(const QString& lMethodName, const QString& lDescription) { mApiMethodDescription[lMethodName] = lDescription; }

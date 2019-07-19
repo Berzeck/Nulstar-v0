@@ -200,7 +200,7 @@ namespace NulstarNS {
     fSendMessage(lMessageRequest.mWebSocketsServerName, lConsolidateAPIResponse);
   }
 
-  void NServiceManagerController::registerapi(const TMessageRequestToProcess& lMessageRequest) {
+  void NServiceManagerController::RegisterAPI(const TMessageRequestToProcess& lMessageRequest) {
      NModuleAPI lModuleAPI(lMessageRequest.mParameters);
      lModuleAPI.fSetMessageID(lMessageRequest.mMessageID);
      lModuleAPI.fSetMSecsSinceEpoch(lMessageRequest.mMSecsSinceEpoch);

@@ -34,7 +34,7 @@ namespace NulstarNS {
       QList<QVersionNumber> fProtocolVersionsSupported() const override { QList<QVersionNumber> lApiVersionsSupported; QVersionNumber lMainVersion(QVersionNumber::fromString(APP_PROTOCOL_VERSIONS)); lApiVersionsSupported << lMainVersion; return lApiVersionsSupported; }
 
     public Q_SLOTS:
-      API_PRIVATE_FUNCTION void registerapi(const TMessageRequestToProcess& lMessageRequest);
+      API_PRIVATE_FUNCTION void RegisterAPI(const TMessageRequestToProcess& lMessageRequest);
       API_PRIVATE_FUNCTION void getconsolidatedapi(const TMessageRequestToProcess& lMessageRequest);
       API_PRIVATE_FUNCTION void forwardmessage(const TMessageRequestToProcess& lMessageRequest);
 
