@@ -1,5 +1,6 @@
 TEMPLATE = subdirs
-SUBDIRS += NCore \
+SUBDIRS += HttpServer \
+           NCore \
            NNetwork \
     NTools
 NCore.depends += NNetwork
