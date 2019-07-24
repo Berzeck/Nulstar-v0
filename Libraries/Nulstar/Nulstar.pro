@@ -1,8 +1,7 @@
 TEMPLATE = subdirs
+CONFIG += ordered
 SUBDIRS += NCore \
            NTools \
            NNetwork \
            HttpServer
 
-NCore.depends += NNetwork
-NNetwork.depends += NTools

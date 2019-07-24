@@ -1,8 +1,7 @@
 TEMPLATE = subdirs
+CONFIG += ordered
 SUBDIRS += Libraries \
            Modules
-
-Modules.depends = Libraries
 
 OTHER_FILES += common.pri \
                .qmake.conf

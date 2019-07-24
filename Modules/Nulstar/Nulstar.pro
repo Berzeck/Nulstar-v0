@@ -1,8 +1,9 @@
 TEMPLATE = subdirs
+CONFIG += ordered
 SUBDIRS += Connector \
-			NulstarMain \
-			ServiceManager \
-			Updater \
-			Tester
+           NulstarMain \
+           ServiceManager \
+           Updater \
+           Tester
 
-NulstarMain.depends += ServiceManager Connector Updater Tester
+
