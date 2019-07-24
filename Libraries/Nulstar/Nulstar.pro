@@ -1,7 +1,7 @@
 TEMPLATE = subdirs
 CONFIG += ordered
-SUBDIRS += NCore \
-           NTools \
+SUBDIRS += NTools \
            NNetwork \
+           NCore \
            HttpServer
 
