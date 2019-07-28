@@ -55,7 +55,7 @@ namespace NulstarNS {
       bool fMethodValid(const QString& lMethodName, const QVariantMap& lMethodList);
 
     public Q_SLOTS:
-      API_PUBLIC_FUNCTION void listapi(const TMessageRequestToProcess& lMessageRequest);
+      API_PUBLIC_FUNCTION void ListAPI(const TMessageRequestToProcess& lMessageRequest);
   /***    API_ADMIN_FUNCTION NResponse setmaxconnections(int lMaxConnections) { return fSetMaxConnections(lClientServerName, lMaxConnections); }
       API_ADMIN_FUNCTION NResponse getmaxconnections() { return fMaxConnections(lClientServerName); }
       API_ADMIN_FUNCTION NResponse gettotalconnections() { return fTotalConnections(lClientServerName); }

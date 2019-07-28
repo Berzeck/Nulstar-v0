@@ -146,6 +146,12 @@ namespace NulstarNS {
     for(const QString& lRequestMethodName : lRequestMethods.keys()) {
       QVariantMap lRequestMethodParams = lRequestMethods.value(lRequestMethodName).toMap();
       TMessageRequestToProcess lMessageRequest({fName(), rConnection->fName(),lMessageID, lRequestMethodName, lRequestMethodName,lRequestMethodParams, lSubscriptionEventCounter, lSubscriptionPeriod, 0, 0} );
+ /*if(lRequestMethodName == "RegisterAPI") {
+     qDebug("1 Method******** '%s' **********", lMessageRequest.mEffectiveMethodName.toStdString().data());
+     qDebug("2 SEC* '%s' **********", QString::number(lMessageRequest.mSubscriptionEventCounter).toStdString().data());
+     qDebug("3 SPC* '%s' **********", QString::number(lMessageRequest.mSubscriptionPeriod).toStdString().data());
+     qDebug("4 Modul;e* '%s' **********", lMessageRequest.mParameters["ModuleName"].toString().toStdString().data());
+}*/
       emit sRequestMessageArrived(lMessageRequest);
     }
   }

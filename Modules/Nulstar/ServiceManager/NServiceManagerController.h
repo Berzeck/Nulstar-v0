@@ -35,13 +35,14 @@ namespace NulstarNS {
 
     public Q_SLOTS:
       API_PRIVATE_FUNCTION void RegisterAPI(const TMessageRequestToProcess& lMessageRequest);
-      API_PRIVATE_FUNCTION void getconsolidatedapi(const TMessageRequestToProcess& lMessageRequest);
-      API_PRIVATE_FUNCTION void forwardmessage(const TMessageRequestToProcess& lMessageRequest);
+      API_PRIVATE_FUNCTION void GetConsolidatedAPI(const TMessageRequestToProcess& lMessageRequest);
+      API_PRIVATE_FUNCTION void ForwardMessage(const TMessageRequestToProcess& lMessageRequest);
 
     protected Q_SLOTS:
       void fProcessResponse(const QVariantMap& lMessageResponse) override;
       void fOnWebSocketDisconnected(const QString& lWebSocketID) override;
       void fFindDependencies();
+      void fFillMethodMinEventAndMinPeriod();
 
     protected:
       QTimer mFindDependenciesRetryTimer;
@@ -51,6 +52,7 @@ namespace NulstarNS {
 
     private:
       QMap<QString, TMessageRequestToProcess> mForwardedMessages; // Forwarded MessageID, Data
+      QString fValidateForwardedMessage(const TMessageRequestToProcess& lMessageRequest, const QVariantMap& lStoredParameters) const;
   };
 }
 

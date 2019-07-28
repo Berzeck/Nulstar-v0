@@ -94,6 +94,8 @@ namespace NulstarNS {
     protected:
       virtual void fFillMethodMetadata() = 0;
       virtual void fInvokeMethod(TMessageRequestToProcess& lMessageRequestToProcess);
+      virtual bool fValidEventCounter(const TMessageRequestToProcess& lMessageRequestToProcess) const;
+      virtual bool fValidPeriod(const TMessageRequestToProcess& lMessageRequestToProcess) const;
       ELogLevel mLogLevel;
       NLogger* pLogger;
 

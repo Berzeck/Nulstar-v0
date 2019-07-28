@@ -302,7 +302,22 @@ namespace NulstarNS {
   }  
 
   void NCoreService::fInvokeMethod(TMessageRequestToProcess& lMessageRequestToProcess) {
-    bool lSuccess =  metaObject()->invokeMethod(this, lMessageRequestToProcess.mEffectiveMethodName.toLatin1().data(), Qt::DirectConnection, Q_ARG(TMessageRequestToProcess, lMessageRequestToProcess));
+    bool lValidEventCounter = fValidEventCounter(lMessageRequestToProcess);
+    bool lValidPeriod = fValidPeriod(lMessageRequestToProcess);
+    if(!lValidEventCounter || !lValidPeriod) {
+      QVariantMap lResponseMap({ {lMessageRequestToProcess.mEffectiveMethodName, QVariantMap({}) }} );
+      qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequestToProcess.mMSecsSinceEpoch);
+      QString lErrorMessage = !lValidEventCounter ? tr("SubscriptionEventCounter parameter: '%1' not valid for method '%2'").arg(lMessageRequestToProcess.mSubscriptionEventCounter).arg(lMessageRequestToProcess.mEffectiveMethodName) :
+                                                    tr("SubscriptionPeriod parameter: '%1' not valid for method '%2'").arg(lMessageRequestToProcess.mSubscriptionPeriod).arg(lMessageRequestToProcess.mEffectiveMethodName);
+      NMessageResponse* lInvalidParameterResponse = new NMessageResponse(lMessageRequestToProcess.mWebSocketID, QString(), lMessageRequestToProcess.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseMethodExeError,
+                                                  lErrorMessage, 0, lResponseMap, QString("%1-%2").arg(fAbbreviation()).arg(int(NMessageResponse::EResponseStatus::eResponseMethodExeError)));
+      fSendMessage(lMessageRequestToProcess.mWebSocketsServerName, lInvalidParameterResponse);
+      fLog(ELogLevel::eLogCritical, ELogMessageType::eMemoryTransaction, lErrorMessage);
+      return;
+    }
+
+    bool lSuccess = true;
+    lSuccess =  metaObject()->invokeMethod(this, lMessageRequestToProcess.mEffectiveMethodName.toLatin1().data(), Qt::DirectConnection, Q_ARG(TMessageRequestToProcess, lMessageRequestToProcess));
     if(lSuccess) {
       if(lMessageRequestToProcess.mSubscriptionEventCounter) {
         lMessageRequestToProcess.mEventCounter += 1;
@@ -318,5 +333,31 @@ namespace NulstarNS {
       fSendMessage(lMessageRequestToProcess.mWebSocketsServerName, lMethodNotFoundResponse);
       fLog(ELogLevel::eLogCritical, ELogMessageType::eMemoryTransaction, QString("Method '%1' couldn't be executed successfully!").arg(lMessageRequestToProcess.mEffectiveMethodName));
     }
+  }
+
+  bool NCoreService::fValidEventCounter(const TMessageRequestToProcess& lMessageRequestToProcess) const {
+    quint64 lMinEventCounter = 0;
+    if(mApiMethodMinEventAndMinPeriod.contains(lMessageRequestToProcess.mEffectiveMethodName))
+      lMinEventCounter = mApiMethodMinEventAndMinPeriod[lMessageRequestToProcess.mEffectiveMethodName].section(",",0,0).toULongLong();
+
+    if((lMinEventCounter == 0) && (lMessageRequestToProcess.mSubscriptionEventCounter > 0))
+      return false;
+    if((lMinEventCounter > 0) && (lMessageRequestToProcess.mSubscriptionEventCounter < lMinEventCounter))
+      return false;
+
+    return true;
+  }
+
+  bool NCoreService::fValidPeriod(const TMessageRequestToProcess& lMessageRequestToProcess) const {
+    quint64 lMinEventPeriod = 0;
+    if(mApiMethodMinEventAndMinPeriod.contains(lMessageRequestToProcess.mEffectiveMethodName))
+      lMinEventPeriod = mApiMethodMinEventAndMinPeriod[lMessageRequestToProcess.mEffectiveMethodName].section(",",1,1).toULongLong();
+
+    if((lMinEventPeriod == 0) && (lMessageRequestToProcess.mSubscriptionPeriod > 0))
+      return false;
+    if((lMinEventPeriod > 0) && (lMessageRequestToProcess.mSubscriptionPeriod < lMinEventPeriod))
+      return false;
+
+    return true;
   }
 }

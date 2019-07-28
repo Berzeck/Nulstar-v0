@@ -12,8 +12,13 @@ namespace NulstarNS {
 
     if(lCommPort)
       fAddWebSocketServer(lCommPort, lBindAddress);
+    fFillMethodMinEventAndMinPeriod();
     connect(&mFindDependenciesRetryTimer, &QTimer::timeout, this, &NServiceManagerController::fFindDependencies, Qt::QueuedConnection);
     mFindDependenciesRetryTimer.start(static_cast<int>(1000 * cTimeSeconds_DependencesSearchRetryPeriod));
+  }
+
+  void NServiceManagerController::fFillMethodMinEventAndMinPeriod() {
+    fAddMethodMinEventAndMinPeriod("GetConsolidatedAPI", QString("1,0"));
   }
 
   QVariantMap NServiceManagerController::fApiRoles() const {
@@ -43,7 +48,7 @@ namespace NulstarNS {
 
         qDebug("%s", qUtf8Printable(QString("API from module '%1' using WebSocket connection '%2' has been removed!").arg(i1.value().fModuleName()).arg(i1.value().fWebSocketID())));
         mModuleAPIActive.remove(i1.key());
-        emit sEventTriggered("getconsolidatedapi");
+        emit sEventTriggered("GetConsolidatedAPI");
         break;
       }
     }
@@ -59,7 +64,7 @@ namespace NulstarNS {
 
         qDebug("%s", qUtf8Printable(QString("Pending API from module '%1' using WebSocket connection '%2' has been removed!").arg(lModuleAPI.fModuleName()).arg(lModuleAPI.fWebSocketID())));
         mModuleAPIPendingDependencies.removeOne(lModuleAPI);
-        emit sEventTriggered("getconsolidatedapi");
+        emit sEventTriggered("GetConsolidatedAPI");
         break;
       }
     }
@@ -144,13 +149,13 @@ namespace NulstarNS {
           fSendMessage(lModuleAPIPending.fWebSocketServerName(), lRegisterAPIResponse);
           mModuleAPIActive[lModuleAPIIndexName] = lModuleAPIPending;
           mModuleAPIPendingDependencies.removeOne(lModuleAPIPending);
-          emit sEventTriggered("getconsolidatedapi");
+          emit sEventTriggered("GetConsolidatedAPI");
         }
       }
     }
   }
 
-  void NServiceManagerController::getconsolidatedapi(const TMessageRequestToProcess& lMessageRequest) {
+  void NServiceManagerController::GetConsolidatedAPI(const TMessageRequestToProcess& lMessageRequest) {
     QVariantMap lMethods;
     lMethods[cFieldName_Admin] = QVariantMap();
     lMethods[cFieldName_Private] = QVariantMap();
@@ -200,33 +205,50 @@ namespace NulstarNS {
     fSendMessage(lMessageRequest.mWebSocketsServerName, lConsolidateAPIResponse);
   }
 
-  void NServiceManagerController::RegisterAPI(const TMessageRequestToProcess& lMessageRequest) {
+  void NServiceManagerController::RegisterAPI(const TMessageRequestToProcess& lMessageRequest) {   
      NModuleAPI lModuleAPI(lMessageRequest.mParameters);
      lModuleAPI.fSetMessageID(lMessageRequest.mMessageID);
      lModuleAPI.fSetMSecsSinceEpoch(lMessageRequest.mMSecsSinceEpoch);
      lModuleAPI.fSetWebSocketID(lMessageRequest.mWebSocketID);
      lModuleAPI.fSetWebSocketServerName(lMessageRequest.mWebSocketsServerName);
+ /*qDebug("1 Method******** '%s' **********", lMessageRequest.mEffectiveMethodName.toStdString().data());
+ qDebug("2 SEC* '%s' **********", QString::number(lMessageRequest.mSubscriptionEventCounter).toStdString().data());
+ qDebug("3 SPC* '%s' **********", QString::number(lMessageRequest.mSubscriptionPeriod).toStdString().data());
+ qDebug("4 Modul;e* '%s' **********", lMessageRequest.mParameters["ModuleName"].toString().toStdString().data());*/
      if(lModuleAPI.fIsValid() && !mModuleAPIPendingDependencies.contains(lModuleAPI))
        mModuleAPIPendingDependencies << lModuleAPI;
   }
 
-  void NServiceManagerController::forwardmessage(const TMessageRequestToProcess& lMessageRequest) {
-    //QVariantMap lParameters({{QStringLiteral("forwardmessage"), lMessageRequestToProcess.mParameters}} );
+  void NServiceManagerController::ForwardMessage(const TMessageRequestToProcess& lMessageRequest) {
+    //QVariantMap lParameters({{QStringLiteral("ForwardMessage"), lMessageRequestToProcess.mParameters}} );
     //TMessageRequestToProcess lForwardedMessage({ lMessageRequest.mWebSocketsServerName, lMessageRequest.mWebSocketID, lMessageRequest.mMessageID,   });
     QStringList lMethods = lMessageRequest.mParameters.keys();
     if(lMethods.size()) {
       QMapIterator<QString, NModuleAPI> i1(mModuleAPIActive);
       while(i1.hasNext()) {
-        i1.next();
+        i1.next();        
         if(i1.value().fIsMethodSupported(lMethods.at(0))) {
-          QVariantMap lParameters( {{lMethods.at(0), lMessageRequest.mParameters.value(lMethods.at(0)).toMap() }} );
-          NMessageRequest* rForwardedRequest = new NMessageRequest(i1.value().fWebSocketID(), QString(), false, lMessageRequest.mSubscriptionEventCounter, lMessageRequest.mSubscriptionPeriod, QString(), 0, lParameters, this);
-          TMessageRequestToProcess lMessageRequestOriginal(lMessageRequest);
-          lMessageRequestOriginal.mOriginalMethodName = lMethods.at(0);
-          lMessageRequestOriginal.mEffectiveMethodName = lMethods.at(0);
-          mForwardedMessages.insert(rForwardedRequest->fMessageID(), lMessageRequestOriginal);
-          fSendMessage(i1.value().fWebSocketServerName(), rForwardedRequest);
-          return;
+          QVariantMap lParameters(lMessageRequest.mParameters.value(lMethods.at(0)).toMap());
+          QString lErrorMessage = fValidateForwardedMessage(lMessageRequest, lParameters);
+          if(!lErrorMessage.isEmpty()) {
+            QVariantMap lResponseMap({ {lMessageRequest.mEffectiveMethodName, QVariantMap({}) }} );
+            qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequest.mMSecsSinceEpoch);
+            NMessageResponse* lInvalidParameterResponse = new NMessageResponse(lMessageRequest.mWebSocketID, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseMethodExeError,
+                                                          lErrorMessage, 0, lResponseMap, QString("%1-%2").arg(fAbbreviation()).arg(int(NMessageResponse::EResponseStatus::eResponseMethodExeError)));
+            fSendMessage(lMessageRequest.mWebSocketsServerName, lInvalidParameterResponse);
+            fLog(ELogLevel::eLogCritical, ELogMessageType::eMemoryTransaction, lErrorMessage);
+            return;
+          }
+          else {
+            QVariantMap lMethodParameters( {{lMethods.at(0), lParameters }} );
+            NMessageRequest* rForwardedRequest = new NMessageRequest(i1.value().fWebSocketID(), QString(), false, lMessageRequest.mSubscriptionEventCounter, lMessageRequest.mSubscriptionPeriod, QString(), 0, lMethodParameters, this);
+            TMessageRequestToProcess lMessageRequestOriginal(lMessageRequest);
+            lMessageRequestOriginal.mOriginalMethodName = lMethods.at(0);
+            lMessageRequestOriginal.mEffectiveMethodName = lMethods.at(0);
+            mForwardedMessages.insert(rForwardedRequest->fMessageID(), lMessageRequestOriginal);
+            fSendMessage(i1.value().fWebSocketServerName(), rForwardedRequest);
+            return;
+          }
         }
       }
       qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequest.mMSecsSinceEpoch);
@@ -239,6 +261,23 @@ namespace NulstarNS {
     NMessageResponse* rRequestResponse = new NMessageResponse(lMessageRequest.mWebSocketID, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseMethodListEmptyError,
                                          tr("Method list is empty!"), 0, QVariantMap({{lMessageRequest.mOriginalMethodName, QVariantMap()}} ), QString("%1-%2").arg(fAbbreviation()).arg(int(NMessageResponse::EResponseStatus::eResponseMethodListEmptyError)));
     fSendMessage(lMessageRequest.mWebSocketsServerName, rRequestResponse);
+  }
+
+  QString NServiceManagerController::fValidateForwardedMessage(const TMessageRequestToProcess& lMessageRequest, const QVariantMap& lStoredParameters) const {
+    quint64 lMinEventCounter = lStoredParameters.value(cFieldName_MethodMinEvent).toULongLong();
+    quint64 lMinEventPeriod = lStoredParameters.value(cFieldName_MethodMinPeriod).toULongLong();
+
+    if((lMinEventCounter == 0) && (lMessageRequest.mSubscriptionEventCounter > 0))
+      return tr("SubscriptionEventCounter parameter: '%1' not valid for method '%2'").arg(lMessageRequest.mSubscriptionEventCounter).arg(lMessageRequest.mEffectiveMethodName);
+    if((lMinEventCounter > 0) && (lMessageRequest.mSubscriptionEventCounter < lMinEventCounter))
+      return tr("SubscriptionEventCounter parameter: '%1' not valid for method '%2'").arg(lMessageRequest.mSubscriptionEventCounter).arg(lMessageRequest.mEffectiveMethodName);
+
+    if((lMinEventPeriod == 0) && (lMessageRequest.mSubscriptionPeriod > 0))
+      return tr("SubscriptionPeriod parameter: '%1' not valid for method '%2'").arg(lMessageRequest.mSubscriptionPeriod).arg(lMessageRequest.mEffectiveMethodName);
+    if((lMinEventPeriod > 0) && (lMessageRequest.mSubscriptionPeriod < lMinEventPeriod))
+      return tr("SubscriptionPeriod parameter: '%1' not valid for method '%2'").arg(lMessageRequest.mSubscriptionPeriod).arg(lMessageRequest.mEffectiveMethodName);
+
+    return QString();
   }
 
   void NServiceManagerController::fProcessResponse(const QVariantMap& lMessageResponse) {

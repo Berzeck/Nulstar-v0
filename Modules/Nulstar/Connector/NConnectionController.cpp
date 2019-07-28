@@ -93,21 +93,21 @@ namespace NulstarNS {
 
   }
 
-  void NConnectionController::listapi(const TMessageRequestToProcess& lMessageRequest) {
-      QVariantMap lListAPIResponse { {"listapi", QVariantMap() } };
+  void NConnectionController::ListAPI(const TMessageRequestToProcess& lMessageRequest) {
+      QVariantMap lListAPIResponse { {"ListAPI", QVariantMap() } };
       if(lMessageRequest.mWebSocketsServerName == cClientServerName) {
-        lListAPIResponse["listapi"] = mPublicMethods;
+        lListAPIResponse["ListAPI"] = mPublicMethods;
       }
       if(lMessageRequest.mWebSocketsServerName == cAdminServerName) {
         QVariantMap lCurrentMap(mPublicMethods);
         lCurrentMap = lCurrentMap.unite(mAdminMethods);
-        lListAPIResponse["listapi"] = lCurrentMap;
+        lListAPIResponse["ListAPI"] = lCurrentMap;
       }
       if(lMessageRequest.mWebSocketsServerName == cCommServerName) {
         QVariantMap lCurrentMap(mPublicMethods);
         lCurrentMap = lCurrentMap.unite(mAdminMethods);
         lCurrentMap = lCurrentMap.unite(mPrivateMethods);
-        lListAPIResponse["listapi"] = lCurrentMap;
+        lListAPIResponse["ListAPI"] = lCurrentMap;
       }
 
     qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequest.mMSecsSinceEpoch);
@@ -116,7 +116,7 @@ namespace NulstarNS {
   }
 
   void NConnectionController::fInvokeMethod(TMessageRequestToProcess& lMessageRequestToProcess) {
-    if(lMessageRequestToProcess.mEffectiveMethodName == QString("listapi"))
+    if(lMessageRequestToProcess.mEffectiveMethodName == QString("ListAPI"))
       NCoreService::fInvokeMethod(lMessageRequestToProcess);
     else {
       if(lMessageRequestToProcess.mWebSocketsServerName == cAdminServerName) {
@@ -155,7 +155,7 @@ namespace NulstarNS {
   }
 
   void NConnectionController::fForwardMessage(const TMessageRequestToProcess& lMessageRequestToProcess) {
-    QVariantMap lParameters({{QStringLiteral("forwardmessage"), QVariantMap( {{lMessageRequestToProcess.mEffectiveMethodName, lMessageRequestToProcess.mParameters }}) }} );
+    QVariantMap lParameters({{QStringLiteral("ForwardMessage"), QVariantMap( {{lMessageRequestToProcess.mEffectiveMethodName, lMessageRequestToProcess.mParameters }}) }} );
     NMessageRequest* rForwardedRequest =   new  NMessageRequest(cServiceManagerName, QString(), false, lMessageRequestToProcess.mSubscriptionEventCounter, lMessageRequestToProcess.mSubscriptionPeriod, QString(), 0, lParameters, this);
     mForwardedMessages.insert(rForwardedRequest->fMessageID(), lMessageRequestToProcess);
     fSendMessage(cServiceManagerName, rForwardedRequest);
