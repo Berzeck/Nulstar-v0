@@ -65,6 +65,7 @@ namespace NulstarNS {
 
   void NConnectionController::fProcessResponse(const QVariantMap& lMessageResponse) {
     bool lResponseSuccessfull = (NMessageResponse::EResponseStatus(lMessageResponse.value(cFieldName_MessageData).toMap().value(cResponseStatusFieldName).toInt()) == NMessageResponse::EResponseStatus::eResponseSuccessful);
+
     QString lRequestID(lMessageResponse.value(cFieldName_MessageData).toMap().value(cRequestIDFieldName).toString());
     QVariantMap lResponseData(lMessageResponse.value(cFieldName_MessageData).toMap().value(cResponseDataFieldName).toMap());
     if(mForwardedMessages.contains(lRequestID)) {
@@ -84,11 +85,14 @@ namespace NulstarNS {
       fSendMessage(cServiceManagerName, new NMessageRequest(cServiceManagerName, QString(), false, 1, 0, QString(), 0, lGetConsolidatedAPI, this), NWebSocket::EConnectionState::eConnectionActive);
       return;
     }
-    if(lResponseData.contains(cCommand_GetConsolidatedAPI) && lResponseSuccessfull) {
-      mPrivateMethods = lResponseData.value(cCommand_GetConsolidatedAPI).toMap().value(cFieldName_Private).toMap();
-      mPublicMethods = lResponseData.value(cCommand_GetConsolidatedAPI).toMap().value(cFieldName_Public).toMap();
-      mAdminMethods = lResponseData.value(cCommand_GetConsolidatedAPI).toMap().value(cFieldName_Admin).toMap();
-      return;
+    if(lResponseData.contains(cCommand_GetConsolidatedAPI)) {
+      lResponseSuccessfull |= (NMessageResponse::EResponseStatus(lMessageResponse.value(cFieldName_MessageData).toMap().value(cResponseStatusFieldName).toInt()) == NMessageResponse::EResponseStatus::eResponseMethodExistedError);
+      if(lResponseSuccessfull) {
+        mPrivateMethods = lResponseData.value(cCommand_GetConsolidatedAPI).toMap().value(cFieldName_Private).toMap();
+        mPublicMethods = lResponseData.value(cCommand_GetConsolidatedAPI).toMap().value(cFieldName_Public).toMap();
+        mAdminMethods = lResponseData.value(cCommand_GetConsolidatedAPI).toMap().value(cFieldName_Admin).toMap();
+        return;
+      }
     }
 
   }

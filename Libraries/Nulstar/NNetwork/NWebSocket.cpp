@@ -48,6 +48,7 @@ namespace NulstarNS {
     if(!rMessage)
       return;
     qint64 lBytesSent = mWebSocket->sendTextMessage(rMessage->fToJsonString());
+  //qDebug("%s \n\n", qUtf8Printable(rMessage->fToJsonString()));
     if(lBytesSent) {
       rMessage->fSetStatus(NMessage::EMessageStatus::eSent);
       emit sLog(ELogLevel::eLogInfo, ELogMessageType::eMessageSent, rMessage->fToJsonString());

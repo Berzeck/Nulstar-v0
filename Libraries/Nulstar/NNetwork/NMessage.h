@@ -43,10 +43,10 @@ namespace NulstarNS {
       virtual QString fToJsonString(QJsonDocument::JsonFormat lFormat = QJsonDocument::Compact) const;
       void fSetStatus(const EMessageStatus lStatus) { mStatus = lStatus; }
       static bool fValidateMessageObject(const QJsonObject& lMessageObject);
+      virtual QString fMessageType() const = 0;
 
     protected:
       virtual QVariantMap fMessageData() const = 0;
-      virtual QString fMessageType() const = 0;
 
       static qint64 mMessageIDPrefix;
       static qint64 mMessageIDSuffix;
