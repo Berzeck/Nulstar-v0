@@ -83,7 +83,7 @@ namespace NulstarNS {
   }
 
   void NWebSocket::fOnTextMessageReceived(const QString& lMessage) {
- qDebug() << "\nText Message received:" << lMessage;
+    //qDebug() << "\nText Message received:" << lMessage;
     QString lMessageType;
     QJsonObject lMessageObject(NMessageFactory::fMessageObjectFromString(lMessage, &lMessageType));    
     if(lMessageType == cTypeNegotiateConnectionResponse && NMessageNegotiateConnectionResponse::fValidateMessageObject(lMessageObject))
@@ -106,7 +106,7 @@ namespace NulstarNS {
     QJsonObject lDataObject(lObjectMessage.value(cFieldName_MessageData).toObject());
     if(lDataObject.value(cNegotiationStatusFieldName).toVariant().toBool()) {
       fSetConnectionState(NWebSocket::EConnectionState::eConnectionActive);
-  qDebug() << QString("Negotiation attempt to '%1' successful!").arg(fName());
+      //qDebug() << QString("Negotiation attempt to '%1' successful!").arg(fName());
     }
     else {
  qDebug() << QString("Negotiation attempt to '%1' failed!").arg(fName());
