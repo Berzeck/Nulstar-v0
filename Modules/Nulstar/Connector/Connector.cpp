@@ -21,9 +21,10 @@ int main(int argc, char *argv[])
   lApp.setOrganizationDomain(APP_DOMAIN);
   lApp.setOrganizationName(APP_DOMAIN);
 
-  QList<QNetworkAddressEntry> lAllowedNetworks;
+  QList<QNetworkAddressEntry> lAllowedNetworks;  
   QCommandLineParser lParser;
   QString lServiceManagerUrl;
+  QString lHttpServerPort("0");
   lParser.setApplicationDescription(APP_NAME);
   lParser.addHelpOption();
   lParser.addVersionOption();
@@ -36,6 +37,7 @@ int main(int argc, char *argv[])
     {{"n", "allowednetworks"}, QStringLiteral("Allowed Networks."), QStringLiteral("allowednetworks")},
     {{"u", "managerurl"}, QStringLiteral("Service manager URL."), QStringLiteral("managerurl")},
     {{"i", "ip"}, QStringLiteral("Listening connections IP"), QStringLiteral("ip")},
+    {{"t", "httpserver"}, QStringLiteral("HTTP Server"), QStringLiteral("httpserver")}
   });
   lParser.process(lApp);
   if(!lParser.isSet("loglevel") || lParser.value("loglevel").toUShort() < 1 || lParser.value("loglevel").toUShort() > 5) {
@@ -86,8 +88,11 @@ int main(int argc, char *argv[])
     }
   }
 
+  if(lParser.isSet("httpserver")) {
+    lHttpServerPort = lParser.value("httpserver");
+  }
   NulstarNS::NConnectionController lController(lSslMode, static_cast<NulstarNS::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")), QUrl(lServiceManagerUrl),
-                                   lAllowedNetworks, lParser.value("commport").toUShort(), lParser.value("adminport").toUShort(), lParser.value("clientport").toUShort(), QHostAddress::AnyIPv4);
+                                   lAllowedNetworks, lParser.value("commport").toUShort(), lParser.value("adminport").toUShort(), lParser.value("clientport").toUShort(), QHostAddress::AnyIPv4, lHttpServerPort);
 
   lController.fControlWebServer(QString(), NulstarNS::NConnectionController::EServiceAction::eStartService);  // Start all web sockets servers
   lController.fConnectToServiceManager(NulstarNS::cRetryInterval);

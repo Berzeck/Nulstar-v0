@@ -40,8 +40,9 @@ SOURCES += Connector.cpp \
 
 INCLUDEPATH += $$LIBRARIES_PATH/Nulstar/NNetwork \
                $$LIBRARIES_PATH/Nulstar/NCore  \
-               $$LIBRARIES_PATH/Nulstar/NTools
-LIBS += -lNNetwork -lNCore -lNTools
+               $$LIBRARIES_PATH/Nulstar/NTools \
+               $$LIBRARIES_PATH/Nulstar/HttpServer
+LIBS += -lNNetwork -lNCore -lNTools -lQtHttpServer
 
 
 

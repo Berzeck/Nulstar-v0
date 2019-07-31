@@ -1,4 +1,5 @@
 #include <QHostAddress>
+#include <qhttpserverrequest.h>
 #include <QSettings>
 #include <QStringList>
 #include <QWebSocket>
@@ -9,8 +10,9 @@
 #include "NConnectionController.h"
 
 namespace NulstarNS {
-  NConnectionController::NConnectionController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress& lIP, const QUrl &lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, quint16 lAdminPort, quint16 lClientPort, QHostAddress::SpecialAddress lBindAddress, QObject* rParent)
-                       : NCoreService(lSslMode, lLogLevel, lIP, lServiceManagerUrl, lAllowedNetworks, rParent), mRequestID(0), mCompressionLevel(0) {
+  NConnectionController::NConnectionController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress& lIP, const QUrl &lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, quint16 lAdminPort, quint16 lClientPort,
+                                               QHostAddress::SpecialAddress lBindAddress, const QString &lHttpServerPort, QObject* rParent)
+                       : NCoreService(lSslMode, lLogLevel, lIP, lServiceManagerUrl, lAllowedNetworks, rParent), mRequestID(0), mCompressionLevel(0), mHttpServerPort(lHttpServerPort) {
 
     if(lCommPort)
       fAddWebSocketServer(lCommPort, lBindAddress);
@@ -18,6 +20,17 @@ namespace NulstarNS {
     fAddWebSocketServer(lClientPort, QHostAddress::AnyIPv4, cClientServerName, cClientServerLabel, false);
     fFillMethodDescriptions();
     fFillMethodMinEventAndMinPeriod();
+
+    if(mHttpServerPort.toInt() > 0) {
+      mHttpServer.route("/", [](const QHttpServerRequest &lRequest) {
+          return QString(lRequest.body());
+        });
+
+      if(mHttpServer.listen(QHostAddress::Any, mHttpServerPort.toUShort()) <= 0) {
+        fLog(NulstarNS::ELogLevel::eLogCritical, NulstarNS::ELogMessageType::eMemoryTransaction, QString("HTTP Server was unable to listen to port '%1'").arg(mHttpServerPort));
+        qDebug("HTTP Server was unable to listen to port '%s'", mHttpServerPort.toStdString().data());
+      }
+    }
   }
 /***
   NResponse NConnectionController::setcompressionlevel(quint8 lCompressionLevel) {

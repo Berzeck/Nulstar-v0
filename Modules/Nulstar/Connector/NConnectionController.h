@@ -9,6 +9,7 @@
 #include <QUrl>
 #include <NCoreService.h>
 #include <QVersionNumber>
+#include <qhttpserver.h>
 
 #include "ConnectorVersion.h"
 //***#include <NResponse.h>
@@ -26,7 +27,7 @@ namespace NulstarNS {
     public:      
       explicit NConnectionController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress& lIP, const QUrl& lServiceManagerUrl,
                                      QList<QNetworkAddressEntry> lAllowedNetworks = QList<QNetworkAddressEntry> (), quint16 lCommPort = 0,
-                                     quint16 lAdminPort = 0, quint16 lClientPort = 0, QHostAddress::SpecialAddress lBindAddress = QHostAddress::Null, QObject* rParent = nullptr);
+                                     quint16 lAdminPort = 0, quint16 lClientPort = 0, QHostAddress::SpecialAddress lBindAddress = QHostAddress::Null, const QString& lHttpServerPort = QString("0"), QObject* rParent = nullptr);
       ~NConnectionController() override {}
 
       QString fAbbreviation() const override { return "NCN"; }
@@ -46,6 +47,8 @@ namespace NulstarNS {
     private:
       quint64 mRequestID;
       quint8 mCompressionLevel;
+      QString mHttpServerPort;
+      QHttpServer mHttpServer;
       QVariantMap mAdminMethods;
       QVariantMap mPublicMethods;
       QVariantMap mPrivateMethods;

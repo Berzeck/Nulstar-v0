@@ -19,3 +19,5 @@ LogLevel=4
 [Security]
 SslMode=0 
 
+[Components]
+HttpServer=8089
