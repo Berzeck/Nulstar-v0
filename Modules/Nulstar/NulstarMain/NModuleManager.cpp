@@ -150,7 +150,7 @@ namespace NulstarNS {
         QString lModuleVersionsDirPath = lNSModulesDirPathTemp.append("%1/").arg(lModuleVersion);
         lModuleVersionsList = fFoldersNameList(lModuleVersionsDirPath);
         if(lModuleVersionsList.isEmpty()){
-          qDebug() << "Versions directory not exist under Module directory " << lModuleVersionsDirPath;
+          //qDebug() << "Versions directory not exist under Module directory " << lModuleVersionsDirPath;
           continue;
         }
         fSetModuleVersions(lNameSpace, lModuleVersion, lModuleVersionsList);

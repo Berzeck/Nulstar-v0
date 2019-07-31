@@ -115,9 +115,10 @@ namespace NulstarNS {
       connect(&lDelayTimer, &QTimer::timeout, &lExtraDelay, &QEventLoop::quit);
       lDelayTimer.start(cTimePeriod_ExtraDelayMSecs);
       lExtraDelay.exec();
+      qDebug("Module '%s-%s' start successfully!", lModuleName.toStdString().data(), lEffectiveModuleVersion.toStdString().data());
       return true;
     }
-    qDebug("Module '%s' and version '%s' could not start successfully!", lModuleName.toStdString().data(), lEffectiveModuleVersion.toStdString().data());
+    //qDebug("Module '%s' and version '%s' could not start successfully!", lModuleName.toStdString().data(), lEffectiveModuleVersion.toStdString().data());
     rModuleProcess->deleteLater();
     return false;
   }
@@ -146,7 +147,7 @@ namespace NulstarNS {
       return false;
     }
     if((lModuleName == APP_NAME) && (lModuleNamespace == APP_DOMAIN)) {
-      qDebug("Module '%s' can't be managed fron this interface!", lModuleName.toStdString().data());
+      qDebug("Module '%s' can't be managed from this interface!", lModuleName.toStdString().data());
       return false;
     }
     fStopModuleByScript(lModuleNamespace, lModuleName, lEffectiveModuleVersion);
