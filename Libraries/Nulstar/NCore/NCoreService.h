@@ -69,7 +69,7 @@ namespace NulstarNS {
       void fSetServiceManagerUrl(const QUrl& lServiceManagerUrl) { if(lServiceManagerUrl.isValid()) mServiceManagerUrl = lServiceManagerUrl; }
       void fSetAllowedNetworks(const QList<QNetworkAddressEntry>& lAllowedNetworks) { mAllowedNetworks = lAllowedNetworks; }
       void fSetHost(const QHostAddress& lIP) { mIP = lIP; }
-      void fSendMessage(const QString& lWebSocketsID, NMessage* rMessage, NWebSocket::EConnectionState lMinStateRequired = NWebSocket::EConnectionState::eConnectionActive);
+      virtual void fSendMessage(const QString& lWebSocketsID, NMessage* rMessage, NWebSocket::EConnectionState lMinStateRequired = NWebSocket::EConnectionState::eConnectionActive);
 
     public Q_SLOTS:
       virtual void fConnectToModule(const NConnectionInfo& lConnectionInfo);

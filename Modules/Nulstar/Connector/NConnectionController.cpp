@@ -1,9 +1,12 @@
+#include <QEventLoop>
 #include <QHostAddress>
 #include <qhttpserverrequest.h>
 #include <QSettings>
 #include <QStringList>
+#include <QTimer>
 #include <QWebSocket>
 #include <NMessage.h>
+#include <NMessageRequest.h>
 #include <NWebSocketServer.h>
 #include <NApiBuilder.h>
 
@@ -22,31 +25,72 @@ namespace NulstarNS {
     fFillMethodMinEventAndMinPeriod();
 
     if(mHttpServerPort.toInt() > 0) {
-      mHttpServer.route("/", [](const QHttpServerRequest &lRequest) {
-          return QString(lRequest.body());
+      mHttpServer.route("/", [this](const QHttpServerRequest &lRequest) {
+        QString lResponse;
+        QEventLoop lTimeout;  // So components have enough time to open the websocket servers
+        QTimer lTimer;
+        connect(&lTimer, &QTimer::timeout, &lTimeout, &QEventLoop::quit);
+        connect(this, &NConnectionController::sHttpResponseProcessed, [&lResponse, &lTimeout](const QString& lHttpResponse) {
+          lResponse = lHttpResponse;
+          lTimeout.quit();
         });
+        fOnTextMessageReceived(lRequest.body());
+        if(lResponse.isEmpty()) {
+          lTimer.start(cHttpServerTimeout * 1000);
+          lTimeout.exec();
+        }
 
-      if(mHttpServer.listen(QHostAddress::Any, mHttpServerPort.toUShort()) <= 0) {
+        if(lResponse.isEmpty()) {
+ qDebug("Message timeout!");
+          fLog(NulstarNS::ELogLevel::eLogWarning, NulstarNS::ELogMessageType::eMemoryTransaction, QString("HTTP Server was unable to send response on time!'"));
+          QString lTimeOutMessage(fProcessHttpRequestTimeout(lRequest.body()));
+          return QString(lTimeOutMessage);
+        }
+        return QString(lResponse);
+      });
+
+      if(mHttpServer.listen(QHostAddress::AnyIPv4, mHttpServerPort.toUShort()) <= 0) {
         fLog(NulstarNS::ELogLevel::eLogCritical, NulstarNS::ELogMessageType::eMemoryTransaction, QString("HTTP Server was unable to listen to port '%1'").arg(mHttpServerPort));
         qDebug("HTTP Server was unable to listen to port '%s'", mHttpServerPort.toStdString().data());
       }
     }
   }
-/***
-  NResponse NConnectionController::setcompressionlevel(quint8 lCompressionLevel) {
-    if(lCompressionLevel > 9) {
-      NResponse lResponse(false, false, tr("Compression level should be in the range [0-9]"));
-      return lResponse;
+
+  QString NConnectionController::fProcessHttpRequestTimeout(const QString& lMessage) {
+    QString lMessageType;
+    QJsonObject lMessageObject(NMessageFactory::fMessageObjectFromString(lMessage, &lMessageType));
+    QVariantMap lMessageMap(lMessageObject.toVariantMap());
+    QVariantMap lRequestMethods(lMessageMap.value(cFieldName_MessageData).toMap().value(cFieldName_RequestMethods).toMap());
+    QString lMessageID(lMessageMap.value(cFieldName_MessageID).toString());
+    quint64 lSubscriptionEventCounter(lMessageMap.value(cFieldName_MessageData).toMap().value(cFieldName_SubscriptionEventCounter).toULongLong());
+    quint64 lSubscriptionPeriod(lMessageMap.value(cFieldName_MessageData).toMap().value(cFieldName_SubscriptionPeriod).toULongLong());
+    for(const QString& lRequestMethodName : lRequestMethods.keys()) {
+      QVariantMap lRequestMethodParams = lRequestMethods.value(lRequestMethodName).toMap();
+      TMessageRequestToProcess lMessageRequest({cHttpServerName, cHttpServerName,lMessageID, lRequestMethodName, lRequestMethodName,lRequestMethodParams, lSubscriptionEventCounter, lSubscriptionPeriod, 0, 0} );
+      lMessageRequest.mMSecsSinceEpoch = QDateTime::currentMSecsSinceEpoch();
+      if(fApiMethodLowercase())
+        lMessageRequest.mEffectiveMethodName = lMessageRequest.mEffectiveMethodName.toLower();
+
+      qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequest.mMSecsSinceEpoch);
+      NMessageResponse* rRequestResponse = new NMessageResponse(cHttpServerName, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseMethodUnavailableError,
+                                           tr("Method '%1' timeout!").arg(lRequestMethodName), 0, QVariantMap({{lMessageRequest.mOriginalMethodName, QVariantMap()}} ), QString("%1-%2").arg(fAbbreviation()).arg(int(NMessageResponse::EResponseStatus::eResponseMethodUnavailableError)));
+      return rRequestResponse->fToJsonString();
     }
-    mCompressionLevel = lCompressionLevel;
-    NResponse lResponse(true, true, tr("Compression level is set to '%1'").arg(mCompressionLevel));
-    return lResponse;
   }
 
-  NResponse NConnectionController::getcompressionlevel() {
-    NResponse lResponse(true, mCompressionLevel, tr("Compression level is '%1'").arg(mCompressionLevel));
-    return lResponse;
-  } ***/
+  void NConnectionController::fOnTextMessageReceived(const QString& lMessage) {
+    qDebug() << "\nConnector: Text Message received:" << lMessage;
+    QString lMessageType;
+    QJsonObject lMessageObject(NMessageFactory::fMessageObjectFromString(lMessage, &lMessageType));
+    if(lMessageType == cTypeRequest && NMessageRequest::fValidateMessageObject(lMessageObject)) {
+       fProcessRequest(cHttpServerName, lMessageObject.toVariantMap());
+       emit sLog(ELogLevel::eLogInfo, ELogMessageType::eMessageReceived, lMessage);
+    }
+    else {
+      emit sLog(ELogLevel::eLogCritical, ELogMessageType::eMessageReceived, QStringLiteral("Wrong message type. Http Server only accepts 'Request' type."));
+      qDebug() << QStringLiteral("Wrong message type. Http Server only accepts 'Request' type.");
+    }
+  }
 
   QVariantMap NConnectionController::fApiRoles() const {
     QVariantMap lApiRolesMap;
@@ -78,8 +122,8 @@ namespace NulstarNS {
 
   void NConnectionController::fProcessResponse(const QVariantMap& lMessageResponse) {
     bool lResponseSuccessfull = (NMessageResponse::EResponseStatus(lMessageResponse.value(cFieldName_MessageData).toMap().value(cResponseStatusFieldName).toInt()) == NMessageResponse::EResponseStatus::eResponseSuccessful);
-
     QString lRequestID(lMessageResponse.value(cFieldName_MessageData).toMap().value(cRequestIDFieldName).toString());
+
     QVariantMap lResponseData(lMessageResponse.value(cFieldName_MessageData).toMap().value(cResponseDataFieldName).toMap());
     if(mForwardedMessages.contains(lRequestID)) {
       TMessageRequestToProcess lMessageResponseStructure = mForwardedMessages.value(lRequestID);
@@ -110,9 +154,18 @@ namespace NulstarNS {
 
   }
 
+  void NConnectionController::fSendMessage(const QString& lWebSocketsID, NMessage* rMessage, NWebSocket::EConnectionState lMinStateRequired) {
+    if(lWebSocketsID == cHttpServerName) {
+      emit sHttpResponseProcessed(rMessage->fToJsonString());
+      rMessage->deleteLater();
+    } else {
+      NCoreService::fSendMessage(lWebSocketsID, rMessage, lMinStateRequired);
+    }
+  }
+
   void NConnectionController::ListAPI(const TMessageRequestToProcess& lMessageRequest) {
       QVariantMap lListAPIResponse { {"ListAPI", QVariantMap() } };
-      if(lMessageRequest.mWebSocketsServerName == cClientServerName) {
+      if((lMessageRequest.mWebSocketsServerName == cClientServerName) || lMessageRequest.mWebSocketsServerName == cHttpServerName) {
         lListAPIResponse["ListAPI"] = mPublicMethods;
       }
       if(lMessageRequest.mWebSocketsServerName == cAdminServerName) {
@@ -148,7 +201,7 @@ namespace NulstarNS {
         else 
           fSendBadMethodResponse(lMessageRequestToProcess);
       }
-      if(lMessageRequestToProcess.mWebSocketsServerName == cClientServerName) {
+      if((lMessageRequestToProcess.mWebSocketsServerName == cClientServerName) || lMessageRequestToProcess.mWebSocketsServerName == cHttpServerName) {
         if(fMethodValid(lMessageRequestToProcess.mEffectiveMethodName, mPublicMethods))
           fForwardMessage(lMessageRequestToProcess);  
         else 
@@ -156,6 +209,7 @@ namespace NulstarNS {
       }
     }
   }
+
   bool NConnectionController::fMethodValid(const QString& lMethodName, const QVariantMap& lMethodList) {
     QMapIterator<QString, QVariant> i1(lMethodList);
     while(i1.hasNext()) {

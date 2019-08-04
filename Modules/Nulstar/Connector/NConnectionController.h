@@ -19,6 +19,8 @@ namespace NulstarNS {
   const QString cAdminServerName = "WebAdminServer";
   const QString cClientServerLabel = "Nulstar Client Channel";
   const QString cClientServerName = "WebClientServer";
+  const QString cHttpServerName = "HttpServer";
+  const int cHttpServerTimeout = 3;
 
   class NWebSocketServer;
   class NConnectionController : public NCoreService {
@@ -37,6 +39,7 @@ namespace NulstarNS {
       QVariantMap fDependencies() const override {  QVariantMap lDependencies; return lDependencies; }
       QVariantMap fApiRoles() const override;
       QList<QVersionNumber> fProtocolVersionsSupported() const override { QList<QVersionNumber> lApiVersionsSupported; QVersionNumber lMainVersion(QVersionNumber::fromString(APP_PROTOCOL_VERSIONS)); lApiVersionsSupported << lMainVersion; return lApiVersionsSupported; }
+      void fSendMessage(const QString& lWebSocketsID, NMessage* rMessage, NWebSocket::EConnectionState lMinStateRequired = NWebSocket::EConnectionState::eConnectionActive) override;
 
     protected:
       void fFillMethodMetadata() override { }
@@ -56,6 +59,7 @@ namespace NulstarNS {
       void fSendBadMethodResponse(const TMessageRequestToProcess& lMessageRequestToProcess);
       void fForwardMessage(const TMessageRequestToProcess& lMessageRequestToProcess);
       bool fMethodValid(const QString& lMethodName, const QVariantMap& lMethodList);
+      QString fProcessHttpRequestTimeout(const QString &lMessage);
 
     public Q_SLOTS:
       API_PUBLIC_FUNCTION void ListAPI(const TMessageRequestToProcess& lMessageRequest);
@@ -66,6 +70,10 @@ namespace NulstarNS {
       API_PUBLIC_FUNCTION NResponse getcompressionlevel();  ***/
     protected Q_SLOTS:
       void fProcessResponse(const QVariantMap& lMessageResponse) override;
+      void fOnTextMessageReceived(const QString& lMessage);
+
+    Q_SIGNALS:
+      void sHttpResponseProcessed(const QString& lHttpResponse);
   };
 }
 
