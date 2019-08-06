@@ -20,7 +20,9 @@ namespace NulstarNS {
   const QString cClientServerLabel = "Nulstar Client Channel";
   const QString cClientServerName = "WebClientServer";
   const QString cHttpServerName = "HttpServer";
+  const QString cHttpError = QStringLiteral("__ERROR");
   const int cHttpServerTimeout = 3;
+
 
   class NWebSocketServer;
   class NConnectionController : public NCoreService {
@@ -60,6 +62,7 @@ namespace NulstarNS {
       void fForwardMessage(const TMessageRequestToProcess& lMessageRequestToProcess);
       bool fMethodValid(const QString& lMethodName, const QVariantMap& lMethodList);
       QString fProcessHttpRequestTimeout(const QString &lMessage);
+      QString fProcessHttpRequestError();
 
     public Q_SLOTS:
       API_PUBLIC_FUNCTION void ListAPI(const TMessageRequestToProcess& lMessageRequest);

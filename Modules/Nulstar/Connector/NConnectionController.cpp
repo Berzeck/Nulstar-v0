@@ -40,9 +40,14 @@ namespace NulstarNS {
           lTimeout.exec();
         }
 
+        if(lResponse == cHttpError) {
+ qDebug("Message error!");
+          QString lErrorMessage(fProcessHttpRequestError());
+          return QString(lErrorMessage);
+        }
         if(lResponse.isEmpty()) {
  qDebug("Message timeout!");
-          fLog(NulstarNS::ELogLevel::eLogWarning, NulstarNS::ELogMessageType::eMemoryTransaction, QString("HTTP Server was unable to send response on time!'"));
+          fLog(NulstarNS::ELogLevel::eLogWarning, NulstarNS::ELogMessageType::eMemoryTransaction, QString("HTTP Server was unable to process the request!'"));
           QString lTimeOutMessage(fProcessHttpRequestTimeout(lRequest.body()));
           return QString(lTimeOutMessage);
         }
@@ -78,6 +83,15 @@ namespace NulstarNS {
     }
   }
 
+  QString NConnectionController::fProcessHttpRequestError() {
+    TMessageRequestToProcess lMessageRequest({cHttpServerName, cHttpServerName,"0", "", "", QVariantMap(), 0, 0, 0, 0} );
+    lMessageRequest.mMSecsSinceEpoch = QDateTime::currentMSecsSinceEpoch();
+    qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequest.mMSecsSinceEpoch);
+    NMessageResponse* rRequestResponse = new NMessageResponse(cHttpServerName, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseMethodUnavailableError,
+                                         tr("Message is not in JSon format!"), 0, QVariantMap({{lMessageRequest.mOriginalMethodName, QVariantMap()}} ), QString("%1-%2").arg(fAbbreviation()).arg(int(NMessageResponse::EResponseStatus::eResponseMethodUnavailableError)));
+    return rRequestResponse->fToJsonString();
+  }
+
   void NConnectionController::fOnTextMessageReceived(const QString& lMessage) {
     qDebug() << "\nConnector: Text Message received:" << lMessage;
     QString lMessageType;
@@ -89,6 +103,7 @@ namespace NulstarNS {
     else {
       emit sLog(ELogLevel::eLogCritical, ELogMessageType::eMessageReceived, QStringLiteral("Wrong message type. Http Server only accepts 'Request' type."));
       qDebug() << QStringLiteral("Wrong message type. Http Server only accepts 'Request' type.");
+      emit sHttpResponseProcessed(cHttpError);
     }
   }
 
