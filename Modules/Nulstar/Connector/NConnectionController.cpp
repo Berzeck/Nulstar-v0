@@ -87,13 +87,13 @@ namespace NulstarNS {
     TMessageRequestToProcess lMessageRequest({cHttpServerName, cHttpServerName,"0", "", "", QVariantMap(), 0, 0, 0, 0} );
     lMessageRequest.mMSecsSinceEpoch = QDateTime::currentMSecsSinceEpoch();
     qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequest.mMSecsSinceEpoch);
-    NMessageResponse* rRequestResponse = new NMessageResponse(cHttpServerName, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseMethodUnavailableError,
-                                         tr("Message is not in JSon format!"), 0, QVariantMap({{lMessageRequest.mOriginalMethodName, QVariantMap()}} ), QString("%1-%2").arg(fAbbreviation()).arg(int(NMessageResponse::EResponseStatus::eResponseMethodUnavailableError)));
+    NMessageResponse* rRequestResponse = new NMessageResponse(cHttpServerName, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseMessageFormatError,
+                                         tr("Message is not in JSon format!"), 0, QVariantMap({{lMessageRequest.mOriginalMethodName, QVariantMap()}} ), QString("%1-%2").arg(fAbbreviation()).arg(int(NMessageResponse::EResponseStatus::eResponseMessageFormatError)));
     return rRequestResponse->fToJsonString();
   }
 
   void NConnectionController::fOnTextMessageReceived(const QString& lMessage) {
-    qDebug() << "\nConnector: Text Message received:" << lMessage;
+    //qDebug() << "\nConnector: Text Message received:" << lMessage;
     QString lMessageType;
     QJsonObject lMessageObject(NMessageFactory::fMessageObjectFromString(lMessage, &lMessageType));
     if(lMessageType == cTypeRequest && NMessageRequest::fValidateMessageObject(lMessageObject)) {

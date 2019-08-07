@@ -83,7 +83,7 @@ namespace NulstarNS {
   }
 
   void NWebSocket::fOnTextMessageReceived(const QString& lMessage) {
-    qDebug() << "\nText Message received:" << lMessage;
+    //qDebug() << "\nText Message received:" << lMessage;
     QString lMessageType;
     QJsonObject lMessageObject(NMessageFactory::fMessageObjectFromString(lMessage, &lMessageType));    
     if(lMessageType == cTypeNegotiateConnectionResponse && NMessageNegotiateConnectionResponse::fValidateMessageObject(lMessageObject))

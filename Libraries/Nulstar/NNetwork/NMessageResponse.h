@@ -29,6 +29,7 @@ namespace NulstarNS {
                                    eResponseMethodExeError = 1, eResponseNoMethodError = 2,
                                    eResponseDependenciesNoFoundError = 3, eResponseMethodExistedError = 4,
                                    eResponseMethodUnavailableError = 5, eResponseMethodListEmptyError = 6,
+                                   eResponseMessageFormatError = 7,
 
 
                                    /*for NULS 2.0 modules*/
