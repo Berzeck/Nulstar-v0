@@ -115,7 +115,7 @@ namespace NulstarNS {
       connect(&lDelayTimer, &QTimer::timeout, &lExtraDelay, &QEventLoop::quit);
       lDelayTimer.start(cTimePeriod_ExtraDelayMSecs);
       lExtraDelay.exec();
-      qDebug("Module '%s-%s' start successfully!", lModuleName.toStdString().data(), lEffectiveModuleVersion.toStdString().data());
+      qWarning("Module '%s-%s' start successfully!", lModuleName.toStdString().data(), lEffectiveModuleVersion.toStdString().data());
       return true;
     }
     //qDebug("Module '%s' and version '%s' could not start successfully!", lModuleName.toStdString().data(), lEffectiveModuleVersion.toStdString().data());
