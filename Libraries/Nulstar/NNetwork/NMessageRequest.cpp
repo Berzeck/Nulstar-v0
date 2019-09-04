@@ -39,11 +39,25 @@ namespace NulstarNS {
       return false;
     }
 
-    if (lMessageObject.value(cMessageTypeFieldName).toString() != cTypeRequest) {
-      qDebug("Message type is not 'Request'!");
+    if(lMessageObject.value(cMessageTypeFieldName).toString() != cTypeRequest) {
+      qWarning("Message type is not 'Request'!");
+      return false;
+    }
+
+    QJsonValue lValue(lMessageObject.value(cFieldName_MessageData));
+    if(lValue.isUndefined()) {
+      qWarning("Request message does not have 'MessageData' field!");
+      return false;
+    }
+    if(!lValue.isObject()) {
+      qWarning("'MessageData' field does not contain a JSON object.");
+      return false;
+    }
+    lValue = lValue.toObject().value(cFieldName_RequestMethods);
+    if(!lValue.isObject()) {
+      qWarning("'RequestMethods' field does not contain a JSON object.");
       return false;
     }
     return true;
   }
-
 }

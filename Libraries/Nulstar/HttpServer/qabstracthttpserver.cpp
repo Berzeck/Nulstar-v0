@@ -67,7 +67,8 @@ void QAbstractHttpServerPrivate::handleNewConnections()
 
         QObject::connect(socket, &QTcpSocket::disconnected, &QObject::deleteLater);
         QObject::connect(socket, &QObject::destroyed, [request] () {
-            delete request;
+          //  delete request;
+           if(request) delete request;
         });
     }
 }

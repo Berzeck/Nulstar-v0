@@ -41,12 +41,12 @@ namespace NulstarNS {
         }
 
         if(lResponse == cHttpError) {
- qDebug("Message error!");
+ qWarning("Message error!");
           QString lErrorMessage(fProcessHttpRequestError());
           return QString(lErrorMessage);
         }
         if(lResponse.isEmpty()) {
- qDebug("Message timeout!");
+ qWarning("Message timeout!");
           fLog(NulstarNS::ELogLevel::eLogWarning, NulstarNS::ELogMessageType::eMemoryTransaction, QString("HTTP Server was unable to process the request!'"));
           QString lTimeOutMessage(fProcessHttpRequestTimeout(lRequest.body()));
           return QString(lTimeOutMessage);

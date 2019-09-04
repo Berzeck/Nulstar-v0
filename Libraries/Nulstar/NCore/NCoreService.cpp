@@ -178,6 +178,7 @@ namespace NulstarNS {
       QVariantMap lRequestMethodParams = lRequestMethods.value(lRequestMethodName).toMap();
       TMessageRequestToProcess lMessageRequest({lWebSocketName, lWebSocketName,lMessageID, lRequestMethodName, lRequestMethodName,lRequestMethodParams, lSubscriptionEventCounter, lSubscriptionPeriod, 0, 0} );
       fOnRequestMessageArrived(lMessageRequest);
+      return; //-- Temporal
     }
   }
 
