@@ -9,7 +9,7 @@ Qt=5.12.3
 [Networks]
 AllowedNetworks=127.0.0.1/32
 CommPort=7772
-AdminPort=7791
+AdminPort=0
 ClientPort=7790
 IP=127.0.0.1
 
