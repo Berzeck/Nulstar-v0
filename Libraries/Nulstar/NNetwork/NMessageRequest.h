@@ -16,12 +16,13 @@ namespace NulstarNS {
   const QString lSubscriptionRangeFieldName("SubscriptionRange");
   const QString lResponseMaxSizeFieldName("ResponseMaxSize");
   const QString cFieldName_RequestMethods("RequestMethods");
+  const QString cFieldName_TimeOut("TimeOut");
   class NETWORKSHARED_EXPORT NMessageRequest : public NMessage {
     Q_OBJECT
 
     public:
       explicit NMessageRequest(const QString& lConnectionName, const QString& lMessageID = QString(), bool lRequestAck = false, quint64 lSubscriptionEventCounter = 0, quint64 lSubscriptionPeriod = 0,
-                               const QString& lSubscriptionRange = QString(), quint64 lResponseMaxSize = 0, const QVariantMap& lRequestMethods = QVariantMap(), QObject* rParent = nullptr);
+                               const QString& lSubscriptionRange = QString(), quint64 lResponseMaxSize = 0, const QVariantMap& lRequestMethods = QVariantMap(), const QString& lTimeOut = QString("10000"), QObject* rParent = nullptr);
       ~NMessageRequest() override {}
 
       bool fRequestAck() const { return mRequestAck; }
@@ -45,6 +46,7 @@ namespace NulstarNS {
       quint64 mSubscriptionEventCounter;
       quint64 mSubscriptionPeriod;
       QString mSubscriptionRange;
+      QString mTimeOut;
       QVariantMap mRequestMethods;
   };
 
@@ -59,6 +61,7 @@ namespace NulstarNS {
       quint64 mSubscriptionPeriod;
       qint64 mMSecsSinceEpoch;
       quint64 mEventCounter;
+      QString mTimeOut;
   };
 } // namespace NulstarNS
 

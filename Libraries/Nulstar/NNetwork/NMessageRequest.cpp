@@ -2,9 +2,9 @@
 
 namespace NulstarNS {
   NMessageRequest::NMessageRequest (const QString& lConnectionName, const QString& lMessageID, bool lRequestAck, quint64 lSubscriptionEventCounter, quint64 lSubscriptionPeriod,
-                                        const QString& lSubscriptionRange, quint64 lResponseMaxSize, const QVariantMap& lRequestMethods, QObject *rParent)
+                                        const QString& lSubscriptionRange, quint64 lResponseMaxSize, const QVariantMap& lRequestMethods, const QString& lTimeOut, QObject *rParent)
                  : NMessage(lConnectionName, lMessageID, rParent), mRequestAck(lRequestAck), mResponseMaxSize(lResponseMaxSize), mSubscriptionEventCounter(lSubscriptionEventCounter), mSubscriptionPeriod(lSubscriptionPeriod),
-                            mSubscriptionRange(lSubscriptionRange), mRequestMethods(lRequestMethods) {
+                            mSubscriptionRange(lSubscriptionRange), mTimeOut(lTimeOut), mRequestMethods(lRequestMethods) {
 
 
   }
@@ -17,6 +17,7 @@ namespace NulstarNS {
     lMessageData.insert(lSubscriptionRangeFieldName, mSubscriptionRange);
     lMessageData.insert(lResponseMaxSizeFieldName, QString::number(mResponseMaxSize));
     lMessageData.insert(cFieldName_RequestMethods, mRequestMethods);
+    lMessageData.insert(cFieldName_TimeOut, mTimeOut);
     return lMessageData;
   }
 

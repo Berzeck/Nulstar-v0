@@ -174,9 +174,10 @@ namespace NulstarNS {
     QString lMessageID(lMessage.value(cFieldName_MessageID).toString());
     quint64 lSubscriptionEventCounter(lMessage.value(cFieldName_MessageData).toMap().value(cFieldName_SubscriptionEventCounter).toULongLong());
     quint64 lSubscriptionPeriod(lMessage.value(cFieldName_MessageData).toMap().value(cFieldName_SubscriptionPeriod).toULongLong());
+    QString lTimeOut(lMessage.value(cFieldName_MessageData).toMap().value(cFieldName_TimeOut).toString());
     for(const QString& lRequestMethodName : lRequestMethods.keys()) {
       QVariantMap lRequestMethodParams = lRequestMethods.value(lRequestMethodName).toMap();
-      TMessageRequestToProcess lMessageRequest({lWebSocketName, lWebSocketName,lMessageID, lRequestMethodName, lRequestMethodName,lRequestMethodParams, lSubscriptionEventCounter, lSubscriptionPeriod, 0, 0} );
+      TMessageRequestToProcess lMessageRequest({lWebSocketName, lWebSocketName,lMessageID, lRequestMethodName, lRequestMethodName,lRequestMethodParams, lSubscriptionEventCounter, lSubscriptionPeriod, 0, 0, lTimeOut} );
       fOnRequestMessageArrived(lMessageRequest);
       return; //-- Temporal
     }

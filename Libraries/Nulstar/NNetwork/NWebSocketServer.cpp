@@ -37,7 +37,8 @@ namespace NulstarNS {
 
     if(rPendingConnection != nullptr) {
       qint64 lMSecsSinceEpoch(QDateTime::currentMSecsSinceEpoch());
-      NWebSocket* rSocket = new NWebSocket(QString::number(lMSecsSinceEpoch), QString(), QUrl(), 0, rPendingConnection, this);
+      QString lUrl(QString("ws://%1:%2").arg(rPendingConnection->peerAddress().toString()).arg(QString::number(rPendingConnection->peerPort()))); // For debugging only
+      NWebSocket* rSocket = new NWebSocket(QString::number(lMSecsSinceEpoch), QString(), lUrl, 0, rPendingConnection, this);
       connect(rSocket, &NWebSocket::sMessageReceived, this, &NWebSocketServer::fProcessTextMessage, Qt::UniqueConnection);
       connect(rSocket, &NWebSocket::sDisconnected, this, &NWebSocketServer::fSocketDisconnected, Qt::UniqueConnection);
       connect(rSocket, &NWebSocket::sLog, this, &NWebSocketServer::sLog, Qt::UniqueConnection);
@@ -140,12 +141,19 @@ namespace NulstarNS {
     }
 
     QVariantMap lRequestMethods(lMessage.value(cFieldName_MessageData).toMap().value(cFieldName_RequestMethods).toMap());
+/*    QString ddd;
+ if(lRequestMethods.contains("latestBlockHeaderPo")) {
+     QVariantMap aaa({{"chainId","2"}});
+  ddd = lRequestMethods["latestBlockHeaderPo"].toMap()["chainId"].toString();
+  lRequestMethods["latestBlockHeaderPo"] = aaa;
+ }*/
     QString lMessageID(lMessage.value(cFieldName_MessageID).toString());
     quint64 lSubscriptionEventCounter(lMessage.value(cFieldName_MessageData).toMap().value(cFieldName_SubscriptionEventCounter).toULongLong());
     quint64 lSubscriptionPeriod(lMessage.value(cFieldName_MessageData).toMap().value(cFieldName_SubscriptionPeriod).toULongLong());
+    QString lTimeOut(lMessage.value(cFieldName_MessageData).toMap().value(cFieldName_TimeOut).toString());
     for(const QString& lRequestMethodName : lRequestMethods.keys()) {
       QVariantMap lRequestMethodParams = lRequestMethods.value(lRequestMethodName).toMap();
-      TMessageRequestToProcess lMessageRequest({fName(), rConnection->fName(),lMessageID, lRequestMethodName, lRequestMethodName,lRequestMethodParams, lSubscriptionEventCounter, lSubscriptionPeriod, 0, 0} );
+      TMessageRequestToProcess lMessageRequest({fName(), rConnection->fName(),lMessageID, lRequestMethodName, lRequestMethodName,lRequestMethodParams, lSubscriptionEventCounter, lSubscriptionPeriod, 0, 0, lTimeOut} );
  /*if(lRequestMethodName == "RegisterAPI") {
      qDebug("1 Method******** '%s' **********", lMessageRequest.mEffectiveMethodName.toStdString().data());
      qDebug("2 SEC* '%s' **********", QString::number(lMessageRequest.mSubscriptionEventCounter).toStdString().data());

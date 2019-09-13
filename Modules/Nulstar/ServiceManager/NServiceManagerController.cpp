@@ -241,7 +241,7 @@ namespace NulstarNS {
           }
           else {
             QVariantMap lMethodParameters( {{lMethods.at(0), lParameters }} );
-            NMessageRequest* rForwardedRequest = new NMessageRequest(i1.value().fWebSocketID(), QString(), false, lMessageRequest.mSubscriptionEventCounter, lMessageRequest.mSubscriptionPeriod, QString(), 0, lMethodParameters, this);
+            NMessageRequest* rForwardedRequest = new NMessageRequest(i1.value().fWebSocketID(), QString(), false, lMessageRequest.mSubscriptionEventCounter, lMessageRequest.mSubscriptionPeriod, QString(), 0, lMethodParameters, QString(), this);
             TMessageRequestToProcess lMessageRequestOriginal(lMessageRequest);
             lMessageRequestOriginal.mOriginalMethodName = lMethods.at(0);
             lMessageRequestOriginal.mEffectiveMethodName = lMethods.at(0);

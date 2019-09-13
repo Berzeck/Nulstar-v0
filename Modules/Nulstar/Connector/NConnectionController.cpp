@@ -69,9 +69,10 @@ namespace NulstarNS {
     QString lMessageID(lMessageMap.value(cFieldName_MessageID).toString());
     quint64 lSubscriptionEventCounter(lMessageMap.value(cFieldName_MessageData).toMap().value(cFieldName_SubscriptionEventCounter).toULongLong());
     quint64 lSubscriptionPeriod(lMessageMap.value(cFieldName_MessageData).toMap().value(cFieldName_SubscriptionPeriod).toULongLong());
+    QString lTimeOut(lMessageMap.value(cFieldName_MessageData).toMap().value(cFieldName_TimeOut).toString());
     for(const QString& lRequestMethodName : lRequestMethods.keys()) {
       QVariantMap lRequestMethodParams = lRequestMethods.value(lRequestMethodName).toMap();
-      TMessageRequestToProcess lMessageRequest({cHttpServerName, cHttpServerName,lMessageID, lRequestMethodName, lRequestMethodName,lRequestMethodParams, lSubscriptionEventCounter, lSubscriptionPeriod, 0, 0} );
+      TMessageRequestToProcess lMessageRequest({cHttpServerName, cHttpServerName,lMessageID, lRequestMethodName, lRequestMethodName,lRequestMethodParams, lSubscriptionEventCounter, lSubscriptionPeriod, 0, 0, lTimeOut} );
       lMessageRequest.mMSecsSinceEpoch = QDateTime::currentMSecsSinceEpoch();
       if(fApiMethodLowercase())
         lMessageRequest.mEffectiveMethodName = lMessageRequest.mEffectiveMethodName.toLower();
@@ -84,7 +85,7 @@ namespace NulstarNS {
   }
 
   QString NConnectionController::fProcessHttpRequestError() {
-    TMessageRequestToProcess lMessageRequest({cHttpServerName, cHttpServerName,"0", "", "", QVariantMap(), 0, 0, 0, 0} );
+    TMessageRequestToProcess lMessageRequest({cHttpServerName, cHttpServerName,"0", "", "", QVariantMap(), 0, 0, 0, 0, "10000"} );
     lMessageRequest.mMSecsSinceEpoch = QDateTime::currentMSecsSinceEpoch();
     qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequest.mMSecsSinceEpoch);
     NMessageResponse* rRequestResponse = new NMessageResponse(cHttpServerName, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseMessageFormatError,
@@ -154,7 +155,7 @@ namespace NulstarNS {
     if(lResponseData.contains(cFieldName_RegisterAPI) && lResponseSuccessfull) {
       QVariantMap lGetConsolidatedAPI;
       lGetConsolidatedAPI[cCommand_GetConsolidatedAPI] = QVariant();
-      fSendMessage(cServiceManagerName, new NMessageRequest(cServiceManagerName, QString(), false, 1, 0, QString(), 0, lGetConsolidatedAPI, this), NWebSocket::EConnectionState::eConnectionActive);
+      fSendMessage(cServiceManagerName, new NMessageRequest(cServiceManagerName, QString(), false, 1, 0, QString(), 0, lGetConsolidatedAPI,QString(), this), NWebSocket::EConnectionState::eConnectionActive);
       return;
     }
     if(lResponseData.contains(cCommand_GetConsolidatedAPI)) {
@@ -242,7 +243,7 @@ namespace NulstarNS {
 
   void NConnectionController::fForwardMessage(const TMessageRequestToProcess& lMessageRequestToProcess) {
     QVariantMap lParameters({{QStringLiteral("ForwardMessage"), QVariantMap( {{lMessageRequestToProcess.mEffectiveMethodName, lMessageRequestToProcess.mParameters }}) }} );
-    NMessageRequest* rForwardedRequest =   new  NMessageRequest(cServiceManagerName, QString(), false, lMessageRequestToProcess.mSubscriptionEventCounter, lMessageRequestToProcess.mSubscriptionPeriod, QString(), 0, lParameters, this);
+    NMessageRequest* rForwardedRequest =   new  NMessageRequest(cServiceManagerName, QString(), false, lMessageRequestToProcess.mSubscriptionEventCounter, lMessageRequestToProcess.mSubscriptionPeriod, QString(), 0, lParameters, QString(), this);
     mForwardedMessages.insert(rForwardedRequest->fMessageID(), lMessageRequestToProcess);
     fSendMessage(cServiceManagerName, rForwardedRequest);
   }

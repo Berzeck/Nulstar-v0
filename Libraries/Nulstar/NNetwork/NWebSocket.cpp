@@ -83,7 +83,7 @@ namespace NulstarNS {
   }
 
   void NWebSocket::fOnTextMessageReceived(const QString& lMessage) {
-    //qDebug() << "\nText Message received:" << lMessage;
+    qDebug() << "\nText Message received:" << lMessage;
     QString lMessageType;
     QJsonObject lMessageObject(NMessageFactory::fMessageObjectFromString(lMessage, &lMessageType));    
     if(lMessageType == cTypeNegotiateConnectionResponse && NMessageNegotiateConnectionResponse::fValidateMessageObject(lMessageObject))
@@ -114,6 +114,6 @@ namespace NulstarNS {
   }
 
   void NWebSocket::fRegisterApi(const QVariantMap& lApiMap) {
-    fQueueMessage(new  NMessageRequest(mName, QString(), false, 0, 0, QString(), 0, lApiMap, this), EConnectionState::eConnectionActive);
+    fQueueMessage(new  NMessageRequest(mName, QString(), false, 0, 0, QString(), 0, lApiMap, QString(), this), EConnectionState::eConnectionActive);
   }
 }
