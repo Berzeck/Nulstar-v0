@@ -1,0 +1,9 @@
+#pragma once
+
+#define APP_NAME '"$$APP_NAME"'
+#define APP_VERSION '"$$APP_VERSION"'
+#define APP_VERSION_NAME '"$$APP_VERSION_NAME"'
+#define APP_PROTOCOL_VERSIONS '"$$APP_PROTOCOL_VERSIONS"'
+#define APP_ROLES '"$$APP_ROLES"'
+#define APP_DOMAIN '"$$APP_DOMAIN"'
+
