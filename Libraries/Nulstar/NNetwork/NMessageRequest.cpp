@@ -17,7 +17,7 @@ namespace NulstarNS {
     lMessageData.insert(lSubscriptionRangeFieldName, mSubscriptionRange);
     lMessageData.insert(lResponseMaxSizeFieldName, QString::number(mResponseMaxSize));
     lMessageData.insert(cFieldName_RequestMethods, mRequestMethods);
-    lMessageData.insert(cFieldName_TimeOut, mTimeOut);
+  //  lMessageData.insert(cFieldName_TimeOut, mTimeOut);
     return lMessageData;
   }
 
