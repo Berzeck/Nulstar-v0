@@ -17,6 +17,7 @@ DESTDIR=$$LIBRARIES_OUTDIR
 # Source Files
 
 HEADERS += NNetwork.h \
+    NDownloader.h \
            NMessageResponse.h \
            NMessageRequest.h \
            NMessageAck.h \
@@ -32,6 +33,7 @@ HEADERS += NNetwork.h \
     NMessageFactory.h
 
 SOURCES += NMessageResponse.cpp \
+    NDownloader.cpp \
            NMessageRequest.cpp \
            NMessageAck.cpp \
            NMessageUnsubscribe.cpp \

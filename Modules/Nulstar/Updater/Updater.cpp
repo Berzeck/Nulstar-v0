@@ -24,6 +24,7 @@ int main(int argc, char *argv[]) {
                          {{"n", "allowednetworks"}, QStringLiteral("Allowed Networks."), QStringLiteral("allowednetworks")},
                          {{"u", "managerurl"}, QStringLiteral("Service manager URL."), QStringLiteral("managerurl")},
                          {{"i", "ip"}, QStringLiteral("Listening connections IP"), QStringLiteral("ip")},
+                         {{"p", "packagesource"}, QStringLiteral("URL in which new packages will be downloaded"), QStringLiteral("packagesource")},
                      });
   lParser.process(lApp);
   if (!lParser.isSet("loglevel") || lParser.value("loglevel").toUShort() < 1

@@ -48,7 +48,7 @@ namespace NulstarNS {
     if(!rMessage)
       return;
     qint64 lBytesSent = mWebSocket->sendTextMessage(rMessage->fToJsonString());
-  //qDebug("%s \n\n", qUtf8Printable(rMessage->fToJsonString()));
+  qDebug("%s \n\n", qUtf8Printable(rMessage->fToJsonString()));
     if(lBytesSent) {
       rMessage->fSetStatus(NMessage::EMessageStatus::eSent);
       emit sLog(ELogLevel::eLogInfo, ELogMessageType::eMessageSent, rMessage->fToJsonString());
@@ -83,7 +83,7 @@ namespace NulstarNS {
   }
 
   void NWebSocket::fOnTextMessageReceived(const QString& lMessage) {
-    qDebug() << "\nText Message received:" << lMessage;
+  //  qDebug() << "\nText Message received:" << lMessage;
     QString lMessageType;
     QJsonObject lMessageObject(NMessageFactory::fMessageObjectFromString(lMessage, &lMessageType));    
     if(lMessageType == cTypeNegotiateConnectionResponse && NMessageNegotiateConnectionResponse::fValidateMessageObject(lMessageObject))

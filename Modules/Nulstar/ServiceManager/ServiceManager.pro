@@ -9,7 +9,7 @@ CONFIG += c++11 console
 # Target Settings
 
 TARGET = ServiceManager
-VERSION = 0.1.0
+VERSION = 0.2.0
 APP_DOMAIN=Nulstar
 APP_ROLES=Role_ServiceManager[0.1]
 APP_PROTOCOL_VERSIONS=0.1

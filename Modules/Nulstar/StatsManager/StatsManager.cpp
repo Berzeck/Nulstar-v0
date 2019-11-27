@@ -15,6 +15,7 @@ int main(int argc, char* argv[])
   lApp.setOrganizationName(APP_DOMAIN);
 
   QList<QNetworkAddressEntry> lAllowedNetworks;
+  QString lServiceManagerUrl;
   QCommandLineParser lParser;
   lParser.setApplicationDescription(APP_NAME);
   lParser.addHelpOption();
@@ -24,6 +25,7 @@ int main(int argc, char* argv[])
     {{"s", "sslmode"}, QStringLiteral("Security Type [0-1]."), QStringLiteral("sslmode")},
     {{"m", "commport"}, QStringLiteral("Communication Port."), QStringLiteral("commport")},
     {{"n", "allowednetworks"}, QStringLiteral("Allowed Networks."), QStringLiteral("allowednetworks")},
+    {{"u", "managerurl"}, QStringLiteral("Service manager URL."), QStringLiteral("managerurl")},
     {{"i", "ip"}, QStringLiteral("Listening connections IP"), QStringLiteral("ip")},
   });
   lParser.process(lApp);
@@ -44,6 +46,15 @@ int main(int argc, char* argv[])
     fputs(qPrintable(QString("IP for listening incoming connections not set!\n\n%1\n").arg(lParser.helpText())), stderr);
     return 6;
   }
+
+  if(lParser.isSet("managerurl")) {
+    lServiceManagerUrl = lParser.value("managerurl");
+  }
+  else {
+    fputs(qPrintable(QString("Service Manager URL not set!\n\n%1\n").arg(lParser.helpText())), stderr);
+    return 7;
+  }
+
   if(lParser.isSet("allowednetworks")) {
     QStringList lNetworks(lParser.value("allowednetworks").split(","));
     for(const QString& lNetwork : lNetworks) {
@@ -63,7 +74,7 @@ int main(int argc, char* argv[])
     lLocalHostUrl.prepend("wss");
     lSslMode = QWebSocketServer::SslMode::SecureMode;
   }
-  NulstarNS::NStatsManagerController lController(lSslMode, static_cast<NulstarNS::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")), QUrl(lLocalHostUrl), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::AnyIPv4);
+  NulstarNS::NStatsManagerController lController(lSslMode, static_cast<NulstarNS::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")), QUrl(lServiceManagerUrl), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::AnyIPv4);
   lController.fControlWebServer(QString(), NulstarNS::NStatsManagerController::EServiceAction::eStartService);  // Start all web sockets servers
   lController.fConnectToServiceManager(0);
   return lApp.exec();

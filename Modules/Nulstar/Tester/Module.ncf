@@ -3,12 +3,12 @@ Language=CPP
 Managed=1
 
 [Libraries]
-Nulstar=0.1.0
-Qt=5.12.3
-JRE=11.0.2
+Nulstar=0.2.0
+Qt=5.13.1
 
 [Networks]
 AllowedNetworks=127.0.0.1/32
+MainControllerIP=127.0.0.1
 CommPort=7773
 IP=127.0.0.1
 
@@ -17,9 +17,3 @@ LogLevel=4
 
 [Security]
 SslMode=0 
-
-[Script]
-Scripted=1
-StartScript=start
-StopScript=stop
-

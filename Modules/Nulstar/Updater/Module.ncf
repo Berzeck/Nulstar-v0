@@ -3,8 +3,8 @@ Language=CPP
 Managed=1
 
 [Libraries]
-Nulstar=0.1.0
-Qt=5.12.3
+Nulstar=0.2.0
+Qt=5.13.1
 
 [Networks]
 AllowedNetworks=127.0.0.1/32
@@ -17,3 +17,5 @@ LogLevel=4
 [Security]
 SslMode=0 
 
+[Sources]
+PackageSource=drive.nulstar.com
