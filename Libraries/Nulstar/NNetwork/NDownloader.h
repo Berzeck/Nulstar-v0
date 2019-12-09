@@ -40,6 +40,7 @@ namespace NulstarNS {
     signals:
       void sLog(ELogLevel eLogLevel, ELogMessageType eLogMessageType, const QString& lMessage);
       void sError(const QUrl& lUrl);
+      void sFinished(const QUrl& lUrl, const QByteArray& lFileContents);
   };
 }
 

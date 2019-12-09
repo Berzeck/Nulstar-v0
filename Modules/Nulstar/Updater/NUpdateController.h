@@ -1,9 +1,10 @@
-//
-// Created by daviyang35 on 2019-01-10.
-//
 
 #ifndef NULSTAR_NUPDATECONTROLLER_H
 #define NULSTAR_NUPDATECONTROLLER_H
+
+#include <QTimer>
+#include <QUrl>
+#include <NDownloader.h>
 
 #include "NCoreService.h"
 #include "UpdaterVersion.h"
@@ -16,6 +17,8 @@ namespace NulstarNS {
       explicit NUpdateController(QWebSocketServer::SslMode lSslMode,
                              ELogLevel lLogLevel, const QHostAddress& lIP,
                              const QUrl &lServiceManagerUrl,
+                             quint16 lCheckUpdatesInterval,
+                             const QString& lPackageSource,
                              QList<QNetworkAddressEntry> lAllowedNetworks = QList<QNetworkAddressEntry>(),
                              quint16 lCommPort = 0,
                              QHostAddress::SpecialAddress lBindAddress = QHostAddress::Null,
@@ -32,6 +35,8 @@ namespace NulstarNS {
 
     public Q_SLOTS:
       API_PUBLIC_FUNCTION void checkupdates(const TMessageRequestToProcess& lMessageRequest);
+      void fCheckUpdates();
+      void fProcessFinishedDownload(const QUrl& lDownloadUrl);
 
     protected:
       void fFillMethodMetadata() override { }
@@ -39,6 +44,10 @@ namespace NulstarNS {
     private:
       quint64 mRequestID;
       quint8 mCompressionLevel;      
+      quint16 mCheckUpdatesInterval;
+      NDownloader mDownloader;
+      QTimer mCheckUpdatesTimer;
+      QUrl mPackageSourceUrl;
   };
 }
 

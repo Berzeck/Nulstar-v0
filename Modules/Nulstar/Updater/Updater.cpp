@@ -24,6 +24,7 @@ int main(int argc, char *argv[]) {
                          {{"n", "allowednetworks"}, QStringLiteral("Allowed Networks."), QStringLiteral("allowednetworks")},
                          {{"u", "managerurl"}, QStringLiteral("Service manager URL."), QStringLiteral("managerurl")},
                          {{"i", "ip"}, QStringLiteral("Listening connections IP"), QStringLiteral("ip")},
+                         {{"c", "checkupdates"}, QStringLiteral("Check updates interval (in seconds)"), QStringLiteral("checkupdates")},
                          {{"p", "packagesource"}, QStringLiteral("URL in which new packages will be downloaded"), QStringLiteral("packagesource")},
                      });
   lParser.process(lApp);
@@ -56,8 +57,7 @@ int main(int argc, char *argv[]) {
   else {
     fputs(qPrintable(QString("Service Manager URL not set!\n\n%1\n").arg(lParser.helpText())), stderr);
     return 7;
-  }
-
+  }  
   if (lParser.isSet("allowednetworks")) {
     QStringList lNetworks(lParser.value("allowednetworks").split(","));
     for (const QString &lNetwork : lNetworks) {
@@ -70,8 +70,22 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  QString lCheckUpdates(lParser.value("checkupdates"));
+  if (!lParser.isSet("checkupdates")) {
+    fputs(qPrintable(QString("Check updates interval is not defined!").arg(lParser.helpText())), stderr);
+    return 8;
+  }
+
+  QString lPackageSource(lParser.value("packagesource"));
+  if (!lParser.isSet("packagesource")) {
+    fputs(qPrintable(QString("Package source URL not defined!").arg(lParser.helpText())), stderr);
+    return 9;
+  }
+
   NulstarNS::NUpdateController lController(lSslMode, static_cast<NulstarNS::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")),
                                                QUrl(lServiceManagerUrl),
+                                               lCheckUpdates.toUShort(),
+                                               lPackageSource,
                                                lAllowedNetworks,
                                                lParser.value("commport").toUShort(),
                                                QHostAddress::AnyIPv4);

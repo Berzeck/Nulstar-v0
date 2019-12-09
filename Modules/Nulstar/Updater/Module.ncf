@@ -10,6 +10,7 @@ Qt=5.13.1
 AllowedNetworks=127.0.0.1/32
 CommPort=7774
 IP=127.0.0.1
+PackageSource=http://drive.nulstar.com/Nuls
 
 [Output]
 LogLevel=4
@@ -17,5 +18,6 @@ LogLevel=4
 [Security]
 SslMode=0 
 
-[Sources]
-PackageSource=drive.nulstar.com
+[Intervals]
+CheckUpdates=5
+

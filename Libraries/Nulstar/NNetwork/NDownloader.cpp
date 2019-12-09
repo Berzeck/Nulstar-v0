@@ -1,7 +1,7 @@
 #include <QDir>
+#include <QFile>
 #include <QNetworkRequest>
 #include <QNetworkReply>
-
 #include "NDownloader.h"
 
 namespace NulstarNS {
@@ -18,29 +18,55 @@ namespace NulstarNS {
       emit sLog(ELogLevel::eLogCritical, ELogMessageType::eResourceManagement, tr("Couldn't create path '%1'. Download aborted.").arg(lDownloadPath));
       return;
     }*/
-
+    QString lUrlString(lUrl.toString());
+    if(!lFilePath.isEmpty()) {
+      QFile lTargetFile(lFilePath);
+      if(lTargetFile.exists() && !lTargetFile.remove()) {
+        emit sLog(ELogLevel::eLogCritical, ELogMessageType::eResourceManagement, tr("File '%1' exists but couldn't be removed.").arg(lUrlString));
+        emit sError(lUrlString);
+        return;
+      }
+    }
     QNetworkRequest lDownloadRequest(lUrl);
     QNetworkReply* rNetworkReply = mNetworkManager.get(lDownloadRequest);
     QTimer* rDownloadTimer = new QTimer();
     tDownloadData lDownloadData = {rNetworkReply, QByteArray(), rDownloadTimer, 0};
-    
-    QString lUrlString(lUrl.toString());
+
     mDownloadData[lUrlString] = lDownloadData;
 
-    connect(rNetworkReply, &QNetworkReply::downloadProgress, rNetworkReply, [&lUrlString, rNetworkReply, this] (qint64 /*lBytesReceived*/, qint64 /*lBytesTotal*/) {
+    connect(rNetworkReply, &QNetworkReply::downloadProgress, rNetworkReply, [lUrlString, rNetworkReply, this] (qint64 /*lBytesReceived*/, qint64 /*lBytesTotal*/) {
         mDownloadData[lUrlString].mFileContents.append(rNetworkReply->readAll()); 
         mDownloadData[lUrlString].pTimeoutTimer->stop();
         mDownloadData[lUrlString].pTimeoutTimer->start(cTime_DownloadTimeout * 1000);
       } );
     
-    connect(rNetworkReply, &QNetworkReply::finished, rNetworkReply, [&lFilePath, &lUrlString, rNetworkReply, this] () {
-        if(rNetworkReply->error() != QNetworkReply::NoError) {
-          if(mDownloadData[lUrlString].pTimeoutTimer->isActive())
-            mDownloadData[lUrlString].pTimeoutTimer->stop();
-          mDownloadData[lUrlString].pTimeoutTimer->deleteLater();
-          rNetworkReply->deleteLater();
-          mDownloadData.remove(lUrlString);
+    connect(rNetworkReply, &QNetworkReply::finished, rNetworkReply, [lFilePath, lUrlString, rNetworkReply, this] () {
+        if(mDownloadData[lUrlString].pTimeoutTimer->isActive())
+          mDownloadData[lUrlString].pTimeoutTimer->stop();
+
+        if(rNetworkReply->error() == QNetworkReply::NoError) {
+          if(lFilePath.isEmpty()) {
+            emit sLog(ELogLevel::eLogInfo, ELogMessageType::eResourceManagement, tr("File '%1' downloaded successfully.").arg(lUrlString));
+            emit sFinished(lUrlString, mDownloadData[lUrlString].mFileContents);
+          }
+          else {
+            QFile lTargetFile(lFilePath);
+            if(lTargetFile.open(QIODevice::WriteOnly)) {
+              lTargetFile.write(mDownloadData[lUrlString].mFileContents);
+              lTargetFile.flush();
+              lTargetFile.close();
+              emit sLog(ELogLevel::eLogInfo, ELogMessageType::eResourceManagement, tr("File '%1' downloaded and saved successfully.").arg(lUrlString));
+              emit sFinished(lUrlString, QByteArray());
+            }
+            else {
+              emit sLog(ELogLevel::eLogCritical, ELogMessageType::eResourceManagement, tr("File '%1' couldn't be written to disk.").arg(lUrlString));
+              emit sError(lUrlString);
+            }
+          }
         }
+        mDownloadData[lUrlString].pTimeoutTimer->deleteLater();
+        rNetworkReply->deleteLater();
+        mDownloadData.remove(lUrlString);
       } );
 
     connect(rNetworkReply, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), rNetworkReply, [&lUrlString, rNetworkReply, this] (QNetworkReply::NetworkError /*lCode*/) {
@@ -48,7 +74,7 @@ namespace NulstarNS {
         emit sError(lUrlString);
       } );
 
-    connect(rDownloadTimer, &QTimer::timeout, rDownloadTimer, [lFilePath, &lUrlString, rDownloadTimer, this] () {
+    connect(rDownloadTimer, &QTimer::timeout, rDownloadTimer, [lFilePath, lUrlString, rDownloadTimer, this] () {
         if(mDownloadData[lUrlString].mRetryTimes == cCount_RetryTimes) {
           rDownloadTimer->stop();
           mDownloadData[lUrlString].pNetworkReply->abort();
