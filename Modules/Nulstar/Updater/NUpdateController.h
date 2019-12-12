@@ -2,6 +2,7 @@
 #ifndef NULSTAR_NUPDATECONTROLLER_H
 #define NULSTAR_NUPDATECONTROLLER_H
 
+#include <QString>
 #include <QTimer>
 #include <QUrl>
 #include <NDownloader.h>
@@ -10,6 +11,8 @@
 #include "UpdaterVersion.h"
 
 namespace NulstarNS {
+  const QString cDirName_Downloads(QStringLiteral("Downloads"));
+  const QString cFileName_Versions(QStringLiteral("Versions.txt"));
   class NUpdateController : public NCoreService {
     Q_OBJECT
 
@@ -35,11 +38,11 @@ namespace NulstarNS {
 
     public Q_SLOTS:
       API_PUBLIC_FUNCTION void checkupdates(const TMessageRequestToProcess& lMessageRequest);
-      void fCheckUpdates();
-      void fProcessFinishedDownload(const QUrl& lDownloadUrl);
+      void fProcessFinishedDownload(const QUrl& lDownloadUrl, const QByteArray& lFileContents);
 
     protected:
       void fFillMethodMetadata() override { }
+      QString fCurrentOS() const;
 
     private:
       quint64 mRequestID;
@@ -47,7 +50,7 @@ namespace NulstarNS {
       quint16 mCheckUpdatesInterval;
       NDownloader mDownloader;
       QTimer mCheckUpdatesTimer;
-      QUrl mPackageSourceUrl;
+      QString mPackageSourceUrl;
   };
 }
 

@@ -30,11 +30,11 @@ namespace NulstarNS {
 
     public:
       explicit NDownloader(QObject* rParent = nullptr);
-
+      ~NDownloader();
       Q_INVOKABLE void fDownload(const QUrl &lUrl, const QString &lFilePath);
 
     private:
-      QNetworkAccessManager mNetworkManager;
+      QNetworkAccessManager* mNetworkManager;
       QMap<QString, tDownloadData> mDownloadData; // Url, DownloadData
 
     signals:

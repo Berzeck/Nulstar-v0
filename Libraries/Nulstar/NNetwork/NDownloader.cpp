@@ -6,18 +6,13 @@
 
 namespace NulstarNS {
   NDownloader::NDownloader(QObject* rParent) : QObject(rParent) {
-
+    mNetworkManager = new QNetworkAccessManager();
+  }
+  NDownloader::~NDownloader() {
+    mNetworkManager->deleteLater();
   }
 
   void NDownloader::fDownload(const QUrl& lUrl, const QString& lFilePath) {
-  /*  QDir lDir;
-    if(lDir.mkpath(lDownloadPath)) {
-
-    }
-    else {
-      emit sLog(ELogLevel::eLogCritical, ELogMessageType::eResourceManagement, tr("Couldn't create path '%1'. Download aborted.").arg(lDownloadPath));
-      return;
-    }*/
     QString lUrlString(lUrl.toString());
     if(!lFilePath.isEmpty()) {
       QFile lTargetFile(lFilePath);
@@ -28,7 +23,7 @@ namespace NulstarNS {
       }
     }
     QNetworkRequest lDownloadRequest(lUrl);
-    QNetworkReply* rNetworkReply = mNetworkManager.get(lDownloadRequest);
+    QNetworkReply* rNetworkReply = mNetworkManager->get(lDownloadRequest);
     QTimer* rDownloadTimer = new QTimer();
     tDownloadData lDownloadData = {rNetworkReply, QByteArray(), rDownloadTimer, 0};
 
@@ -69,7 +64,7 @@ namespace NulstarNS {
         mDownloadData.remove(lUrlString);
       } );
 
-    connect(rNetworkReply, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), rNetworkReply, [&lUrlString, rNetworkReply, this] (QNetworkReply::NetworkError /*lCode*/) {
+    connect(rNetworkReply, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), rNetworkReply, [lUrlString, rNetworkReply, this] (QNetworkReply::NetworkError /*lCode*/) {
         emit sLog(ELogLevel::eLogCritical, ELogMessageType::eResourceManagement, tr("File '%1' couldn't be downloaded. Error: '%2'.").arg(lUrlString).arg(rNetworkReply->errorString()));
         emit sError(lUrlString);
       } );

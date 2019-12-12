@@ -1,7 +1,6 @@
-//
-// Created by daviyang35 on 2019-01-10.
-//
-
+#include <QCoreApplication>
+#include <QDir>
+#include <QSettings>
 #include <QUrl>
 
 #include "NUpdateController.h"
@@ -15,27 +14,30 @@ namespace NulstarNS {
                                                 quint16 lCommPort,
                                                 QHostAddress::SpecialAddress lBindAddress,
                                                 QObject *rParent)
-                    : NCoreService(lSslMode, lLogLevel, lIP, lServiceManagerUrl, lAllowedNetworks, rParent), mRequestID(0), mCompressionLevel(0), mCheckUpdatesInterval(lCheckUpdatesInterval) {
+                    : NCoreService(lSslMode, lLogLevel, lIP, lServiceManagerUrl, lAllowedNetworks, rParent), mRequestID(0), mCompressionLevel(0), mCheckUpdatesInterval(lCheckUpdatesInterval), mPackageSourceUrl(lPackageSource) {
 
     if(lCommPort)
       fAddWebSocketServer(lCommPort, lBindAddress);
-    connect(&mDownloader, &NDownloader::sLog, this, &NUpdateController::sLog);
-    connect(&mDownloader, &NDownloader::sFinished, this, &NUpdateController::fProcessFinishedDownload);
-    connect(&mCheckUpdatesTimer, &QTimer::timeout, this, &NUpdateController::fCheckUpdates);
-    mCheckUpdatesTimer.start(mCheckUpdatesInterval * 1000);
 
-    QString lOS;
-#ifdef Q_OS_WIN64
-    lOS = QStringLiteral("Windows");
-#endif
-#ifdef Q_OS_LINUX
-    lOS = QStringLiteral("Linux");
-#endif
-#ifdef Q_OS_MACOS
-    lOS = QStringLiteral("MacOS");
-#endif
+     QDir lMainAppDir(qApp->applicationDirPath());
+     lMainAppDir.cdUp();
+     lMainAppDir.cdUp();
+     lMainAppDir.cdUp();
+     lMainAppDir.cdUp();
+     QDir lDownloadsDir(QString("%1/%2/%3").arg(lMainAppDir.path()).arg(cDirName_Downloads).arg(fCurrentOS()));
+    if(lDownloadsDir.mkpath(lDownloadsDir.path())) {
+      lDownloadsDir.cdUp();
+      connect(&mDownloader, &NDownloader::sLog, this, &NUpdateController::sLog);
+      connect(&mDownloader, &NDownloader::sFinished, this, &NUpdateController::fProcessFinishedDownload);
+      connect(&mCheckUpdatesTimer, &QTimer::timeout, this, [lDownloadsDir, this] () {
+        mDownloader.fDownload(QUrl(QString("%1/%2").arg(mPackageSourceUrl).arg(cFileName_Versions)), QString("%1/%2").arg(lDownloadsDir.path()).arg(cFileName_Versions));
+      } );
 
-    mPackageSourceUrl = QUrl(QString("%1/%2/").arg(lPackageSource).arg(lOS));
+      mCheckUpdatesTimer.start(mCheckUpdatesInterval * 1000);
+    }
+    else {
+      fLog(NulstarNS::ELogLevel::eLogCritical, NulstarNS::ELogMessageType::eResourceManagement, QString("Download directory '%1' couldn't be created.").arg(lDownloadsDir.path()));
+    }
   }
 
   QVariantMap NUpdateController::fApiRoles() const {
@@ -58,12 +60,29 @@ namespace NulstarNS {
     fSendMessage(lMessageRequest.mWebSocketsServerName, rGetUpdatesResponse);
   }
 
-  void NUpdateController::fCheckUpdates() {
-    mDownloader.fDownload(QUrl("http://drive.nulstar.com/Nuls/Linux/Nuls_Linux_2.2.1/Nuls_Linux_2.2.1.manifest"), "/home/Berzeck/Templates/aaa/Nuls_Linux_2.2.1.manifest");
-    qDebug("%s", qUtf8Printable(mPackageSourceUrl.toString()));
+  void NUpdateController::fProcessFinishedDownload(const QUrl& lDownloadUrl, const QByteArray& /*lFileContents*/) {
+    if(lDownloadUrl.toString() == QString("%1/%2").arg(mPackageSourceUrl).arg(cFileName_Versions)) { // Versions.txt
+      QSettings lVersionSettings(lDownloadUrl.toString(), QSettings::IniFormat);
+      lVersionSettings.beginGroup("LatestVersions");
+      QString lLastVersion(lVersionSettings.value(fCurrentOS()).toString());
+      lVersionSettings.endGroup();
+    }
+    else {
+
+    }
   }
 
-  void NUpdateController::fProcessFinishedDownload(const QUrl& lDownloadUrl) {
-
+  QString NUpdateController::fCurrentOS() const {
+    QString lOS;
+    #ifdef Q_OS_WIN64
+      lOS = QStringLiteral("Windows");
+    #endif
+    #ifdef Q_OS_LINUX
+      lOS = QStringLiteral("Linux");
+    #endif
+    #ifdef Q_OS_MACOS
+      lOS = QStringLiteral("MacOS");
+    #endif
+    return lOS;
   }
 }
