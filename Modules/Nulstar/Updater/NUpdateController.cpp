@@ -19,12 +19,12 @@ namespace NulstarNS {
     if(lCommPort)
       fAddWebSocketServer(lCommPort, lBindAddress);
 
-     QDir lMainAppDir(qApp->applicationDirPath());
-     lMainAppDir.cdUp();
-     lMainAppDir.cdUp();
-     lMainAppDir.cdUp();
-     lMainAppDir.cdUp();
-     QDir lDownloadsDir(QString("%1/%2/%3").arg(lMainAppDir.path()).arg(cDirName_Downloads).arg(fCurrentOS()));
+    QDir lMainAppDir(qApp->applicationDirPath());
+    lMainAppDir.cdUp();
+    lMainAppDir.cdUp();
+    lMainAppDir.cdUp();
+    lMainAppDir.cdUp();
+    QDir lDownloadsDir(QString("%1/%2/%3").arg(lMainAppDir.path()).arg(cDirName_Downloads).arg(fCurrentOS()));
     if(lDownloadsDir.mkpath(lDownloadsDir.path())) {
       lDownloadsDir.cdUp();
       connect(&mDownloader, &NDownloader::sLog, this, &NUpdateController::sLog);
