@@ -20,6 +20,7 @@ namespace NulstarNS {
       explicit NUpdateController(QWebSocketServer::SslMode lSslMode,
                              ELogLevel lLogLevel, const QHostAddress& lIP,
                              const QUrl &lServiceManagerUrl,
+                             const QString& lMainPath,
                              quint16 lCheckUpdatesInterval,
                              const QString& lPackageSource,
                              QList<QNetworkAddressEntry> lAllowedNetworks = QList<QNetworkAddressEntry>(),
@@ -50,7 +51,7 @@ namespace NulstarNS {
       quint16 mCheckUpdatesInterval;
       NDownloader mDownloader;
       QTimer mCheckUpdatesTimer;
-      QString mPackageSourceUrl;
+      QUrl mPackageSourceUrl;
   };
 }
 

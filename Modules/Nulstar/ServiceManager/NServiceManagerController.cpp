@@ -7,8 +7,8 @@ namespace NulstarNS {
   const double cTimeSeconds_DependencesSearchRetryPeriod = 0.5;
   const int cTotal_DependencesSearchRetryTimes = 20;
 
-  NServiceManagerController::NServiceManagerController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress &lIP, const QUrl &lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, QHostAddress::SpecialAddress lBindAddress, QObject* rParent)
-                           : NCoreService(lSslMode, lLogLevel, lIP, lServiceManagerUrl, lAllowedNetworks, rParent) {
+  NServiceManagerController::NServiceManagerController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress &lIP, const QUrl &lServiceManagerUrl, const QString &lMainPath, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, QHostAddress::SpecialAddress lBindAddress, QObject* rParent)
+                           : NCoreService(lSslMode, lLogLevel, lIP, lServiceManagerUrl, lMainPath, lAllowedNetworks, rParent) {
 
     if(lCommPort)
       fAddWebSocketServer(lCommPort, lBindAddress);

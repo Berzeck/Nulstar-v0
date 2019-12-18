@@ -25,7 +25,8 @@ int main(int argc, char *argv[]) {
                          {{"u", "managerurl"}, QStringLiteral("Service manager URL."), QStringLiteral("managerurl")},
                          {{"i", "ip"}, QStringLiteral("Listening connections IP"), QStringLiteral("ip")},
                          {{"c", "checkupdates"}, QStringLiteral("Check updates interval (in seconds)"), QStringLiteral("checkupdates")},
-                         {{"p", "packagesource"}, QStringLiteral("URL in which new packages will be downloaded"), QStringLiteral("packagesource")},
+                         {{"k", "packagesource"}, QStringLiteral("URL in which new packages will be downloaded"), QStringLiteral("packagesource")},
+                         {{"p", "mainpath"}, QStringLiteral("Main service path"), QStringLiteral("mainpath")},
                      });
   lParser.process(lApp);
   if (!lParser.isSet("loglevel") || lParser.value("loglevel").toUShort() < 1
@@ -81,9 +82,14 @@ int main(int argc, char *argv[]) {
     fputs(qPrintable(QString("Package source URL not defined!").arg(lParser.helpText())), stderr);
     return 9;
   }
+  if(!lParser.isSet("mainpath")) {
+    fputs(qPrintable(QString("Main service path is not set!\n\n%1\n").arg(lParser.helpText())), stderr);
+    return 10;
+  }
 
   NulstarNS::NUpdateController lController(lSslMode, static_cast<NulstarNS::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")),
                                                QUrl(lServiceManagerUrl),
+                                               lParser.value("mainpath"),
                                                lCheckUpdates.toUShort(),
                                                lPackageSource,
                                                lAllowedNetworks,

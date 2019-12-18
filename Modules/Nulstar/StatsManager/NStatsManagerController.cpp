@@ -9,8 +9,9 @@
 #include "NStatsManagerController.h"
 
 namespace NulstarNS {
-    NStatsManagerController::NStatsManagerController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress &lIP, const QUrl &lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, QHostAddress::SpecialAddress lBindAddress, QObject* rParent)
-      : NCoreService(lSslMode, lLogLevel, lIP, lServiceManagerUrl, lAllowedNetworks, rParent) {
+    NStatsManagerController::NStatsManagerController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress &lIP, const QUrl &lServiceManagerUrl,
+                                                     const QString &lMainPath, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, QHostAddress::SpecialAddress lBindAddress, QObject* rParent)
+      : NCoreService(lSslMode, lLogLevel, lIP, lServiceManagerUrl, lMainPath, lAllowedNetworks, rParent) {
 
     if(lCommPort)
       fAddWebSocketServer(lCommPort, lBindAddress);

@@ -8,9 +8,9 @@
 #include "NCoreService.h"
 
 namespace NulstarNS {
-  NCoreService::NCoreService(NWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress& lIP, const QUrl& lServiceManagerUrl, const QList<QNetworkAddressEntry>& lAllowedNetworks,
+  NCoreService::NCoreService(NWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress& lIP, const QUrl& lServiceManagerUrl, const QString &lMainPath, const QList<QNetworkAddressEntry>& lAllowedNetworks,
                              QObject *rParent)
-              : QObject(rParent), mLogLevel(lLogLevel), mFirstInstance(true), pRunGuard(nullptr), mServiceManagerUrl(lServiceManagerUrl), mIP(lIP), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks) {
+              : QObject(rParent), mLogLevel(lLogLevel), mFirstInstance(true), mMainPath(lMainPath), pRunGuard(nullptr), mServiceManagerUrl(lServiceManagerUrl), mIP(lIP), mSslMode(lSslMode), mAllowedNetworks(lAllowedNetworks) {
 
     pRunGuard = new NRunGuard(QString("%1%2").arg(NulstarNS::cSharedMemoryKey).arg(qApp->applicationDirPath()));
     if(!pRunGuard->fTryToRun()) {

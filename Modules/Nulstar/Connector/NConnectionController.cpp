@@ -13,9 +13,9 @@
 #include "NConnectionController.h"
 
 namespace NulstarNS {
-  NConnectionController::NConnectionController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress& lIP, const QUrl &lServiceManagerUrl, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, quint16 lAdminPort, quint16 lClientPort,
+  NConnectionController::NConnectionController(QWebSocketServer::SslMode lSslMode, ELogLevel lLogLevel, const QHostAddress& lIP, const QUrl &lServiceManagerUrl, const QString &lMainPath, QList<QNetworkAddressEntry> lAllowedNetworks, quint16 lCommPort, quint16 lAdminPort, quint16 lClientPort,
                                                QHostAddress::SpecialAddress lBindAddress, const QString &lHttpServerPort, QObject* rParent)
-                       : NCoreService(lSslMode, lLogLevel, lIP, lServiceManagerUrl, lAllowedNetworks, rParent), mRequestID(0), mCompressionLevel(0), mHttpServerPort(lHttpServerPort) {
+                       : NCoreService(lSslMode, lLogLevel, lIP, lServiceManagerUrl, lMainPath, lAllowedNetworks, rParent), mRequestID(0), mCompressionLevel(0), mHttpServerPort(lHttpServerPort) {
 
     if(lCommPort)
       fAddWebSocketServer(lCommPort, lBindAddress);

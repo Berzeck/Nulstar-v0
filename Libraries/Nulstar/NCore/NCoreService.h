@@ -37,7 +37,7 @@ namespace NulstarNS {
       enum class EServiceAction {eStartService = 0, eStopService = 1, eRestartService = 2};
 
       NCoreService(QWebSocketServer::SslMode lSslMode = QWebSocketServer::SslMode::NonSecureMode, ELogLevel lLogLevel = ELogLevel::eLogWarning, const QHostAddress& lIP = QHostAddress::SpecialAddress::LocalHost,
-                   const QUrl& lServiceManagerUrl = QUrl(), const QList<QNetworkAddressEntry>& lAllowedNetworks = QList<QNetworkAddressEntry> (), QObject* rParent = nullptr);
+                   const QUrl& lServiceManagerUrl = QUrl(), const QString& lMainPath = QString(), const QList<QNetworkAddressEntry>& lAllowedNetworks = QList<QNetworkAddressEntry> (), QObject* rParent = nullptr);
       virtual ~NCoreService();
 
       virtual QString fAbbreviation() const = 0;
@@ -61,6 +61,7 @@ namespace NulstarNS {
 
       void fLog(ELogLevel eLogLevel, ELogMessageType eLogMessageType, const QString& lMessage) { emit sLog(eLogLevel, eLogMessageType, lMessage); }
       void fExit(ELogLevel eLogLevel, const QString& lMessage) { emit sExit(eLogLevel, lMessage); }
+      QString fMainPath() const { return mMainPath; };
       QString fMethodDescription(const QString& lMethodName) const;
       QString fMethodMinEventAndMinPeriod(const QString& lMethodName) const;
       QUrl fServiceManagerUrl() const { return mServiceManagerUrl; }
@@ -102,6 +103,7 @@ namespace NulstarNS {
     private:
       bool mFirstInstance;
       quint64 mLastID;
+      QString mMainPath;
       NRunGuard* pRunGuard;
       QUrl mServiceManagerUrl;
       QHostAddress mIP;

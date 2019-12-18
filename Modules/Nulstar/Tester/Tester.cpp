@@ -32,6 +32,7 @@ int main(int argc, char *argv[])
     {{"n", "allowednetworks"}, QStringLiteral("Allowed Networks."), QStringLiteral("allowednetworks")},
     {{"u", "managerurl"}, QStringLiteral("Service manager URL."), QStringLiteral("managerurl")},
     {{"i", "ip"}, QStringLiteral("Listening connections IP"), QStringLiteral("ip")},    
+    {{"p", "mainpath"}, QStringLiteral("Main service path"), QStringLiteral("mainpath")},
   });
   lParser.process(lApp);
   if(!lParser.isSet("loglevel") || lParser.value("loglevel").toUShort() < 1 || lParser.value("loglevel").toUShort() > 5) {
@@ -55,6 +56,10 @@ int main(int argc, char *argv[])
     fputs(qPrintable(QString("IP for listening incoming connections not set!\n\n%1\n").arg(lParser.helpText())), stderr);
     return 6;
   }
+  if(!lParser.isSet("mainpath")) {
+    fputs(qPrintable(QString("Main service path is not set!\n\n%1\n").arg(lParser.helpText())), stderr);
+    return 8;
+  }
   if(lParser.isSet("allowednetworks")) {
     QStringList lNetworks(lParser.value("allowednetworks").split(","));
     for(const QString& lNetwork : lNetworks) {
@@ -76,7 +81,7 @@ int main(int argc, char *argv[])
   }
 
   NulstarNS::NTesterController lController(lSslMode, static_cast<NulstarNS::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")),
-                                           QUrl(lServiceManagerUrl), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::AnyIPv4);
+                                           QUrl(lServiceManagerUrl), lParser.value("mainpath"), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::AnyIPv4);
   //lController.fControlWebServer(QString(), NulstarNS::NTesterController::EServiceAction::eStartService);
   //const int lRetryInterval = 5;
   //lController.fConnectToServiceManager(lRetryInterval);

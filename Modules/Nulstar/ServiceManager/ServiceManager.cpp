@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
     {{"m", "commport"}, QStringLiteral("Communication Port."), QStringLiteral("commport")},
     {{"n", "allowednetworks"}, QStringLiteral("Allowed Networks."), QStringLiteral("allowednetworks")},
     {{"i", "ip"}, QStringLiteral("Listening connections IP"), QStringLiteral("ip")},
+    {{"p", "mainpath"}, QStringLiteral("Main service path"), QStringLiteral("mainpath")},
   });
   lParser.process(lApp);
   if(!lParser.isSet("loglevel") || lParser.value("loglevel").toUShort() < 1 || lParser.value("loglevel").toUShort() > 5) {
@@ -46,6 +47,10 @@ int main(int argc, char *argv[])
     fputs(qPrintable(QString("IP for listening incoming connections not set!\n\n%1\n").arg(lParser.helpText())), stderr);
     return 6;
   }
+  if(!lParser.isSet("mainpath")) {
+    fputs(qPrintable(QString("Main service path is not set!\n\n%1\n").arg(lParser.helpText())), stderr);
+    return 7;
+  }
   if(lParser.isSet("allowednetworks")) {
     QStringList lNetworks(lParser.value("allowednetworks").split(","));
     for(const QString& lNetwork : lNetworks) {
@@ -63,7 +68,7 @@ int main(int argc, char *argv[])
     lLocalHostUrl.prepend("wss");
     lSslMode = QWebSocketServer::SslMode::SecureMode;
   }
-  NulstarNS::NServiceManagerController lController(lSslMode, static_cast<NulstarNS::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")), QUrl(lLocalHostUrl), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::AnyIPv4);
+  NulstarNS::NServiceManagerController lController(lSslMode, static_cast<NulstarNS::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")), QUrl(lLocalHostUrl), lParser.value("mainpath"), lAllowedNetworks, lParser.value("commport").toUShort(), QHostAddress::AnyIPv4);
   lController.fControlWebServer(QString(), NulstarNS::NServiceManagerController::EServiceAction::eStartService);  // Start all web sockets servers
   lController.fConnectToServiceManager(0);
   return lApp.exec();

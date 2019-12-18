@@ -8,13 +8,13 @@
 namespace NulstarNS {
   NUpdateController::NUpdateController(QWebSocketServer::SslMode lSslMode,
                                                 NulstarNS::ELogLevel lLogLevel, const QHostAddress &lIP,
-                                                const QUrl &lServiceManagerUrl,
+                                                const QUrl &lServiceManagerUrl, const QString &lMainPath,
                                                 quint16 lCheckUpdatesInterval, const QString &lPackageSource,
                                                 QList<QNetworkAddressEntry> lAllowedNetworks,
                                                 quint16 lCommPort,
                                                 QHostAddress::SpecialAddress lBindAddress,
                                                 QObject *rParent)
-                    : NCoreService(lSslMode, lLogLevel, lIP, lServiceManagerUrl, lAllowedNetworks, rParent), mRequestID(0), mCompressionLevel(0), mCheckUpdatesInterval(lCheckUpdatesInterval), mPackageSourceUrl(lPackageSource) {
+                    : NCoreService(lSslMode, lLogLevel, lIP, lServiceManagerUrl, lMainPath, lAllowedNetworks, rParent), mRequestID(0), mCompressionLevel(0), mCheckUpdatesInterval(lCheckUpdatesInterval), mPackageSourceUrl(lPackageSource) {
 
     if(lCommPort)
       fAddWebSocketServer(lCommPort, lBindAddress);
@@ -30,7 +30,7 @@ namespace NulstarNS {
       connect(&mDownloader, &NDownloader::sLog, this, &NUpdateController::sLog);
       connect(&mDownloader, &NDownloader::sFinished, this, &NUpdateController::fProcessFinishedDownload);
       connect(&mCheckUpdatesTimer, &QTimer::timeout, this, [lDownloadsDir, this] () {
-        mDownloader.fDownload(QUrl(QString("%1/%2").arg(mPackageSourceUrl).arg(cFileName_Versions)), QString("%1/%2").arg(lDownloadsDir.path()).arg(cFileName_Versions));
+        mDownloader.fDownload(QUrl(QString("%1/%2").arg(mPackageSourceUrl.toString()).arg(cFileName_Versions)), QString("%1/%2").arg(lDownloadsDir.path()).arg(cFileName_Versions));
       } );
 
       mCheckUpdatesTimer.start(mCheckUpdatesInterval * 1000);
@@ -61,10 +61,11 @@ namespace NulstarNS {
   }
 
   void NUpdateController::fProcessFinishedDownload(const QUrl& lDownloadUrl, const QByteArray& /*lFileContents*/) {
-    if(lDownloadUrl.toString() == QString("%1/%2").arg(mPackageSourceUrl).arg(cFileName_Versions)) { // Versions.txt
+    if(lDownloadUrl.toString() == QString("%1/%2").arg(mPackageSourceUrl.toString()).arg(cFileName_Versions)) { // Versions.txt
       QSettings lVersionSettings(lDownloadUrl.toString(), QSettings::IniFormat);
       lVersionSettings.beginGroup("LatestVersions");
       QString lLastVersion(lVersionSettings.value(fCurrentOS()).toString());
+      QString lProduct = mPackageSourceUrl.path().section("/",1,1);
       lVersionSettings.endGroup();
     }
     else {

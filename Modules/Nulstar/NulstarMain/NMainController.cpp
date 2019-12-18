@@ -11,15 +11,16 @@
 namespace NulstarNS {
   const int cProcessStartMaxSeconds = 5;
   const int cTimePeriod_ExtraDelayMSecs = 500;
-  const QString cComponentsDirectory("MainModules");
-  const QString cMainControllerIPParameter("MainControllerIP");
-  const QString cManageParameter("Managed");
-  const QString cAllowedNetworks("AllowedNetworks");
-  const QString cCommPortParameter("CommPort");
-  const QString cLogLevelParameter("LogLevel");
-  const QString cIPParameter("IP");
-  const QString cSslModeParameter("SslMode");
-  const QString cParameter_ManagerURL("managerurl");
+  const QString cComponentsDirectory(QStringLiteral("MainModules"));
+  const QString cMainControllerIPParameter(QStringLiteral("MainControllerIP"));
+  const QString cManageParameter(QStringLiteral("Managed"));
+  const QString cAllowedNetworks(QStringLiteral("AllowedNetworks"));
+  const QString cCommPortParameter(QStringLiteral("CommPort"));
+  const QString cLogLevelParameter(QStringLiteral("LogLevel"));
+  const QString cIPParameter(QStringLiteral("IP"));
+  const QString cSslModeParameter(QStringLiteral("SslMode"));
+  const QString cParameter_ManagerURL(QStringLiteral("managerurl"));
+  const QString cParameter_MainPath(QStringLiteral("mainpath"));
 
   NMainController::NMainController()
                  : NCoreService() {
@@ -107,6 +108,7 @@ namespace NulstarNS {
     QStringList lFormattedParameters(lModuleInfo.fFormattedParameters());
     if(lModuleInfo.fModuleName() != cServiceManagerName)
       lFormattedParameters << QString("--%1").arg(cParameter_ManagerURL) << fServiceManagerUrl().toString();
+    lFormattedParameters << QString("--%1").arg(cParameter_MainPath) << QCoreApplication::applicationDirPath();
     rModuleProcess->start(lModuleInfo.fModuleAppPath(), lFormattedParameters);
     if(rModuleProcess->waitForStarted(cProcessStartMaxSeconds * 1000)) {
       mModulesRunning.insert(lProcessIndex, rModuleProcess);

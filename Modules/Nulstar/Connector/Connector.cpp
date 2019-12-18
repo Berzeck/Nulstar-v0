@@ -37,6 +37,7 @@ int main(int argc, char *argv[])
     {{"n", "allowednetworks"}, QStringLiteral("Allowed Networks."), QStringLiteral("allowednetworks")},
     {{"u", "managerurl"}, QStringLiteral("Service manager URL."), QStringLiteral("managerurl")},
     {{"i", "ip"}, QStringLiteral("Listening connections IP"), QStringLiteral("ip")},
+    {{"p", "mainpath"}, QStringLiteral("Main service path"), QStringLiteral("mainpath")},
     {{"t", "httpserver"}, QStringLiteral("HTTP Server"), QStringLiteral("httpserver")}
   });
   lParser.process(lApp);
@@ -87,11 +88,14 @@ int main(int argc, char *argv[])
       lAllowedNetworks << lNetworkAddress;
     }
   }
-
+  if(!lParser.isSet("mainpath")) {
+    fputs(qPrintable(QString("Main service path is not set!\n\n%1\n").arg(lParser.helpText())), stderr);
+    return 8;
+  }
   if(lParser.isSet("httpserver")) {
     lHttpServerPort = lParser.value("httpserver");
   }
-  NulstarNS::NConnectionController lController(lSslMode, static_cast<NulstarNS::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")), QUrl(lServiceManagerUrl),
+  NulstarNS::NConnectionController lController(lSslMode, static_cast<NulstarNS::ELogLevel> (lParser.value("loglevel").toUInt()), QHostAddress(lParser.value("ip")), QUrl(lServiceManagerUrl), lParser.value("mainpath"),
                                    lAllowedNetworks, lParser.value("commport").toUShort(), lParser.value("adminport").toUShort(), lParser.value("clientport").toUShort(), QHostAddress::AnyIPv4, lHttpServerPort);
 
   lController.fControlWebServer(QString(), NulstarNS::NConnectionController::EServiceAction::eStartService);  // Start all web sockets servers
