@@ -47,6 +47,13 @@ namespace NulstarNS {
     return lPackageName;
   }
 
+  QString NVersionManifest::fFullPackageName() const {
+    if(!fIsValid())
+      return QString();
+    QString lFullPackageName(QString("%1_%2_%3").arg(fPackageName()).arg(fPlatform()).arg(fVersionNumber().toString()));
+    return lFullPackageName;
+  }
+
   QString NVersionManifest::fPackageHash() const {
     if(!fIsValid())
       return QString();

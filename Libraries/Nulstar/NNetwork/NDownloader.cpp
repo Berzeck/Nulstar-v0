@@ -12,8 +12,10 @@ namespace NulstarNS {
     mNetworkManager->deleteLater();
   }
 
-  void NDownloader::fDownload(const QUrl& lUrl, const QString& lFilePath) {
+  void NDownloader::fDownload(const QUrl& lUrl, const QString& lFilePath, bool lNotifyIfSuccessfull) {
     QString lUrlString(lUrl.toString());
+    if(mDownloadData.contains(lUrlString))
+      return;
     if(!lFilePath.isEmpty()) {
       QFile lTargetFile(lFilePath);
       if(lTargetFile.exists() && !lTargetFile.remove()) {
@@ -25,7 +27,7 @@ namespace NulstarNS {
     QNetworkRequest lDownloadRequest(lUrl);
     QNetworkReply* rNetworkReply = mNetworkManager->get(lDownloadRequest);
     QTimer* rDownloadTimer = new QTimer();
-    tDownloadData lDownloadData = {rNetworkReply, QByteArray(), rDownloadTimer, 0};
+    tDownloadData lDownloadData = {rNetworkReply, QByteArray(), rDownloadTimer, 0, lNotifyIfSuccessfull};
 
     mDownloadData[lUrlString] = lDownloadData;
 
@@ -41,7 +43,8 @@ namespace NulstarNS {
 
         if(rNetworkReply->error() == QNetworkReply::NoError) {
           if(lFilePath.isEmpty()) {
-            emit sLog(ELogLevel::eLogInfo, ELogMessageType::eResourceManagement, tr("File '%1' downloaded successfully.").arg(lUrlString));
+            if(mDownloadData[lUrlString].mNotifyIfSuccessfull)
+              emit sLog(ELogLevel::eLogInfo, ELogMessageType::eResourceManagement, tr("File '%1' downloaded successfully.").arg(lUrlString));
             emit sFinished(lUrlString, mDownloadData[lUrlString].mFileContents);
           }
           else {
@@ -50,7 +53,8 @@ namespace NulstarNS {
               lTargetFile.write(mDownloadData[lUrlString].mFileContents);
               lTargetFile.flush();
               lTargetFile.close();
-              emit sLog(ELogLevel::eLogInfo, ELogMessageType::eResourceManagement, tr("File '%1' downloaded and saved successfully.").arg(lUrlString));
+              if(mDownloadData[lUrlString].mNotifyIfSuccessfull)
+                emit sLog(ELogLevel::eLogInfo, ELogMessageType::eResourceManagement, tr("File '%1' downloaded and saved successfully.").arg(lUrlString));
               emit sFinished(lUrlString, QByteArray());
             }
             else {

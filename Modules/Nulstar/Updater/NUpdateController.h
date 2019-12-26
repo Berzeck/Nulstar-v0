@@ -2,10 +2,13 @@
 #ifndef NULSTAR_NUPDATECONTROLLER_H
 #define NULSTAR_NUPDATECONTROLLER_H
 
+#include <QDir>
 #include <QString>
 #include <QTimer>
 #include <QUrl>
+#include <QVariantMap>
 #include <NDownloader.h>
+#include <NVersionManifest.h>
 
 #include "NCoreService.h"
 #include "UpdaterVersion.h"
@@ -13,6 +16,15 @@
 namespace NulstarNS {
   const QString cDirName_Downloads(QStringLiteral("Downloads"));
   const QString cFileName_Versions(QStringLiteral("Versions.txt"));
+  const QString cFileName_VersionManifest(QStringLiteral("Version.manifest"));
+ /* const QString cFieldName_VersionSoftwareName(QStringLiteral("Name"));
+  const QString cFieldName_VersionPlatform(QStringLiteral("Platform"));
+  const QString cFieldName_VersionPriority(QStringLiteral("Priority"));
+  const QString cFieldName_VersionReleaseDate(QStringLiteral("ReleaseDate"));
+  const QString cFieldName_VersionUpgradeNotes(QStringLiteral("UpgradeNotes"));
+  const QString cFieldName_VersionName(QStringLiteral("VersionName"));
+  const QString cFieldName_VersionNumber(QStringLiteral("VersionNumber"));*/
+
   class NUpdateController : public NCoreService {
     Q_OBJECT
 
@@ -44,6 +56,12 @@ namespace NulstarNS {
     protected:
       void fFillMethodMetadata() override { }
       QString fCurrentOS() const;
+      void fVerifyIfNewUpdateIsAvailble(const QUrl &lDownloadUrl);
+      void fDownloadManifest(const QString& lVersion);
+      void fLoadNewVersionData(const QString& lNewVersionManifestPath);
+
+    protected Q_SLOTS:
+      void fDownloadLatestVersionsList();
 
     private:
       quint64 mRequestID;
@@ -51,7 +69,14 @@ namespace NulstarNS {
       quint16 mCheckUpdatesInterval;
       NDownloader mDownloader;
       QTimer mCheckUpdatesTimer;
+      QDir mDownloadsDir;
       QUrl mPackageSourceUrl;
+      NVersionManifest mCurrentVersionManifest;
+      NVersionManifest mLatestVersionManifest;
+
+    Q_SIGNALS:
+      void sCheckUpdatesTriggered();
+
   };
 }
 

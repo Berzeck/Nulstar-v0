@@ -23,6 +23,7 @@ namespace NulstarNS {
     QByteArray mFileContents;
     QTimer* pTimeoutTimer;
     quint8 mRetryTimes;
+    bool mNotifyIfSuccessfull;
   };
 
   class NETWORKSHARED_EXPORT NDownloader : public QObject {
@@ -31,7 +32,7 @@ namespace NulstarNS {
     public:
       explicit NDownloader(QObject* rParent = nullptr);
       ~NDownloader();
-      Q_INVOKABLE void fDownload(const QUrl &lUrl, const QString &lFilePath);
+      Q_INVOKABLE void fDownload(const QUrl &lUrl, const QString &lFilePath, bool lNotifyIfSuccessfull = false);
 
     private:
       QNetworkAccessManager* mNetworkManager;

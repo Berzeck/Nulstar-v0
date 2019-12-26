@@ -1,5 +1,5 @@
 #include <QCoreApplication>
-#include <QDir>
+#include <QFile>
 #include <QSettings>
 #include <QUrl>
 
@@ -14,29 +14,21 @@ namespace NulstarNS {
                                                 quint16 lCommPort,
                                                 QHostAddress::SpecialAddress lBindAddress,
                                                 QObject *rParent)
-                    : NCoreService(lSslMode, lLogLevel, lIP, lServiceManagerUrl, lMainPath, lAllowedNetworks, rParent), mRequestID(0), mCompressionLevel(0), mCheckUpdatesInterval(lCheckUpdatesInterval), mPackageSourceUrl(lPackageSource) {
+                    : NCoreService(lSslMode, lLogLevel, lIP, lServiceManagerUrl, lMainPath, lAllowedNetworks, rParent), mRequestID(0), mCompressionLevel(0), mCheckUpdatesInterval(lCheckUpdatesInterval),
+                      mDownloadsDir(QString("%1/%2/%3").arg(fMainPath()).arg(cDirName_Downloads).arg(fCurrentOS())), mPackageSourceUrl(lPackageSource) {
 
     if(lCommPort)
       fAddWebSocketServer(lCommPort, lBindAddress);
 
-    QDir lMainAppDir(qApp->applicationDirPath());
-    lMainAppDir.cdUp();
-    lMainAppDir.cdUp();
-    lMainAppDir.cdUp();
-    lMainAppDir.cdUp();
-    QDir lDownloadsDir(QString("%1/%2/%3").arg(lMainAppDir.path()).arg(cDirName_Downloads).arg(fCurrentOS()));
-    if(lDownloadsDir.mkpath(lDownloadsDir.path())) {
-      lDownloadsDir.cdUp();
+    if(mDownloadsDir.mkpath(mDownloadsDir.path())) {
+      mDownloadsDir.cdUp();
       connect(&mDownloader, &NDownloader::sLog, this, &NUpdateController::sLog);
       connect(&mDownloader, &NDownloader::sFinished, this, &NUpdateController::fProcessFinishedDownload);
-      connect(&mCheckUpdatesTimer, &QTimer::timeout, this, [lDownloadsDir, this] () {
-        mDownloader.fDownload(QUrl(QString("%1/%2").arg(mPackageSourceUrl.toString()).arg(cFileName_Versions)), QString("%1/%2").arg(lDownloadsDir.path()).arg(cFileName_Versions));
-      } );
-
+      connect(&mCheckUpdatesTimer, &QTimer::timeout, this, &NUpdateController::fDownloadLatestVersionsList);
       mCheckUpdatesTimer.start(mCheckUpdatesInterval * 1000);
     }
     else {
-      fLog(NulstarNS::ELogLevel::eLogCritical, NulstarNS::ELogMessageType::eResourceManagement, QString("Download directory '%1' couldn't be created.").arg(lDownloadsDir.path()));
+      fLog(NulstarNS::ELogLevel::eLogCritical, NulstarNS::ELogMessageType::eResourceManagement, QString("Download directory '%1' couldn't be created.").arg(mDownloadsDir.path()));
     }
   }
 
@@ -62,15 +54,74 @@ namespace NulstarNS {
 
   void NUpdateController::fProcessFinishedDownload(const QUrl& lDownloadUrl, const QByteArray& /*lFileContents*/) {
     if(lDownloadUrl.toString() == QString("%1/%2").arg(mPackageSourceUrl.toString()).arg(cFileName_Versions)) { // Versions.txt
-      QSettings lVersionSettings(lDownloadUrl.toString(), QSettings::IniFormat);
-      lVersionSettings.beginGroup("LatestVersions");
-      QString lLastVersion(lVersionSettings.value(fCurrentOS()).toString());
-      QString lProduct = mPackageSourceUrl.path().section("/",1,1);
-      lVersionSettings.endGroup();
+      fVerifyIfNewUpdateIsAvailble(QString("%1/%2").arg(mDownloadsDir.path()).arg(cFileName_Versions));
+      return;
     }
+
+    QSettings lVersionSettings(QString("%1/%2").arg(mDownloadsDir.path()).arg(cFileName_Versions), QSettings::IniFormat);
+    lVersionSettings.beginGroup("LatestVersions");
+    QString lLastVersion(lVersionSettings.value(fCurrentOS()).toString());
+    lVersionSettings.endGroup();
+    QString lProduct = mPackageSourceUrl.path().section("/",1,1);
+    QString lFullPackageName(QString("%1_%2_%3").arg(lProduct).arg(fCurrentOS()).arg(lLastVersion));
+    QString lManifestUrl(QString("%1/%2/%3/%4").arg(mPackageSourceUrl.toString()).arg(fCurrentOS()).arg(lFullPackageName).arg(cFileName_VersionManifest));
+    if(lDownloadUrl.toString() == lManifestUrl) { // Version.manifest
+      fLoadNewVersionData(QString("%1/%2/%3").arg(mDownloadsDir.path()).arg(fCurrentOS()).arg(cFileName_VersionManifest));
+      return;
+    }
+
     else {
 
     }
+  }
+
+  void NUpdateController::fVerifyIfNewUpdateIsAvailble(const QUrl& lDownloadUrl) {
+    QSettings lVersionSettings(lDownloadUrl.toString(), QSettings::IniFormat);
+    lVersionSettings.beginGroup("LatestVersions");
+    QString lLastVersion(lVersionSettings.value(fCurrentOS()).toString());
+    QString lProduct = mPackageSourceUrl.path().section("/",1,1);
+    lVersionSettings.endGroup();
+    if(QFile::exists(QString("%1/%2").arg(fMainPath()).arg(cFileName_VersionManifest))) {
+      QSettings lCurrentVersionSettings(QString("%1/%2").arg(fMainPath()).arg(cFileName_VersionManifest), QSettings::IniFormat);
+      lCurrentVersionSettings.beginGroup("PackageSummary");
+      QString lCurrentVersion(lCurrentVersionSettings.value(cFieldName_VersionNumber).toString());
+      lCurrentVersionSettings.endGroup();
+      QVersionNumber lLatestVersionNumber(QVersionNumber::fromString(lLastVersion));
+      QVersionNumber lCurrentVersionNumber(QVersionNumber::fromString(lCurrentVersion));
+      if(lLatestVersionNumber > lCurrentVersionNumber)
+        fDownloadManifest(lLastVersion);
+    }
+    else {
+      fDownloadManifest(lLastVersion);
+    }
+  }
+
+  void NUpdateController::fLoadNewVersionData(const QString& lNewVersionManifestPath) {
+    mNewVersionData.clear();
+    QSettings lVersionManifest(lNewVersionManifestPath, QSettings::IniFormat);
+    lVersionManifest.beginGroup("PackageSummary");
+    QVariantMap lPackageSummary;
+    lPackageSummary[cFieldName_VersionSoftwareName] = lVersionManifest.value(cFieldName_VersionSoftwareName);
+    lPackageSummary[cFieldName_VersionPlatform] = lVersionManifest.value(cFieldName_VersionPlatform);
+    lPackageSummary[cFieldName_VersionPriority] = lVersionManifest.value(cFieldName_VersionPriority);
+    lPackageSummary[cFieldName_VersionReleaseDate] = lVersionManifest.value(cFieldName_VersionReleaseDate);
+    lPackageSummary[cFieldName_VersionUpgradeNotes] = lVersionManifest.value(cFieldName_VersionUpgradeNotes);
+    lPackageSummary[cFieldName_VersionName] = lVersionManifest.value(cFieldName_VersionName);
+    lPackageSummary[cFieldName_VersionNumber] = lVersionManifest.value(cFieldName_VersionNumber);
+    mNewVersionData["PackageSummary"] = lPackageSummary;
+    lVersionManifest.endGroup();
+  }
+
+  void NUpdateController::fDownloadLatestVersionsList() {
+    mDownloader.fDownload(QUrl(QString("%1/%2").arg(mPackageSourceUrl.toString()).arg(cFileName_Versions)), QString("%1/%2").arg(mDownloadsDir.path()).arg(cFileName_Versions));
+  }
+
+  void NUpdateController::fDownloadManifest(const QString& lVersion) {
+    QString lProduct = mPackageSourceUrl.path().section("/",1,1);
+    QString lFullPackageName(QString("%1_%2_%3").arg(lProduct).arg(fCurrentOS()).arg(lVersion));
+    QUrl lManifestUrl(QString("%1/%2/%3/%4").arg(mPackageSourceUrl.toString()).arg(fCurrentOS()).arg(lFullPackageName).arg(cFileName_VersionManifest));
+    QString lLocalPath(QString("%1/%2/%3").arg(mDownloadsDir.path()).arg(fCurrentOS()).arg(cFileName_VersionManifest));
+    mDownloader.fDownload(lManifestUrl, lLocalPath);
   }
 
   QString NUpdateController::fCurrentOS() const {
