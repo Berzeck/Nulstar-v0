@@ -51,14 +51,13 @@ namespace NulstarNS {
 
     public Q_SLOTS:
       API_PUBLIC_FUNCTION void checkupdates(const TMessageRequestToProcess& lMessageRequest);
-      void fProcessFinishedDownload(const QUrl& lDownloadUrl, const QByteArray& lFileContents);
+      void fProcessFinishedDownload(const QString &lDownloadID, const QByteArray& lFileContents);
 
     protected:
       void fFillMethodMetadata() override { }
       QString fCurrentOS() const;
-      void fVerifyIfNewUpdateIsAvailble(const QUrl &lDownloadUrl);
+      void fVerifyIfNewUpdateIsAvailble(const QUrl& lLocalDownloadUrl);
       void fDownloadManifest(const QString& lVersion);
-      void fLoadNewVersionData(const QString& lNewVersionManifestPath);
 
     protected Q_SLOTS:
       void fDownloadLatestVersionsList();

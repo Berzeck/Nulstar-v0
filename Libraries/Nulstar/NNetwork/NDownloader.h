@@ -32,7 +32,7 @@ namespace NulstarNS {
     public:
       explicit NDownloader(QObject* rParent = nullptr);
       ~NDownloader();
-      Q_INVOKABLE void fDownload(const QUrl &lUrl, const QString &lFilePath, bool lNotifyIfSuccessfull = false);
+      Q_INVOKABLE void fDownload(const QUrl &lUrl, const QString &lFilePath, bool lNotifyIfSuccessfull = false, const QString &lID = QString());
 
     private:
       QNetworkAccessManager* mNetworkManager;
@@ -40,8 +40,8 @@ namespace NulstarNS {
 
     signals:
       void sLog(ELogLevel eLogLevel, ELogMessageType eLogMessageType, const QString& lMessage);
-      void sError(const QUrl& lUrl);
-      void sFinished(const QUrl& lUrl, const QByteArray& lFileContents);
+      void sError(const QString& lDownloadID);
+      void sFinished(const QString& lDownloadID, const QByteArray& lFileContents);
   };
 }
 

@@ -44,6 +44,7 @@ namespace NulstarNS {
       QString fManifestHash() const;
 
       QString fPackageName() const;
+      QString fFullPackageName() const;
       QString fPackageHash() const;
       QString fPlatform() const;
       QString fPriority() const;

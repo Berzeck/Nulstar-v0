@@ -52,42 +52,38 @@ namespace NulstarNS {
     fSendMessage(lMessageRequest.mWebSocketsServerName, rGetUpdatesResponse);
   }
 
-  void NUpdateController::fProcessFinishedDownload(const QUrl& lDownloadUrl, const QByteArray& /*lFileContents*/) {
-    if(lDownloadUrl.toString() == QString("%1/%2").arg(mPackageSourceUrl.toString()).arg(cFileName_Versions)) { // Versions.txt
+  void NUpdateController::fProcessFinishedDownload(const QString& lDownloadID, const QByteArray& /*lFileContents*/) {
+    if(lDownloadID == cFileName_Versions) { // Versions.txt
       fVerifyIfNewUpdateIsAvailble(QString("%1/%2").arg(mDownloadsDir.path()).arg(cFileName_Versions));
       return;
     }
 
-    QSettings lVersionSettings(QString("%1/%2").arg(mDownloadsDir.path()).arg(cFileName_Versions), QSettings::IniFormat);
-    lVersionSettings.beginGroup("LatestVersions");
-    QString lLastVersion(lVersionSettings.value(fCurrentOS()).toString());
-    lVersionSettings.endGroup();
-    QString lProduct = mPackageSourceUrl.path().section("/",1,1);
-    QString lFullPackageName(QString("%1_%2_%3").arg(lProduct).arg(fCurrentOS()).arg(lLastVersion));
-    QString lManifestUrl(QString("%1/%2/%3/%4").arg(mPackageSourceUrl.toString()).arg(fCurrentOS()).arg(lFullPackageName).arg(cFileName_VersionManifest));
-    if(lDownloadUrl.toString() == lManifestUrl) { // Version.manifest
-      fLoadNewVersionData(QString("%1/%2/%3").arg(mDownloadsDir.path()).arg(fCurrentOS()).arg(cFileName_VersionManifest));
-      return;
+    if(lDownloadID == cFileName_VersionManifest) { // Version.manifest
+      if(mLatestVersionManifest.fSetFile(QString("%1/%2/%3").arg(mDownloadsDir.path()).arg(fCurrentOS()).arg(cFileName_VersionManifest))) {
+        QString lProduct(mLatestVersionManifest.fPackageName());
+        QString lFullPackageName(mLatestVersionManifest.fFullPackageName());
+        QString lManifestUrl(QString("%1/%2/%3/%4").arg(mPackageSourceUrl.toString()).arg(fCurrentOS()).arg(lFullPackageName).arg(cFileName_VersionManifest));
+      }
+      else {
+        fLog(NulstarNS::ELogLevel::eLogCritical, NulstarNS::ELogMessageType::eResourceManagement, QString("Version manifest could not be loaded!").arg(mDownloadsDir.path()));
+      }
     }
-
-    else {
-
-    }
+    
+    /*****
+    else { // Packages
+        
+    }****/
   }
 
-  void NUpdateController::fVerifyIfNewUpdateIsAvailble(const QUrl& lDownloadUrl) {
-    QSettings lVersionSettings(lDownloadUrl.toString(), QSettings::IniFormat);
+  void NUpdateController::fVerifyIfNewUpdateIsAvailble(const QUrl& lLocalDownloadUrl) {
+    QSettings lVersionSettings(lLocalDownloadUrl.toString(), QSettings::IniFormat);
     lVersionSettings.beginGroup("LatestVersions");
     QString lLastVersion(lVersionSettings.value(fCurrentOS()).toString());
     QString lProduct = mPackageSourceUrl.path().section("/",1,1);
     lVersionSettings.endGroup();
-    if(QFile::exists(QString("%1/%2").arg(fMainPath()).arg(cFileName_VersionManifest))) {
-      QSettings lCurrentVersionSettings(QString("%1/%2").arg(fMainPath()).arg(cFileName_VersionManifest), QSettings::IniFormat);
-      lCurrentVersionSettings.beginGroup("PackageSummary");
-      QString lCurrentVersion(lCurrentVersionSettings.value(cFieldName_VersionNumber).toString());
-      lCurrentVersionSettings.endGroup();
+    if(mCurrentVersionManifest.fSetFile(QString("%1/%2").arg(fMainPath()).arg(cFileName_VersionManifest))) {
       QVersionNumber lLatestVersionNumber(QVersionNumber::fromString(lLastVersion));
-      QVersionNumber lCurrentVersionNumber(QVersionNumber::fromString(lCurrentVersion));
+      QVersionNumber lCurrentVersionNumber(mCurrentVersionManifest.fVersionNumber());
       if(lLatestVersionNumber > lCurrentVersionNumber)
         fDownloadManifest(lLastVersion);
     }
@@ -96,24 +92,8 @@ namespace NulstarNS {
     }
   }
 
-  void NUpdateController::fLoadNewVersionData(const QString& lNewVersionManifestPath) {
-    mNewVersionData.clear();
-    QSettings lVersionManifest(lNewVersionManifestPath, QSettings::IniFormat);
-    lVersionManifest.beginGroup("PackageSummary");
-    QVariantMap lPackageSummary;
-    lPackageSummary[cFieldName_VersionSoftwareName] = lVersionManifest.value(cFieldName_VersionSoftwareName);
-    lPackageSummary[cFieldName_VersionPlatform] = lVersionManifest.value(cFieldName_VersionPlatform);
-    lPackageSummary[cFieldName_VersionPriority] = lVersionManifest.value(cFieldName_VersionPriority);
-    lPackageSummary[cFieldName_VersionReleaseDate] = lVersionManifest.value(cFieldName_VersionReleaseDate);
-    lPackageSummary[cFieldName_VersionUpgradeNotes] = lVersionManifest.value(cFieldName_VersionUpgradeNotes);
-    lPackageSummary[cFieldName_VersionName] = lVersionManifest.value(cFieldName_VersionName);
-    lPackageSummary[cFieldName_VersionNumber] = lVersionManifest.value(cFieldName_VersionNumber);
-    mNewVersionData["PackageSummary"] = lPackageSummary;
-    lVersionManifest.endGroup();
-  }
-
   void NUpdateController::fDownloadLatestVersionsList() {
-    mDownloader.fDownload(QUrl(QString("%1/%2").arg(mPackageSourceUrl.toString()).arg(cFileName_Versions)), QString("%1/%2").arg(mDownloadsDir.path()).arg(cFileName_Versions));
+    mDownloader.fDownload(QUrl(QString("%1/%2").arg(mPackageSourceUrl.toString()).arg(cFileName_Versions)), QString("%1/%2").arg(mDownloadsDir.path()).arg(cFileName_Versions), false, cFileName_Versions);
   }
 
   void NUpdateController::fDownloadManifest(const QString& lVersion) {
@@ -121,7 +101,7 @@ namespace NulstarNS {
     QString lFullPackageName(QString("%1_%2_%3").arg(lProduct).arg(fCurrentOS()).arg(lVersion));
     QUrl lManifestUrl(QString("%1/%2/%3/%4").arg(mPackageSourceUrl.toString()).arg(fCurrentOS()).arg(lFullPackageName).arg(cFileName_VersionManifest));
     QString lLocalPath(QString("%1/%2/%3").arg(mDownloadsDir.path()).arg(fCurrentOS()).arg(cFileName_VersionManifest));
-    mDownloader.fDownload(lManifestUrl, lLocalPath);
+    mDownloader.fDownload(lManifestUrl, lLocalPath, false, cFileName_VersionManifest);
   }
 
   QString NUpdateController::fCurrentOS() const {

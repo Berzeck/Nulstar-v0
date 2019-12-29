@@ -16,8 +16,7 @@ namespace NulstarNS {
       pVersionManifestFile = new QSettings(lManifestPath, QSettings::IniFormat, this);
       return true;
     }
-    else
-      return false;
+    return false;
   }
 
   bool NVersionManifest::fIsValid() const {

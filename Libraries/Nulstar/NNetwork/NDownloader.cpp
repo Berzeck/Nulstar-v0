@@ -12,15 +12,19 @@ namespace NulstarNS {
     mNetworkManager->deleteLater();
   }
 
-  void NDownloader::fDownload(const QUrl& lUrl, const QString& lFilePath, bool lNotifyIfSuccessfull) {
+  void NDownloader::fDownload(const QUrl& lUrl, const QString& lFilePath, bool lNotifyIfSuccessfull, const QString& lID ) {
     QString lUrlString(lUrl.toString());
-    if(mDownloadData.contains(lUrlString))
+    QString lDownloadID(lID);
+    if(lID.simplified().isEmpty())
+      lDownloadID = lUrlString;
+
+    if(mDownloadData.contains(lDownloadID))
       return;
     if(!lFilePath.isEmpty()) {
       QFile lTargetFile(lFilePath);
       if(lTargetFile.exists() && !lTargetFile.remove()) {
         emit sLog(ELogLevel::eLogCritical, ELogMessageType::eResourceManagement, tr("File '%1' exists but couldn't be removed.").arg(lUrlString));
-        emit sError(lUrlString);
+        emit sError(lDownloadID);
         return;
       }
     }
@@ -29,62 +33,62 @@ namespace NulstarNS {
     QTimer* rDownloadTimer = new QTimer();
     tDownloadData lDownloadData = {rNetworkReply, QByteArray(), rDownloadTimer, 0, lNotifyIfSuccessfull};
 
-    mDownloadData[lUrlString] = lDownloadData;
+    mDownloadData[lDownloadID] = lDownloadData;
 
-    connect(rNetworkReply, &QNetworkReply::downloadProgress, rNetworkReply, [lUrlString, rNetworkReply, this] (qint64 /*lBytesReceived*/, qint64 /*lBytesTotal*/) {
-        mDownloadData[lUrlString].mFileContents.append(rNetworkReply->readAll()); 
-        mDownloadData[lUrlString].pTimeoutTimer->stop();
-        mDownloadData[lUrlString].pTimeoutTimer->start(cTime_DownloadTimeout * 1000);
+    connect(rNetworkReply, &QNetworkReply::downloadProgress, rNetworkReply, [lDownloadID, rNetworkReply, this] (qint64 /*lBytesReceived*/, qint64 /*lBytesTotal*/) {
+        mDownloadData[lDownloadID].mFileContents.append(rNetworkReply->readAll());
+        mDownloadData[lDownloadID].pTimeoutTimer->stop();
+        mDownloadData[lDownloadID].pTimeoutTimer->start(cTime_DownloadTimeout * 1000);
       } );
     
-    connect(rNetworkReply, &QNetworkReply::finished, rNetworkReply, [lFilePath, lUrlString, rNetworkReply, this] () {
-        if(mDownloadData[lUrlString].pTimeoutTimer->isActive())
-          mDownloadData[lUrlString].pTimeoutTimer->stop();
+    connect(rNetworkReply, &QNetworkReply::finished, rNetworkReply, [lFilePath, lDownloadID, lUrlString, rNetworkReply, this] () {
+        if(mDownloadData[lDownloadID].pTimeoutTimer->isActive())
+          mDownloadData[lDownloadID].pTimeoutTimer->stop();
 
         if(rNetworkReply->error() == QNetworkReply::NoError) {
           if(lFilePath.isEmpty()) {
-            if(mDownloadData[lUrlString].mNotifyIfSuccessfull)
+            if(mDownloadData[lDownloadID].mNotifyIfSuccessfull)
               emit sLog(ELogLevel::eLogInfo, ELogMessageType::eResourceManagement, tr("File '%1' downloaded successfully.").arg(lUrlString));
-            emit sFinished(lUrlString, mDownloadData[lUrlString].mFileContents);
+            emit sFinished(lDownloadID, mDownloadData[lDownloadID].mFileContents);
           }
           else {
             QFile lTargetFile(lFilePath);
             if(lTargetFile.open(QIODevice::WriteOnly)) {
-              lTargetFile.write(mDownloadData[lUrlString].mFileContents);
+              lTargetFile.write(mDownloadData[lDownloadID].mFileContents);
               lTargetFile.flush();
               lTargetFile.close();
-              if(mDownloadData[lUrlString].mNotifyIfSuccessfull)
+              if(mDownloadData[lDownloadID].mNotifyIfSuccessfull)
                 emit sLog(ELogLevel::eLogInfo, ELogMessageType::eResourceManagement, tr("File '%1' downloaded and saved successfully.").arg(lUrlString));
-              emit sFinished(lUrlString, QByteArray());
+              emit sFinished(lDownloadID, QByteArray());
             }
             else {
               emit sLog(ELogLevel::eLogCritical, ELogMessageType::eResourceManagement, tr("File '%1' couldn't be written to disk.").arg(lUrlString));
-              emit sError(lUrlString);
+              emit sError(lDownloadID);
             }
           }
         }
-        mDownloadData[lUrlString].pTimeoutTimer->deleteLater();
+        mDownloadData[lDownloadID].pTimeoutTimer->deleteLater();
         rNetworkReply->deleteLater();
-        mDownloadData.remove(lUrlString);
+        mDownloadData.remove(lDownloadID);
       } );
 
-    connect(rNetworkReply, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), rNetworkReply, [lUrlString, rNetworkReply, this] (QNetworkReply::NetworkError /*lCode*/) {
+    connect(rNetworkReply, QOverload<QNetworkReply::NetworkError>::of(&QNetworkReply::error), rNetworkReply, [lDownloadID, lUrlString, rNetworkReply, this] (QNetworkReply::NetworkError /*lCode*/) {
         emit sLog(ELogLevel::eLogCritical, ELogMessageType::eResourceManagement, tr("File '%1' couldn't be downloaded. Error: '%2'.").arg(lUrlString).arg(rNetworkReply->errorString()));
-        emit sError(lUrlString);
+        emit sError(lDownloadID);
       } );
 
-    connect(rDownloadTimer, &QTimer::timeout, rDownloadTimer, [lFilePath, lUrlString, rDownloadTimer, this] () {
-        if(mDownloadData[lUrlString].mRetryTimes == cCount_RetryTimes) {
+    connect(rDownloadTimer, &QTimer::timeout, rDownloadTimer, [lFilePath, lDownloadID, lUrlString, rDownloadTimer, this] () {
+        if(mDownloadData[lDownloadID].mRetryTimes == cCount_RetryTimes) {
           rDownloadTimer->stop();
-          mDownloadData[lUrlString].pNetworkReply->abort();
+          mDownloadData[lDownloadID].pNetworkReply->abort();
           emit sLog(ELogLevel::eLogCritical, ELogMessageType::eResourceManagement, tr("File '%1' couldn't be downloaded succesfully after '%2' retries.").arg(lUrlString).arg(cCount_RetryTimes));
-          emit sError(lUrlString);
+          emit sError(lDownloadID);
         }
         else {
           rDownloadTimer->stop();
-          mDownloadData[lUrlString].pNetworkReply->abort();
+          mDownloadData[lDownloadID].pNetworkReply->abort();
           emit sLog(ELogLevel::eLogWarning, ELogMessageType::eResourceManagement, tr("File '%1' download timeout, retrying ...").arg(lUrlString));
-          metaObject()->invokeMethod(this, "fDownload", Qt::QueuedConnection, Q_ARG(QUrl, QUrl(lUrlString)), Q_ARG(QString, lFilePath));
+          metaObject()->invokeMethod(this, "fDownload", Qt::QueuedConnection, Q_ARG(QUrl, QUrl(lUrlString)), Q_ARG(QString, lFilePath), Q_ARG(bool, mDownloadData[lDownloadID].mNotifyIfSuccessfull), Q_ARG(QString, lDownloadID));
         }
       } );
 
