@@ -6,7 +6,7 @@
 #include <QSettings>
 #include <QString>
 #include <QStringList>
-#include <QMap>
+#include <QVariantMap>
 #include <QVersionNumber>
 #include "NTools.h"
 
@@ -42,7 +42,6 @@ namespace NulstarNS {
       bool fSetFile(const QString& lManifestPath);
       QString fHashSignature() const;
       QString fManifestHash() const;
-
       QString fPackageName() const;
       QString fFullPackageName() const;
       QString fPackageHash() const;
@@ -53,9 +52,10 @@ namespace NulstarNS {
       QString fUpgradeNotes() const;
       QString fVersionName() const;
       QVersionNumber fVersionNumber() const;
-      QMap<QString, QString> fExecHashes() const;
-      QMap<QString, QString> fLibraryHashes() const;
-      QMap<QString, QString> fModuleHashes() const;
+      QVariantMap fExecHashes() const;
+      QVariantMap fLibraryHashes() const;
+      QVariantMap fModuleHashes() const;
+      QVariantMap fManifestContents() const;
 
     private:
       QSettings* pVersionManifestFile;

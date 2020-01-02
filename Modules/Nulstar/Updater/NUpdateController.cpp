@@ -50,6 +50,10 @@ namespace NulstarNS {
     qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequest.mMSecsSinceEpoch);
     NMessageResponse* rGetUpdatesResponse = new NMessageResponse(lMessageRequest.mWebSocketID, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseSuccessful, QString(), 0, lGetUpdatesResponse, QString());
     fSendMessage(lMessageRequest.mWebSocketsServerName, rGetUpdatesResponse);
+
+    /*NMessageResponse* lRegisterAPIResponse = new NMessageResponse(lModuleAPIPending.fWebSocketID(), QString(), lModuleAPIPending.fMessageID(), lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseSuccessful,
+                                            tr("Module '%1' is active!").arg(lModuleAPIPending.fModuleName()), 0,lDependencies, QString());
+    fSendMessage(lModuleAPIPending.fWebSocketServerName(), lRegisterAPIResponse);*/
   }
 
   void NUpdateController::fProcessFinishedDownload(const QString& lDownloadID, const QByteArray& /*lFileContents*/) {
@@ -60,9 +64,10 @@ namespace NulstarNS {
 
     if(lDownloadID == cFileName_VersionManifest) { // Version.manifest
       if(mLatestVersionManifest.fSetFile(QString("%1/%2/%3").arg(mDownloadsDir.path()).arg(fCurrentOS()).arg(cFileName_VersionManifest))) {
-        QString lProduct(mLatestVersionManifest.fPackageName());
-        QString lFullPackageName(mLatestVersionManifest.fFullPackageName());
-        QString lManifestUrl(QString("%1/%2/%3/%4").arg(mPackageSourceUrl.toString()).arg(fCurrentOS()).arg(lFullPackageName).arg(cFileName_VersionManifest));
+  QVariantMap lTemp =  mLatestVersionManifest.fManifestContents();
+   QString lProduct(mLatestVersionManifest.fPackageName());
+   QString lFullPackageName(mLatestVersionManifest.fFullPackageName());
+   QString lManifestUrl(QString("%1/%2/%3/%4").arg(mPackageSourceUrl.toString()).arg(fCurrentOS()).arg(lFullPackageName).arg(cFileName_VersionManifest));
       }
       else {
         fLog(NulstarNS::ELogLevel::eLogCritical, NulstarNS::ELogMessageType::eResourceManagement, QString("Version manifest could not be loaded!").arg(mDownloadsDir.path()));

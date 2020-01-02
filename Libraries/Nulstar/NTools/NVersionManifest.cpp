@@ -121,10 +121,10 @@ namespace NulstarNS {
     return QVersionNumber(QVersionNumber::fromString(lVersionNumber));
   }
 
-  QMap<QString, QString> NVersionManifest::fExecHashes() const {
+  QVariantMap NVersionManifest::fExecHashes() const {
     if(!fIsValid())
-      return QMap<QString, QString>();
-    QMap<QString, QString> lExecHashes;
+      return QVariantMap();
+    QVariantMap lExecHashes;
     pVersionManifestFile->beginGroup(cParameterCategory_Sha256ExecHash);
     QStringList lExecKeys(pVersionManifestFile->childKeys());
     for(const QString& lKey : lExecKeys) {
@@ -134,10 +134,10 @@ namespace NulstarNS {
     return lExecHashes;
   }
 
-  QMap<QString, QString> NVersionManifest::fLibraryHashes() const {
+  QVariantMap NVersionManifest::fLibraryHashes() const {
     if(!fIsValid())
-      return QMap<QString, QString>();
-    QMap<QString, QString> lLibHashes;
+      return QVariantMap();
+    QVariantMap lLibHashes;
     pVersionManifestFile->beginGroup(cParameterCategory_Sha256LibHashes);
     QStringList lLibKeys(pVersionManifestFile->childKeys());
     for(const QString& lKey : lLibKeys) {
@@ -147,10 +147,10 @@ namespace NulstarNS {
     return lLibHashes;
   }
 
-  QMap<QString, QString> NVersionManifest::fModuleHashes() const {
+  QVariantMap NVersionManifest::fModuleHashes() const {
     if(!fIsValid())
-      return QMap<QString, QString>();
-    QMap<QString, QString> lModuleHashes;
+      return QVariantMap();
+    QVariantMap lModuleHashes;
     pVersionManifestFile->beginGroup(cParameterCategory_Sha256ModuleHashes);
     QStringList lModuleKeys(pVersionManifestFile->childKeys());
     for(const QString& lKey : lModuleKeys) {
@@ -158,5 +158,38 @@ namespace NulstarNS {
     }
     pVersionManifestFile->endGroup();
     return lModuleHashes;
+  }
+
+  QVariantMap NVersionManifest::fManifestContents() const {
+    if(!fIsValid())
+      return QVariantMap();
+
+    // Package Summary
+    QVariantMap lPackageSummary;
+    lPackageSummary[cParameterName_PackageName] = fPackageName();
+    lPackageSummary[cParameterName_Platform] = fPlatform();
+    lPackageSummary[cParameterName_Priority] = fPriority();
+    lPackageSummary[cParameterName_ReleaseDate] = fReleaseDate().toString(Qt::ISODate);
+    lPackageSummary[cParameterName_UpgradeNotes] = fUpgradeNotes();
+    lPackageSummary[cParameterName_VersionName] = fVersionName();
+    lPackageSummary[cParameterName_VersionNumber] = fVersionNumber().toString();
+
+    // Validation
+    QVariantMap lValidation;
+    lValidation[cParameterName_ValidationHashSignature] = fHashSignature();
+    lValidation[cParameterName_ValidationManifestHash] = fManifestHash();
+    //lValidation[cParameterName_ValidationPublicKey] = fHashSignature(); // Should be embedded
+
+    // Manifest
+    QVariantMap lManifest;
+    lManifest[cParameterCategory_PackageSummary] = lPackageSummary;
+    lManifest[cParameterCategory_Sha256ExecHash] = fExecHashes();
+    lManifest[cParameterCategory_Sha256LibHashes] = fLibraryHashes();
+    lManifest[cParameterCategory_Sha256ModuleHashes] = fModuleHashes();
+    lManifest[cParameterCategory_Sha256PackageHash] = fPackageHash();
+    lManifest[cParameterCategory_UpgradeLogs] = fUpgradeLogs();
+    lManifest[cParameterCategory_Validation] = lValidation;
+
+    return lManifest;
   }
 }
