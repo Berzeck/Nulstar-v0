@@ -45,15 +45,20 @@ namespace NulstarNS {
   }
 
   void NUpdateController::checkupdates(const TMessageRequestToProcess& lMessageRequest) {
-    qDebug("%s", qUtf8Printable(QString("Updater-%1").arg(lMessageRequest.mMessageID)));
-    QVariantMap lGetUpdatesResponse { {"checkupdates", QVariantMap({{ "Update1", "Version1" }, { "Update2", "Version2" } }) } };
+    QVariantMap lCheckUpdatesResponse;
+    if(mLatestVersionManifest.fVersionNumber() > mCurrentVersionManifest.fVersionNumber()) {
+      lCheckUpdatesResponse = mLatestVersionManifest.fManifestContents();
+      lCheckUpdatesResponse[cFieldName_UpdateAvailable] = 1;
+    }
+    else {
+      lCheckUpdatesResponse = mCurrentVersionManifest.fManifestContents();
+      lCheckUpdatesResponse[cFieldName_UpdateAvailable] = 0;
+    }
+    QVariantMap lResponse;
+    lResponse["checkupdates"] = lCheckUpdatesResponse;
     qint64 lResponseProcessingTime = NMessageResponse::fCalculateResponseProccessingTime(lMessageRequest.mMSecsSinceEpoch);
-    NMessageResponse* rGetUpdatesResponse = new NMessageResponse(lMessageRequest.mWebSocketID, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseSuccessful, QString(), 0, lGetUpdatesResponse, QString());
+    NMessageResponse* rGetUpdatesResponse = new NMessageResponse(lMessageRequest.mWebSocketID, QString(), lMessageRequest.mMessageID, lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseSuccessful, QString(), 0, lResponse, QString());
     fSendMessage(lMessageRequest.mWebSocketsServerName, rGetUpdatesResponse);
-
-    /*NMessageResponse* lRegisterAPIResponse = new NMessageResponse(lModuleAPIPending.fWebSocketID(), QString(), lModuleAPIPending.fMessageID(), lResponseProcessingTime, NMessageResponse::EResponseStatus::eResponseSuccessful,
-                                            tr("Module '%1' is active!").arg(lModuleAPIPending.fModuleName()), 0,lDependencies, QString());
-    fSendMessage(lModuleAPIPending.fWebSocketServerName(), lRegisterAPIResponse);*/
   }
 
   void NUpdateController::fProcessFinishedDownload(const QString& lDownloadID, const QByteArray& /*lFileContents*/) {
@@ -64,7 +69,7 @@ namespace NulstarNS {
 
     if(lDownloadID == cFileName_VersionManifest) { // Version.manifest
       if(mLatestVersionManifest.fSetFile(QString("%1/%2/%3").arg(mDownloadsDir.path()).arg(fCurrentOS()).arg(cFileName_VersionManifest))) {
-  QVariantMap lTemp =  mLatestVersionManifest.fManifestContents();
+   QVariantMap lTemp =  mLatestVersionManifest.fManifestContents();
    QString lProduct(mLatestVersionManifest.fPackageName());
    QString lFullPackageName(mLatestVersionManifest.fFullPackageName());
    QString lManifestUrl(QString("%1/%2/%3/%4").arg(mPackageSourceUrl.toString()).arg(fCurrentOS()).arg(lFullPackageName).arg(cFileName_VersionManifest));

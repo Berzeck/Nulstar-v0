@@ -17,13 +17,7 @@ namespace NulstarNS {
   const QString cDirName_Downloads(QStringLiteral("Downloads"));
   const QString cFileName_Versions(QStringLiteral("Versions.txt"));
   const QString cFileName_VersionManifest(QStringLiteral("Version.manifest"));
- /* const QString cFieldName_VersionSoftwareName(QStringLiteral("Name"));
-  const QString cFieldName_VersionPlatform(QStringLiteral("Platform"));
-  const QString cFieldName_VersionPriority(QStringLiteral("Priority"));
-  const QString cFieldName_VersionReleaseDate(QStringLiteral("ReleaseDate"));
-  const QString cFieldName_VersionUpgradeNotes(QStringLiteral("UpgradeNotes"));
-  const QString cFieldName_VersionName(QStringLiteral("VersionName"));
-  const QString cFieldName_VersionNumber(QStringLiteral("VersionNumber"));*/
+  const QString cFieldName_UpdateAvailable(QStringLiteral("UpdateAvailable"));
 
   class NUpdateController : public NCoreService {
     Q_OBJECT

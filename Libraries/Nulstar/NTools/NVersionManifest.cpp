@@ -161,10 +161,7 @@ namespace NulstarNS {
   }
 
   QVariantMap NVersionManifest::fManifestContents() const {
-    if(!fIsValid())
-      return QVariantMap();
-
-    // Package Summary
+      // Package Summary
     QVariantMap lPackageSummary;
     lPackageSummary[cParameterName_PackageName] = fPackageName();
     lPackageSummary[cParameterName_Platform] = fPlatform();
@@ -174,13 +171,13 @@ namespace NulstarNS {
     lPackageSummary[cParameterName_VersionName] = fVersionName();
     lPackageSummary[cParameterName_VersionNumber] = fVersionNumber().toString();
 
-    // Validation
+        // Validation
     QVariantMap lValidation;
     lValidation[cParameterName_ValidationHashSignature] = fHashSignature();
     lValidation[cParameterName_ValidationManifestHash] = fManifestHash();
-    //lValidation[cParameterName_ValidationPublicKey] = fHashSignature(); // Should be embedded
+      //lValidation[cParameterName_ValidationPublicKey] = fHashSignature(); // Should be embedded
 
-    // Manifest
+        // Manifest
     QVariantMap lManifest;
     lManifest[cParameterCategory_PackageSummary] = lPackageSummary;
     lManifest[cParameterCategory_Sha256ExecHash] = fExecHashes();
