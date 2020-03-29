@@ -4,6 +4,7 @@
 
 #include <QDir>
 #include <QString>
+#include <QStringList>
 #include <QTimer>
 #include <QUrl>
 #include <QVariantMap>
@@ -45,6 +46,7 @@ namespace NulstarNS {
 
     public Q_SLOTS:
       API_PUBLIC_FUNCTION void checkupdates(const TMessageRequestToProcess& lMessageRequest);
+      API_ADMIN_FUNCTION void updatesystem(const TMessageRequestToProcess& lMessageRequest);
       void fProcessFinishedDownload(const QString &lDownloadID, const QByteArray& lFileContents);
 
     protected:
@@ -52,6 +54,8 @@ namespace NulstarNS {
       QString fCurrentOS() const;
       void fVerifyIfNewUpdateIsAvailble(const QUrl& lLocalDownloadUrl);
       void fDownloadManifest(const QString& lVersion);
+      void fDownloadPackages();
+      QStringList fGenerateDownloadList() const;
 
     protected Q_SLOTS:
       void fDownloadLatestVersionsList();

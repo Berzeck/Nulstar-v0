@@ -52,10 +52,11 @@ namespace NulstarNS {
       QString fUpgradeNotes() const;
       QString fVersionName() const;
       QVersionNumber fVersionNumber() const;
-      QVariantMap fExecHashes() const;
-      QVariantMap fLibraryHashes() const;
-      QVariantMap fModuleHashes() const;
+      QVariantMap fExecHashes(bool lStripVersion = false) const;
+      QVariantMap fLibraryHashes(bool lStripVersion = false) const;
+      QVariantMap fModuleHashes(bool lStripVersion = false) const;
       QVariantMap fManifestContents() const;
+      QVariantMap fPackagesToUpgrade(const NVersionManifest &lNewVersionManifest) const;
 
     private:
       QSettings* pVersionManifestFile;

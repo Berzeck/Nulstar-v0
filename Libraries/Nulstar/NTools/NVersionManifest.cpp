@@ -121,43 +121,67 @@ namespace NulstarNS {
     return QVersionNumber(QVersionNumber::fromString(lVersionNumber));
   }
 
-  QVariantMap NVersionManifest::fExecHashes() const {
+  QVariantMap NVersionManifest::fExecHashes(bool lStripVersion) const {
     if(!fIsValid())
       return QVariantMap();
     QVariantMap lExecHashes;
     pVersionManifestFile->beginGroup(cParameterCategory_Sha256ExecHash);
     QStringList lExecKeys(pVersionManifestFile->childKeys());
     for(const QString& lKey : lExecKeys) {
-      lExecHashes[lKey] = pVersionManifestFile->value(QString(lKey)).toString();
+      if(lStripVersion)
+        lExecHashes[lKey] = pVersionManifestFile->value(QString(lKey)).toString().section("_",0,2);
+      else
+        lExecHashes[lKey] = pVersionManifestFile->value(QString(lKey)).toString();
     }
     pVersionManifestFile->endGroup();
     return lExecHashes;
   }
 
-  QVariantMap NVersionManifest::fLibraryHashes() const {
+  QVariantMap NVersionManifest::fLibraryHashes(bool lStripVersion) const {
     if(!fIsValid())
       return QVariantMap();
     QVariantMap lLibHashes;
     pVersionManifestFile->beginGroup(cParameterCategory_Sha256LibHashes);
     QStringList lLibKeys(pVersionManifestFile->childKeys());
     for(const QString& lKey : lLibKeys) {
-      lLibHashes[lKey] = pVersionManifestFile->value(QString(lKey)).toString();
+      if(lStripVersion)
+        lLibHashes[lKey] = pVersionManifestFile->value(QString(lKey)).toString().section("_",0,2);
+      else
+        lLibHashes[lKey] = pVersionManifestFile->value(QString(lKey)).toString();
     }
     pVersionManifestFile->endGroup();
     return lLibHashes;
   }
 
-  QVariantMap NVersionManifest::fModuleHashes() const {
+  QVariantMap NVersionManifest::fModuleHashes(bool lStripVersion) const {
     if(!fIsValid())
       return QVariantMap();
     QVariantMap lModuleHashes;
     pVersionManifestFile->beginGroup(cParameterCategory_Sha256ModuleHashes);
     QStringList lModuleKeys(pVersionManifestFile->childKeys());
     for(const QString& lKey : lModuleKeys) {
-      lModuleHashes[lKey] = pVersionManifestFile->value(QString(lKey)).toString();
+      if(lStripVersion)
+        lModuleHashes[lKey] = pVersionManifestFile->value(QString(lKey)).toString().section("_",0,2);
+      else
+        lModuleHashes[lKey] = pVersionManifestFile->value(QString(lKey)).toString();
     }
     pVersionManifestFile->endGroup();
     return lModuleHashes;
+  }
+
+  QVariantMap NVersionManifest::fPackagesToUpgrade(const NVersionManifest& lNewVersionManifest) const {
+    QVariantMap lPackagesToUpgrade;
+
+    QVariantMap lNewExecPackages(lNewVersionManifest.fExecHashes(false));
+    QVariantMap lCurrentExecPackages(fExecHashes(true));
+    QMapIterator<QString, QVariant> i1(lNewExecPackages);
+    while(i1.hasNext()) {
+      i1.next();
+      QString lPackage(i1.key().section("_",0,2));
+    }
+
+
+    return lPackagesToUpgrade;
   }
 
   QVariantMap NVersionManifest::fManifestContents() const {
@@ -180,7 +204,7 @@ namespace NulstarNS {
         // Manifest
     QVariantMap lManifest;
     lManifest[cParameterCategory_PackageSummary] = lPackageSummary;
-    lManifest[cParameterCategory_Sha256ExecHash] = fExecHashes();
+    lManifest[cParameterCategory_Sha256ExecHash] = fExecHashes(false);
     lManifest[cParameterCategory_Sha256LibHashes] = fLibraryHashes();
     lManifest[cParameterCategory_Sha256ModuleHashes] = fModuleHashes();
     lManifest[cParameterCategory_Sha256PackageHash] = fPackageHash();

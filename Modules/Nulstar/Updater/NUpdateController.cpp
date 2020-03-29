@@ -61,6 +61,15 @@ namespace NulstarNS {
     fSendMessage(lMessageRequest.mWebSocketsServerName, rGetUpdatesResponse);
   }
 
+  void NUpdateController::updatesystem(const TMessageRequestToProcess& lMessageRequest) {
+    if(mLatestVersionManifest.fVersionNumber() > mCurrentVersionManifest.fVersionNumber()) {
+      fDownloadPackages();
+    }
+    else {
+        /// ERROR! NO UPDATES AVAILABLE
+    }
+  }
+
   void NUpdateController::fProcessFinishedDownload(const QString& lDownloadID, const QByteArray& /*lFileContents*/) {
     if(lDownloadID == cFileName_Versions) { // Versions.txt
       fVerifyIfNewUpdateIsAvailble(QString("%1/%2").arg(mDownloadsDir.path()).arg(cFileName_Versions));
@@ -114,6 +123,22 @@ namespace NulstarNS {
     mDownloader.fDownload(lManifestUrl, lLocalPath, false, cFileName_VersionManifest);
   }
 
+  void NUpdateController::fDownloadPackages() {
+
+  }
+
+  QStringList NUpdateController::fGenerateDownloadList() const {
+    QVariantMap lCurrentHashes(mCurrentVersionManifest.fExecHashes(true).unite(mCurrentVersionManifest.fLibraryHashes(true).unite(mCurrentVersionManifest.fModuleHashes(true))));
+    QVariantMap lLatestHashes(mLatestVersionManifest.fExecHashes(true).unite(mLatestVersionManifest.fLibraryHashes(true).unite(mLatestVersionManifest.fModuleHashes(true))));
+    QMapIterator<QString, QVariant> i1(lCurrentHashes);
+    while(i1.hasNext()) {
+      i1.next();
+      
+    }
+    
+    
+  }
+  
   QString NUpdateController::fCurrentOS() const {
     QString lOS;
     #ifdef Q_OS_WIN64
